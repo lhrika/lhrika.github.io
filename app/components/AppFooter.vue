@@ -16,6 +16,15 @@
 					"
 				/>
 			</div>
+			<div v-else>
+				<ULink
+					:href="`/login?redirect=${encodeURIComponent(route.fullPath)}`"
+					class="flex items-center"
+				>
+					<UIcon name="i-lucide-log-in" class="inline-block mr-1" />
+					Log in
+				</ULink>
+			</div>
 			<div class="text-center">
 				&copy; {{ new Date().getFullYear() }} Huyễn Cảnh Lưu Ly. All rights
 				reserved.
@@ -27,4 +36,5 @@
 <script setup lang="ts">
 const user = useSupabaseUser()
 const supabase = useSupabaseClient()
+const route = useRoute()
 </script>

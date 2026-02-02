@@ -10,7 +10,7 @@ const slug =
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 if (!user.value) {
-	navigateTo('/login')
+	navigateTo(`/login?redirect=${encodeURIComponent(route.fullPath)}`)
 }
 const { data: post } = await useAsyncData(`post-${slug}`, async () => {
 	const { data, error } = await supabase

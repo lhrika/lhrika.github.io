@@ -107,10 +107,5 @@ const items = computed<NavigationMenuItem[]>(() => [
 		to: '/kakeibo',
 		icon: 'i-lucide-wallet',
 	},
-	{
-		label: t('login'),
-		to: '/login',
-		icon: 'i-lucide-log-in',
-	},
 ])
 </script>

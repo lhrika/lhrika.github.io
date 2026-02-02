@@ -320,6 +320,9 @@ import { getGroupedRowModel } from '@tanstack/vue-table'
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+if (!user.value) {
+	navigateTo('/login?redirect=/kakeibo')
+}
 
 const currency = ref<string>('')
 const exchangeRates = ref<

@@ -38,6 +38,10 @@ const signInWithPassword = async () => {
 			color: 'success',
 		})
 	}
+	setTimeout(() => {
+		const redirect = useRoute().query.redirect as string | undefined
+		navigateTo(redirect || '/')
+	}, 1000)
 }
 </script>
 
