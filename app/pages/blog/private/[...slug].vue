@@ -1,6 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
 	title: 'Blog',
+	middleware: ['auth'],
 })
 const route = useRoute()
 const slug =
@@ -8,10 +9,6 @@ const slug =
 		? route.params.slug
 		: (route.params.slug ?? []).join('/')
 const supabase = useSupabaseClient()
-const user = useSupabaseUser()
-if (!user.value) {
-	navigateTo(`/login?redirect=${encodeURIComponent(route.fullPath)}`)
-}
 const { data: post } = await useAsyncData(`post-${slug}`, async () => {
 	const { data, error } = await supabase
 		.from('posts')

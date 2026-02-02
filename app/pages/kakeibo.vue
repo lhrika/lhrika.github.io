@@ -318,11 +318,13 @@ import type { Row, GroupingOptions, Column } from '@tanstack/vue-table'
 import shops from '~/assets/json/kakeiboShops.json'
 import { getGroupedRowModel } from '@tanstack/vue-table'
 
+definePageMeta({
+	title: '家計簿',
+	middlewares: ['auth'],
+})
+
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
-if (!user.value) {
-	navigateTo('/login?redirect=/kakeibo')
-}
 
 const currency = ref<string>('')
 const exchangeRates = ref<
