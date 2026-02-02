@@ -26,7 +26,6 @@ export default defineContentConfig({
 			},
 			schema: z.object({
 				title: z.string(),
-				body: z.record(z.string(), z.string().or(z.array(z.string()))),
 			}),
 		}),
 		messages: defineCollection({

@@ -158,7 +158,7 @@ const results = computed<DictionaryResult[]>(() => {
 	const matches: DictionaryResult[] = []
 
 	for (const dictEntry of dictionaryData.value || []) {
-		for (const [word, definition] of Object.entries(dictEntry.body!)) {
+		for (const [word, definition] of Object.entries(dictEntry.meta!)) {
 			// Skip metadata keys (starting with _)
 			if (word.startsWith('_') || word === 'title') continue
 
@@ -166,7 +166,7 @@ const results = computed<DictionaryResult[]>(() => {
 			if (word.toLowerCase().includes(query)) {
 				matches.push({
 					word: word,
-					definition: definition,
+					definition: definition as string,
 					dictionary: dictEntry.title,
 				})
 			}
@@ -179,6 +179,7 @@ const results = computed<DictionaryResult[]>(() => {
 // Perform search (debounced via component updates)
 const performSearch = () => {
 	loading.value = false
+	console.log(dictionaryData.value)
 	hasSearched.value = searchQuery.value.trim().length > 0
 }
 
