@@ -179,7 +179,6 @@ const results = computed<DictionaryResult[]>(() => {
 // Perform search (debounced via component updates)
 const performSearch = () => {
 	loading.value = false
-	console.log(dictionaryData.value)
 	hasSearched.value = searchQuery.value.trim().length > 0
 }
 
