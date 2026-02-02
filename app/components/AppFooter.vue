@@ -16,7 +16,7 @@
 					"
 				/>
 			</div>
-			<div v-else>
+			<div v-else-if="route.path !== '/login'">
 				<ULink
 					:href="`/login?redirect=${encodeURIComponent(route.fullPath)}`"
 					class="flex items-center"
