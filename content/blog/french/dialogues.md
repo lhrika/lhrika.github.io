@@ -13,3 +13,12 @@
 - Voilà! Et avec ceci?
 - Je vais prendre quatre croissants aussi.
 - Très bien. C'est tout?
+- Oui, c'est tout. Ça fait combien?
+- Alors, ça fait six euros cinquante.
+- Voilà dix euros.
+- Merci. Je vous rends trois euros cinquante.
+- Merci beaucoup!
+- Je vous en prie. Bonne journée!
+- Bonne journée à vous aussi!
+
+Maintenant, voyons ensemble quelques mots clés de ce dialogue.
