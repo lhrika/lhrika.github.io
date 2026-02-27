@@ -125,7 +125,7 @@
 				<UTable
 					ref="table"
 					sticky
-					:data="kakeiboData?.data ?? []"
+					:data="kakeiboData ?? []"
 					:columns="columns"
 					:initial-state="{
 						columnVisibility: {
@@ -364,19 +364,30 @@ definePageMeta({
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 
+// Resolve vue components
+const UButton = resolveComponent('UButton')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
+
+// Nuxt UI composable
+const toast = useToast()
+
 // Template refs
 const inputDate = useTemplateRef('inputDate')
 const inputDateRange = useTemplateRef('inputDateRange')
+const table = useTemplateRef('table')
 
+// Currencies and exchanges
 const currency = ref<string>('')
 const exchangeRates = ref<
 	Record<string, Record<string, Record<string, number>>>
 >({})
 
+// Modal open states
 const formModalOpen = ref(false)
 const categoryFormModalOpen = ref(false)
 const entryDateCalendarOpen = shallowRef(false)
 
+// Shop select menu items
 const shopItems = ref(shops)
 const onCreateShopItem = (item: string) => {
 	shopItems.value.push(item)
@@ -428,6 +439,7 @@ const initializeEntryState = () => {
 	entryState.shop = undefined
 }
 
+// Category form schema definition
 const categorySchema = z.object({
 	id: z.number().optional(),
 	label: z.string(),
@@ -435,20 +447,31 @@ const categorySchema = z.object({
 	order: z.number().optional(),
 })
 type CategorySchema = z.output<typeof categorySchema>
+
+// Category form state
 const categoryState = reactive<Partial<CategorySchema>>({})
 
-const { data: categoryData, refresh: refreshCategoryData } = useAsyncData(
+// Fetch kakeibo category data from supabase
+const { data: categoryData, refresh: refreshCategoryData } = await useAsyncData(
+	'kakeibo-cateogries',
 	async () => await supabase.from('kakeibo_categories').select('*').order('id'),
 	{
 		server: false,
+		transform: res => {
+			return res.data
+		},
 	},
 )
+
+// Label of the category select in the entry modal
 const categoryLabel = computed(() => {
-	const category = (categoryData.value?.data || []).find(
+	const category = (categoryData.value ?? []).find(
 		cat => cat.id === entryState.category,
 	)
 	return category ? category.label! : 'カテゴリーを選択'
 })
+
+// Category map. Key is category id
 type CategoryMapItem = {
 	id: number
 	label: string
@@ -458,7 +481,7 @@ type CategoryMapItem = {
 }
 const categoryMap = computed(() => {
 	const m = new Map<number, CategoryMapItem>()
-	categoryData.value?.data?.forEach(cat => {
+	categoryData.value?.forEach(cat => {
 		m.set(cat.id, {
 			...cat,
 			children: [],
@@ -471,6 +494,8 @@ const categoryMap = computed(() => {
 	})
 	return m
 })
+
+// Items of the category drop down menu in the entry form
 const categories = computed(() => {
 	const orderMaxValue = Number.MAX_SAFE_INTEGER
 	const rootItems: DropdownMenuItem[] = [
@@ -516,15 +541,19 @@ const categories = computed(() => {
 	)
 	return rootItems
 })
+
+// Items of the category select (to select parent category) in the category form
 const categorySelectMenuItems = computed(() =>
-	(categoryData.value?.data || []).map(cat => {
+	(categoryData.value ?? []).map(cat => {
 		return {
 			label: cat.label,
 			id: cat.id,
 		}
 	}),
 )
-const { data: kakeiboData, refresh: refreshKakeiboData } = useAsyncData(
+
+// Kakeibo entries data
+const { data: kakeiboData, refresh: refreshKakeiboData } = await useAsyncData(
 	'kakeibo',
 	async () =>
 		await supabase
@@ -535,9 +564,13 @@ const { data: kakeiboData, refresh: refreshKakeiboData } = useAsyncData(
 			.order('date', { ascending: false }),
 	{
 		server: false,
+		transform: res => {
+			return res.data
+		},
 	},
 )
 
+// Type definition of a row in the table
 type Entry = {
 	id: number
 	date: string
@@ -547,8 +580,8 @@ type Entry = {
 	shop: string | null
 	note: string | null
 }
-const UButton = resolveComponent('UButton')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
+
+// Drop down menu items of actions at the end of each table row
 function getRowItems(row: Row<Entry>): DropdownMenuItem[] {
 	return [
 		{
@@ -590,6 +623,8 @@ function getRowItems(row: Row<Entry>): DropdownMenuItem[] {
 		},
 	]
 }
+
+// Total expense amount in current selected currency
 const totalAmount = (column: Column<Entry>) => {
 	return column.getFacetedRowModel().rows.reduce((acc, currentValue) => {
 		const rate =
@@ -605,6 +640,8 @@ const totalAmount = (column: Column<Entry>) => {
 		return acc + currentValue.original.amount * rate
 	}, 0)
 }
+
+// Amount of one row in current selected currency
 const amountInCurrency = (row: Row<Entry>) => {
 	const rate =
 		(exchangeRates.value &&
@@ -616,6 +653,8 @@ const amountInCurrency = (row: Row<Entry>) => {
 			: 1) ?? 1
 	return row.original.amount * rate
 }
+
+// Labels of table columns. Key is table column accessorKey
 const columnLabels: Record<string, string> = {
 	date: '日付',
 	category: 'カテゴリー',
@@ -624,6 +663,8 @@ const columnLabels: Record<string, string> = {
 	note: 'メモ',
 	currency: '通貨',
 }
+
+// Table columns definition
 const columns: TableColumn<Entry>[] = [
 	{
 		id: 'expand',
@@ -764,8 +805,7 @@ const columns: TableColumn<Entry>[] = [
 	},
 ]
 
-const toast = useToast()
-
+// Event handler on submitting entry form
 const submitEntry = async (event: FormSubmitEvent<EntrySchema>) => {
 	event.preventDefault()
 	const entryData = event.data
@@ -785,7 +825,6 @@ const submitEntry = async (event: FormSubmitEvent<EntrySchema>) => {
 			note: entryData.note,
 		})
 		.select()
-
 	if (error) {
 		console.error('エントリの追加に失敗しました:', error)
 		alert('エントリの追加に失敗しました。')
@@ -804,6 +843,7 @@ const submitEntry = async (event: FormSubmitEvent<EntrySchema>) => {
 	}
 }
 
+// Event handler on submitting category form
 const submitCategory = async (event: FormSubmitEvent<CategorySchema>) => {
 	event.preventDefault()
 	const categoryData = event.data
@@ -839,27 +879,23 @@ const submitCategory = async (event: FormSubmitEvent<CategorySchema>) => {
 	}
 }
 
-// Table
-const table = useTemplateRef('table')
-// Filter
-// Date range
+// Model value of date range filter
 const dateRange = shallowRef({
 	start: today(getLocalTimeZone()).set({ day: 1 }),
 	end: today(getLocalTimeZone()),
 })
-// Grouping
+
+// Grouping settings
 const groupingOptions = ref<GroupingOptions>({
 	groupedColumnMode: 'reorder',
 	getGroupedRowModel: getGroupedRowModel(),
 })
 const groupingColumns = shallowRef<string[]>([])
 
-// Currency
+// Fetch exchange rates from currency API when selected currency changes
 const handleCurrencyChange = async () => {
-	const dates = kakeiboData.value?.data?.map(row => row.date)
-	const currencies = kakeiboData.value?.data?.map(row =>
-		row.currency.toLowerCase(),
-	)
+	const dates = kakeiboData.value?.map(row => row.date)
+	const currencies = kakeiboData.value?.map(row => row.currency.toLowerCase())
 	if (!exchangeRates.value) {
 		exchangeRates.value = {}
 	}
@@ -881,8 +917,4 @@ const handleCurrencyChange = async () => {
 		}
 	})
 }
-
-onMounted(() => {
-	refreshKakeiboData()
-})
 </script>
