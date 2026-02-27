@@ -320,7 +320,6 @@ import { getGroupedRowModel } from '@tanstack/vue-table'
 
 definePageMeta({
 	title: '家計簿',
-	middleware: ['auth'],
 })
 
 const supabase = useSupabaseClient()

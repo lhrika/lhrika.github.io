@@ -1,7 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
 	title: 'Blog',
-	middleware: ['auth'],
 })
 const route = useRoute()
 const slug =
