@@ -183,7 +183,7 @@
 					open => {
 						if (!open && entryState.id !== undefined) {
 							initializeEntryState()
-							entryState.date = today(getLocalTimeZone())
+							entryState.date = new Date()
 						}
 					}
 				"
@@ -221,7 +221,7 @@
 								root: 'justify-start',
 							}"
 						>
-							<UInputDate ref="inputDate" v-model="entryState.date">
+							<UInputDate ref="inputDate" v-model="entryDate">
 								<template #trailing>
 									<UPopover
 										v-model:open="entryDateCalendarOpen"
@@ -237,7 +237,7 @@
 										/>
 										<template #content>
 											<UCalendar
-												v-model="entryState.date"
+												v-model="entryDate"
 												variant="soft"
 												class="p-2"
 												@update:model-value="entryDateCalendarOpen = false"
@@ -348,14 +348,9 @@
 	</UPage>
 </template>
 <script setup lang="ts">
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 import { h, resolveComponent } from 'vue'
-import {
-	CalendarDate,
-	today,
-	parseDate,
-	getLocalTimeZone,
-} from '@internationalized/date'
+import { CalendarDate, today, getLocalTimeZone } from '@internationalized/date'
 import type { DropdownMenuItem, FormSubmitEvent, TableColumn } from '@nuxt/ui'
 import type { Row, GroupingOptions, Column } from '@tanstack/vue-table'
 import shops from '~/assets/json/kakeiboShops.json'
@@ -388,23 +383,42 @@ const onCreateShopItem = (item: string) => {
 	entryState.shop = item
 }
 
+// Kakeibo entry form schema definition
 const entrySchema = z.object({
 	id: z.number().optional(),
-	date: z.instanceof(CalendarDate),
+	date: z.date(),
 	category: z.number().optional(),
 	amount: z.number().min(0, '金額は0以上で入力してください'),
 	currency: z.string(),
 	shop: z.string().optional(),
 	note: z.string().optional(),
 })
-
 type EntrySchema = z.output<typeof entrySchema>
 
+// Kakeibo entry form state
 const entryState = reactive<Partial<EntrySchema>>({
-	date: today(getLocalTimeZone()),
+	date: new Date(),
 	amount: 0,
 	currency: 'JPY',
 })
+// Model value for UInputDate
+const entryDate = computed({
+	get() {
+		if (!entryState.date) {
+			return today(getLocalTimeZone())
+		}
+		return new CalendarDate(
+			entryState.date.getFullYear(),
+			entryState.date.getMonth() + 1,
+			entryState.date.getDate(),
+		)
+	},
+	set(value) {
+		entryState.date = value.toDate(getLocalTimeZone())
+	},
+})
+
+// Initalize entry form state without resetting date
 const initializeEntryState = () => {
 	entryState.id = undefined
 	entryState.amount = 0
@@ -541,7 +555,7 @@ function getRowItems(row: Row<Entry>): DropdownMenuItem[] {
 			label: '編集',
 			onSelect: () => {
 				entryState.id = row.original.id
-				entryState.date = parseDate(row.original.date)
+				entryState.date = new Date(row.original.date)
 				entryState.amount = row.original.amount
 				entryState.currency = row.original.currency
 				entryState.category = row.original.category ?? undefined
@@ -763,7 +777,7 @@ const submitEntry = async (event: FormSubmitEvent<EntrySchema>) => {
 		.from('kakeibo')
 		.upsert({
 			id: entryData.id,
-			date: entryData.date.toString(),
+			date: entryData.date.toDateString(),
 			category: entryData.category,
 			amount: entryData.amount,
 			currency: entryData.currency,
