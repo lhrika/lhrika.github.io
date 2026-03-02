@@ -18,7 +18,7 @@ export default defineProvider<{ baseURL?: string }>({
 		return {
 			url: joinURL(
 				baseURL ?? '',
-				src + (operations ? '=' + operations + '-no' : ''),
+				src + (operations ? '=' + operations + '-no' : '=s0'),
 			),
 		}
 	},
