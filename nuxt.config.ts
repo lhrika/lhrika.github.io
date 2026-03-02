@@ -41,6 +41,16 @@ export default defineNuxtConfig({
 			scan: true,
 		},
 	},
+	image: {
+		providers: {
+			google: {
+				provider: '~/providers/google',
+				options: {
+					baseURL: 'https://lh3.googleusercontent.com',
+				},
+			},
+		},
+	},
 	supabase: {
 		redirect: false,
 		url: process.env.SUPABASE_URL,
