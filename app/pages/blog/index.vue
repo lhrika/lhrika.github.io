@@ -34,6 +34,15 @@
 					v-bind="post"
 					:to="post.path"
 				>
+					<template v-if="post.image" #header>
+						<NuxtImg
+							:src="post.image"
+							:provider="post.image.startsWith('http') ? 'ipx' : 'google'"
+							width="640"
+							height="360"
+							loading="lazy"
+						/>
+					</template>
 					<template #description>
 						<div v-if="post.description">
 							{{ post.description }}
@@ -41,6 +50,9 @@
 						<div v-if="post.tags" class="text-sm mt-2">
 							{{ post.tags?.map(tag => `#${tag}`).join(' ') }}
 						</div>
+					</template>
+					<template v-if="post.date" #date>
+						<span>{{ new Date(post.date).toLocaleDateString(locale) }}</span>
 					</template>
 				</UBlogPost>
 			</UBlogPosts>
@@ -67,6 +79,9 @@
 definePageMeta({
 	title: 'Blog',
 })
+
+// Locale used to format date
+const { locale } = useI18n()
 
 const availableTags = ref<string[]>([])
 const allPosts = await queryCollection('blog').select('tags').all()

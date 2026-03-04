@@ -19,4 +19,10 @@ const { locale } = useI18n()
 const currentLocale = computed(() => {
 	return locales[locale.value as keyof typeof locales]
 })
+
+useHead({
+	htmlAttrs: {
+		lang: locale.value,
+	},
+})
 </script>

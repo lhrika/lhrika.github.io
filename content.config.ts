@@ -12,11 +12,14 @@ export default defineContentConfig({
 				exclude: ['blog/private/**'],
 			},
 			schema: z.object({
-				title: z.string(),
-				description: z.string().optional(),
-				date: z.date(),
+				date: z.date().optional(),
 				tags: z.array(z.string()).optional(),
 				draft: z.boolean().default(false),
+				image: z.string().optional(),
+				excerpt: z.object({
+					type: z.string(),
+					children: z.any(),
+				}),
 			}),
 		}),
 		dictionary: defineCollection({
