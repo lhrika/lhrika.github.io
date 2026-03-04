@@ -1,5 +1,5 @@
 <template>
-	<UPage class="px-4">
+	<UPage>
 		<UPageHeader
 			title="BLOG"
 			:ui="{
@@ -15,54 +15,69 @@
 			<div class="text-center text-sm font-light">꧁──────ஓ๑♡๑ஓ──────꧂</div>
 		</UPageHeader>
 		<UPageBody>
-			<USelect
-				v-model="tags"
-				:items="availableTags"
-				multiple
-				placeholder="Filter by tags"
-				class="w-48 lg:hidden"
-				@change="
-					() => {
-						refreshPostCount()
-						refreshPosts()
-					}
-				"
-			/>
-			<UBlogPosts>
-				<UBlogPost
-					v-for="(post, index) in posts"
-					:key="index"
-					v-bind="post"
-					:to="post.path"
-				>
-					<template v-if="post.image" #header>
-						<NuxtImg
-							:src="post.image"
-							:provider="post.image.startsWith('http') ? 'ipx' : 'google'"
-							width="640"
-							height="360"
-							loading="lazy"
-						/>
-					</template>
-					<template #description>
-						<div v-if="post.description">
-							{{ post.description }}
-						</div>
-						<div v-if="post.tags" class="text-sm mt-2">
-							{{ post.tags?.map(tag => `#${tag}`).join(' ') }}
-						</div>
-					</template>
-					<template v-if="post.date" #date>
-						<span>{{ new Date(post.date).toLocaleDateString(locale) }}</span>
-					</template>
-				</UBlogPost>
-			</UBlogPosts>
+			<UContainer>
+				<USelect
+					v-model="tags"
+					:items="availableTags"
+					multiple
+					placeholder="Filter by tags"
+					class="w-48 lg:hidden"
+					@change="
+						() => {
+							refreshPostCount()
+							refreshPosts()
+						}
+					"
+				/>
+			</UContainer>
+			<UContainer>
+				<UBlogPosts>
+					<UBlogPost
+						v-for="(post, index) in posts"
+						:key="index"
+						v-bind="post"
+						:to="post.path"
+					>
+						<template #header>
+							<NuxtImg
+								v-if="post.image"
+								:src="post.image"
+								:provider="post.image.startsWith('http') ? 'ipx' : 'google'"
+								width="640"
+								height="360"
+								loading="lazy"
+							/>
+							<div
+								v-else
+								class="absolute bg-primary/40 inset-0 content-center text-center font-bold text-lg"
+							>
+								{{ post.title }}
+							</div>
+						</template>
+						<template #description>
+							<div v-if="post.description">
+								{{ post.description }}
+							</div>
+							<div v-if="post.tags" class="text-sm mt-2">
+								{{ post.tags?.map(tag => `#${tag}`).join(' ') }}
+							</div>
+						</template>
+						<template v-if="post.date" #date>
+							<span>{{ new Date(post.date).toLocaleDateString(locale) }}</span>
+						</template>
+					</UBlogPost>
+				</UBlogPosts>
+			</UContainer>
 			<UPagination
 				v-if="(postCount ?? 0) > 5"
 				v-model:page="currentPage"
 				:total="postCount"
 				:items-per-page="5"
+				:ui="{
+					list: 'justify-center',
+				}"
 			/>
+
 			<div v-if="user">
 				<UPageSection
 					:title="$t('privatePosts')"
