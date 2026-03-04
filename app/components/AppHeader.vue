@@ -31,15 +31,9 @@
 		</template>
 		<UNavigationMenu :items="items" />
 		<template #right>
-			<div class="flex gap-4 items-center justify-end">
-				<ULocaleSelect
-					:model-value="locale"
-					:locales="Object.values(availableLocales)"
-					@update:model-value="updateLocale"
-				/>
-				<UColorModeButton />
-				<ThemePalette />
-			</div>
+			<LocaleMenu />
+			<UColorModeButton />
+			<ThemePalette />
 		</template>
 		<template #body>
 			<UNavigationMenu :items="items" orientation="vertical" class="-mx-2.5" />
@@ -49,7 +43,6 @@
 </template>
 
 <script setup lang="ts">
-import * as uiLocales from '@nuxt/ui/locale'
 import type { NavigationMenuItem } from '@nuxt/ui'
 import { createReusableTemplate } from '@vueuse/core'
 
@@ -62,18 +55,7 @@ const route = useRoute()
 const pageTitle = computed(() => (route.meta.title as string) || '')
 
 // I18n
-const { locale, locales, t } = useI18n()
-const switchLocalePath = useSwitchLocalePath()
-const availableLocales = computed(() => {
-	return Object.values(uiLocales).filter(uiLocale =>
-		locales.value.find(l => l.code === uiLocale.code),
-	)
-})
-
-const updateLocale = (code: string) => {
-	// @ts-expect-error code is string
-	navigateTo(switchLocalePath(code))
-}
+const { t } = useI18n()
 
 // Navigation Menu
 const items = computed<NavigationMenuItem[]>(() => [
