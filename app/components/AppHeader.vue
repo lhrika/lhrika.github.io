@@ -98,14 +98,25 @@ const items = computed<NavigationMenuItem[]>(() => [
 		icon: 'i-lucide-mail',
 	},
 	{
-		label: t('adv'),
-		to: '/adv',
-		icon: 'i-lucide-book-open-text',
-	},
-	{
-		label: '家計簿',
-		to: '/kakeibo',
-		icon: 'i-lucide-wallet',
+		label: 'APP',
+		icon: 'i-lucide-layout-grid',
+		children: [
+			{
+				label: '家計簿',
+				to: '/kakeibo',
+				icon: 'i-lucide-wallet',
+			},
+			{
+				label: t('adv'),
+				to: '/adv',
+				icon: 'i-lucide-book-open-text',
+			},
+			{
+				label: 'Google Photos Direct URL',
+				icon: 'i-lucide-aperture',
+				to: '/app/google-photos-direct-url',
+			},
+		],
 	},
 ])
 </script>
