@@ -6,11 +6,3 @@
 	--font-fancy: 'Charmonman', cursive, serif;
 	--font-vintage: 'Cormorant SC', serif;
 }
-
-:root {
-	--ui-primary: var(--ui-color-primary-950);
-}
-
-.dark {
-	--ui-primary: var(--ui-color-primary-50);
-}

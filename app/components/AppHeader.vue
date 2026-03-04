@@ -32,6 +32,7 @@
 					@update:model-value="updateLocale"
 				/>
 				<UColorModeButton />
+				<ThemePalette />
 			</div>
 		</template>
 		<template #body>
