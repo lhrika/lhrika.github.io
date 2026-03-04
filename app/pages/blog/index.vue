@@ -20,10 +20,11 @@
 				:items="availableTags"
 				multiple
 				placeholder="Filter by tags"
-				class="w-48"
+				class="w-48 lg:hidden"
 				@change="
 					() => {
-						refreshBlog()
+						refreshPostCount()
+						refreshPosts()
 					}
 				"
 			/>
@@ -56,6 +57,12 @@
 					</template>
 				</UBlogPost>
 			</UBlogPosts>
+			<UPagination
+				v-if="(postCount ?? 0) > 5"
+				v-model:page="currentPage"
+				:total="postCount"
+				:items-per-page="5"
+			/>
 			<div v-if="user">
 				<UPageSection
 					:title="$t('privatePosts')"
@@ -72,6 +79,23 @@
 				</UBlogPosts>
 			</div>
 		</UPageBody>
+		<template #right>
+			<UPageAside>
+				<USelect
+					v-model="tags"
+					:items="availableTags"
+					multiple
+					placeholder="Filter by tags"
+					class="w-48"
+					@change="
+						() => {
+							refreshPostCount()
+							refreshPosts()
+						}
+					"
+				/>
+			</UPageAside>
+		</template>
 	</UPage>
 </template>
 
@@ -83,25 +107,75 @@ definePageMeta({
 // Locale used to format date
 const { locale } = useI18n()
 
-const availableTags = ref<string[]>([])
+// Route used to get page and tags
+const route = useRoute()
+
+// Query all posts to get all tags
 const allPosts = await queryCollection('blog').select('tags').all()
+const availableTags = ref<string[]>([])
 availableTags.value = [...new Set(allPosts.flatMap(post => post.tags || []))]
+
+// Selected tags
 const tags = ref<string[]>([])
 
-const { data: posts, refresh: refreshBlog } = await useAsyncData(
-	'blog',
-	async () => {
-		// fetch all blog posts then filter client-side to require ALL tags in `tags`
-		const all = await queryCollection('blog').all()
-		if (!tags.value.length) return all
-		return (all || []).filter(p => {
-			return tags.value.every(t => p.tags?.includes(t))
+// Current page from url query
+const currentPage = computed({
+	get() {
+		return typeof route.query.page === 'string' ? parseInt(route.query.page) : 1
+	},
+	set(page: number) {
+		navigateTo({
+			query: { ...route.query, page },
 		})
 	},
+})
+
+// Refresh blog data when current page changes
+watch(currentPage, () => {
+	refreshPosts()
+})
+
+// Post count for pagination
+const { data: postCount, refresh: refreshPostCount } = await useAsyncData(
+	'post-count',
+	() => {
+		return queryCollection('blog')
+			.andWhere(query => {
+				if (!tags.value || !tags.value.length) {
+					return query.where('id', 'IS NOT NULL') // No tags selected, return all posts
+				}
+				return tags.value.reduce((acc, cur) => {
+					return acc.where('tags', 'LIKE', `%${cur}%`)
+				}, query)
+			})
+			.count()
+	},
 )
+
+// Filtered blog data
+const { data: posts, refresh: refreshPosts } = await useAsyncData(
+	'blog',
+	() => {
+		return queryCollection('blog')
+			.andWhere(query => {
+				if (!tags.value || !tags.value.length) {
+					return query.where('id', 'IS NOT NULL') // No tags selected, return all posts
+				}
+				return tags.value.reduce((acc, cur) => {
+					return acc.where('tags', 'LIKE', `%${cur}%`)
+				}, query)
+			})
+			.order('date', 'DESC')
+			.skip((currentPage.value - 1) * 5)
+			.limit(5)
+			.all()
+	},
+)
+
+// Display private posts only to authorized users
 const user = useSupabaseUser()
 const supabase = useSupabaseClient()
-const { data: privatePosts, refresh } = useAsyncData(
+const { data: privatePosts } = useAsyncData(
 	'private-posts',
 	async () => {
 		if (user.value) {
@@ -120,6 +194,6 @@ const { data: privatePosts, refresh } = useAsyncData(
 )
 
 onMounted(() => {
-	refresh()
+	// refresh()
 })
 </script>
