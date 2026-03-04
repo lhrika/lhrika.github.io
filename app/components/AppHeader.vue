@@ -1,14 +1,20 @@
 <template>
-	<div
-		class="uppercase hidden lg:flex flex-col items-center justify-center h-48"
-	>
-		<div class="flex justify-center items-start gap-2 text-2xl">
-			꒰୨⁺<span class="text-5xl font-fancy font-bold text-primary"
-				>Huyễn Cảnh Lưu Ly</span
-			>⁺୧꒱
+	<DefineTemplate v-slot="{ classes }">
+		<div
+			class="flex-col items-center justify-center h-32 lg:h-48"
+			:class="classes"
+		>
+			<div class="flex justify-center items-start gap-2 text-lg lg:text-2xl">
+				꒰୨⁺
+				<span class="text-3xl lg:text-5xl font-fancy font-bold text-highlighted"
+					>Huyễn Cảnh Lưu Ly</span
+				>
+				⁺୧꒱
+			</div>
+			<div class="text-lg lg:text-2xl">· · ─ ·𖥸· ─ · ·</div>
 		</div>
-		<div class="text-2xl">· · ─ ·𖥸· ─ · ·</div>
-	</div>
+	</DefineTemplate>
+	<ReuseTemplate classes="hidden lg:flex uppercase" />
 	<UHeader
 		:title="pageTitle"
 		mode="drawer"
@@ -39,19 +45,17 @@
 			<UNavigationMenu :items="items" orientation="vertical" class="-mx-2.5" />
 		</template>
 	</UHeader>
-	<div class="lg:hidden flex flex-col items-center justify-center h-32">
-		<div class="text-lg flex justify-center items-start gap-2">
-			꒰୨⁺<span class="text-3xl font-bold text-primary font-fancy"
-				>Huyễn Cảnh Lưu Ly</span
-			>⁺୧꒱
-		</div>
-		<div class="text-lg">· · ─ ·𖥸· ─ · ·</div>
-	</div>
+	<ReuseTemplate classes="flex lg:hidden" />
 </template>
 
 <script setup lang="ts">
 import * as uiLocales from '@nuxt/ui/locale'
 import type { NavigationMenuItem } from '@nuxt/ui'
+import { createReusableTemplate } from '@vueuse/core'
+
+const [DefineTemplate, ReuseTemplate] = createReusableTemplate<{
+	classes: string
+}>()
 
 // Page title
 const route = useRoute()
