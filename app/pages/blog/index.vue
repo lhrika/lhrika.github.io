@@ -83,15 +83,17 @@
 					:title="$t('privatePosts')"
 					description="Limited to logged in users"
 				/>
-				<UBlogPosts>
-					<UBlogPost
-						v-for="(post, index) in privatePosts"
-						:key="index"
-						:title="post.title ?? 'No Title'"
-						:date="new Date(post.created_at)"
-						:to="`/blog/private/${post.slug}`"
-					/>
-				</UBlogPosts>
+				<UContainer>
+					<UBlogPosts>
+						<UBlogPost
+							v-for="(post, index) in privatePosts"
+							:key="index"
+							:title="post.title ?? 'No Title'"
+							:date="new Date(post.created_at)"
+							:to="`/blog/private/${post.slug}`"
+						/>
+					</UBlogPosts>
+				</UContainer>
 			</div>
 		</UPageBody>
 		<template #right>
@@ -115,12 +117,16 @@
 </template>
 
 <script setup lang="ts">
+// Locale used to format date
+const { locale, t } = useI18n()
+
+// SEO
 definePageMeta({
 	title: 'Blog',
 })
-
-// Locale used to format date
-const { locale } = useI18n()
+useHead({
+	title: t('blog'),
+})
 
 // Route used to get page and tags
 const route = useRoute()

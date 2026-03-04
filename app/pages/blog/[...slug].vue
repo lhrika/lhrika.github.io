@@ -1,7 +1,7 @@
 <template>
 	<UPage>
 		<UPageBody>
-			<UContextMenu :items="contextMenuItems">
+			<UContextMenu :items="contextMenuItems" :disabled="!post?.dictionary">
 				<ContentRenderer
 					v-if="post"
 					:value="post"

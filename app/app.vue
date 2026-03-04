@@ -24,5 +24,8 @@ useHead({
 	htmlAttrs: {
 		lang: locale.value,
 	},
+	titleTemplate(title) {
+		return title ? `${title} - Huyễn Cảnh Lưu Ly` : 'Huyễn Cảnh Lưu Ly'
+	},
 })
 </script>

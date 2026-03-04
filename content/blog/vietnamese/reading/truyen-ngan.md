@@ -1,6 +1,7 @@
 ---
 date: 2025-12-25
 description: 收集一些越南语短文，可以作为越南语阅读材料。
+dictionary: true
 tags:
   - 越南语
   - 语言学习
