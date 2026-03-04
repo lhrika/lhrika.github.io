@@ -18,16 +18,10 @@
 			<UContainer>
 				<USelect
 					v-model="tags"
-					:items="availableTags"
+					:items="tagSelectItems"
 					multiple
 					placeholder="Filter by tags"
 					class="w-48 lg:hidden"
-					@change="
-						() => {
-							refreshPostCount()
-							refreshPosts()
-						}
-					"
 				/>
 			</UContainer>
 			<UContainer>
@@ -100,17 +94,12 @@
 			<UPageAside>
 				<USelect
 					v-model="tags"
-					:items="availableTags"
+					:items="tagSelectItems"
 					multiple
 					placeholder="Filter by tags"
-					class="w-48"
-					@change="
-						() => {
-							refreshPostCount()
-							refreshPosts()
-						}
-					"
+					class="w-full mb-4"
 				/>
+				<UCheckboxGroup v-model="tags" :items="tagCheckboxGroupItems" />
 			</UPageAside>
 		</template>
 	</UPage>
@@ -133,11 +122,50 @@ const route = useRoute()
 
 // Query all posts to get all tags
 const allPosts = await queryCollection('blog').select('tags').all()
-const availableTags = ref<string[]>([])
-availableTags.value = [...new Set(allPosts.flatMap(post => post.tags || []))]
+const availableTags: Record<string, number> = allPosts.reduce(
+	(acc, post) => {
+		if (post.tags) {
+			post.tags.forEach((tag: string) => {
+				acc[tag] = (acc[tag] || 0) + 1
+			})
+		}
+		return acc
+	},
+	{} as Record<string, number>,
+)
+const tagCheckboxGroupItems = computed(() =>
+	Object.entries(availableTags).map(([tag, count]) => ({
+		label: `${tag} (${count})`,
+		value: tag,
+	})),
+)
+const tagSelectItems = computed(() =>
+	Object.entries(availableTags).map(([tag]) => tag),
+)
 
 // Selected tags
-const tags = ref<string[]>([])
+const tags = computed({
+	get() {
+		const queryTags = route.query.tags
+		if (typeof queryTags === 'string') {
+			return [queryTags]
+		} else if (Array.isArray(queryTags)) {
+			return queryTags as string[]
+		}
+		return [] as string[]
+	},
+	set(newTags: string[]) {
+		navigateTo({
+			query: { ...route.query, tags: newTags },
+		})
+	},
+})
+
+// Refresh blog data when tags change
+watch(tags, () => {
+	refreshPostCount()
+	refreshPosts()
+})
 
 // Current page from url query
 const currentPage = computed({
