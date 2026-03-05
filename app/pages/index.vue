@@ -1,15 +1,19 @@
 <template>
 	<UPage>
 		<UPageBody>
-			<OtmfcGallery />
+			<!-- <OtmfcGallery /> -->
+			<UPageSection
+				title="动态"
+				description="喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵"
+			/>
 			<UpdateList />
-			<UpdateModal />
+			<UpdateModal v-if="user" />
 			<UPageSection
 				title="留言版"
 				description="欢迎留言。通过审核的留言将会展示在这里"
 			/>
 			<MessageBoard />
-			<div class="space-y-4">
+			<UContainer class="space-y-4">
 				<UCard
 					v-for="(message, index) in messages"
 					:key="index"
@@ -32,12 +36,13 @@
 						{{ message.content }}
 					</div>
 				</UCard>
-			</div>
+			</UContainer>
 		</UPageBody>
 	</UPage>
 </template>
 
 <script setup lang="ts">
+const user = useSupabaseUser()
 const { data: messagesData } = await useAsyncData('messages', () =>
 	queryCollection('messages').all(),
 )
