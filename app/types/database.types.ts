@@ -38,6 +38,27 @@ export type Database = {
         }
         Relationships: []
       }
+      google_photos_urls: {
+        Row: {
+          created_at: string
+          direct_url: string
+          id: number
+          share_url: string
+        }
+        Insert: {
+          created_at?: string
+          direct_url: string
+          id?: number
+          share_url: string
+        }
+        Update: {
+          created_at?: string
+          direct_url?: string
+          id?: number
+          share_url?: string
+        }
+        Relationships: []
+      }
       kakeibo: {
         Row: {
           amount: number
@@ -148,17 +169,59 @@ export type Database = {
         }
         Relationships: []
       }
-      roles: {
+      role_permissions: {
         Row: {
-          role: string
+          id: number
+          permission: Database["public"]["Enums"]["app_permission"]
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          id?: number
+          permission: Database["public"]["Enums"]["app_permission"]
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          id?: number
+          permission?: Database["public"]["Enums"]["app_permission"]
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      updates: {
+        Row: {
+          content: string
+          created_at: string
+          id: number
           user_id: string
         }
         Insert: {
-          role?: string
+          content: string
+          created_at?: string
+          id?: number
           user_id?: string
         }
         Update: {
-          role?: string
+          content?: string
+          created_at?: string
+          id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: number
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: number
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: number
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
@@ -168,10 +231,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      authorize: {
+        Args: {
+          requested_permission: Database["public"]["Enums"]["app_permission"]
+        }
+        Returns: boolean
+      }
+      custom_access_token_hook: { Args: { event: Json }; Returns: Json }
     }
     Enums: {
-      [_ in never]: never
+      app_permission:
+        | "posts.select"
+        | "posts.insert"
+        | "posts.update"
+        | "posts.delete"
+        | "kakeibo_categories.select"
+        | "kakeibo_categories.insert"
+        | "kakeibo_categories.update"
+        | "kakeibo_categories.delete"
+      app_role: "admin" | "guest"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -298,6 +376,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_permission: [
+        "posts.select",
+        "posts.insert",
+        "posts.update",
+        "posts.delete",
+        "kakeibo_categories.select",
+        "kakeibo_categories.insert",
+        "kakeibo_categories.update",
+        "kakeibo_categories.delete",
+      ],
+      app_role: ["admin", "guest"],
+    },
   },
 } as const
