@@ -92,6 +92,14 @@
 		</UPageBody>
 		<template #right>
 			<UPageAside>
+				<UCalendar
+					v-model="dateRange"
+					:locale="locale"
+					range
+					size="xs"
+					class="mb-6"
+				/>
+
 				<USelect
 					v-model="tags"
 					:items="tagSelectItems"
@@ -99,13 +107,16 @@
 					placeholder="Filter by tags"
 					class="w-full mb-4"
 				/>
-				<UCheckboxGroup v-model="tags" :items="tagCheckboxGroupItems" />
+				<UScrollArea class="max-h-64">
+					<UCheckboxGroup v-model="tags" :items="tagCheckboxGroupItems" />
+				</UScrollArea>
 			</UPageAside>
 		</template>
 	</UPage>
 </template>
 
 <script setup lang="ts">
+import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date'
 // Locale used to format date
 const { locale, t } = useI18n()
 
@@ -167,15 +178,30 @@ watch(tags, () => {
 	refreshPosts()
 })
 
+// Date range for calendar
+const dateRange = shallowRef<{
+	start: CalendarDate
+	end: CalendarDate
+}>()
+watch(dateRange, () => {
+	refreshPostCount()
+	refreshPosts()
+})
+
 // Current page from url query
 const currentPage = computed({
 	get() {
 		return typeof route.query.page === 'string' ? parseInt(route.query.page) : 1
 	},
 	set(page: number) {
-		navigateTo({
-			query: { ...route.query, page },
-		})
+		if (page === 1) {
+			const { page: _, ...query } = route.query
+			navigateTo({ query })
+		} else {
+			navigateTo({
+				query: { ...route.query, page },
+			})
+		}
 	},
 })
 
@@ -197,9 +223,23 @@ const { data: postCount, refresh: refreshPostCount } = await useAsyncData(
 					return acc.where('tags', 'LIKE', `%${cur}%`)
 				}, query)
 			})
+			.andWhere(query => {
+				if (!dateRange.value) {
+					return query.where('id', 'IS NOT NULL') // No date range selected, return all posts
+				}
+				const endDate = dateRange.value.end.add({ days: 1 }).toString()
+				return query
+					.where('date', '>=', dateRange.value.start.toString())
+					.where('date', '<', endDate)
+			})
 			.count()
 	},
 )
+
+// Reset to first page when post count changes
+watch(postCount, () => {
+	currentPage.value = 1
+})
 
 // Filtered blog data
 const { data: posts, refresh: refreshPosts } = await useAsyncData(
@@ -213,6 +253,15 @@ const { data: posts, refresh: refreshPosts } = await useAsyncData(
 				return tags.value.reduce((acc, cur) => {
 					return acc.where('tags', 'LIKE', `%${cur}%`)
 				}, query)
+			})
+			.andWhere(query => {
+				if (!dateRange.value) {
+					return query.where('id', 'IS NOT NULL') // No date range selected, return all posts
+				}
+				const endDate = dateRange.value.end.add({ days: 1 }).toString()
+				return query
+					.where('date', '>=', dateRange.value.start.toString())
+					.where('date', '<', endDate)
 			})
 			.order('date', 'DESC')
 			.skip((currentPage.value - 1) * 5)
