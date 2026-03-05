@@ -6,7 +6,7 @@
 				:key="index"
 				:content="update.content"
 				:at="update.at"
-				:avatar="update.avatar"
+				:user="update.user"
 			/>
 		</div>
 	</UContainer>

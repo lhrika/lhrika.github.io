@@ -64,8 +64,19 @@ export default defineContentConfig({
 				items: z.object({
 					content: z.string(),
 					at: z.date(),
-					avatar: z.string().optional(),
+					user: z.string(),
 				}),
+			}),
+		}),
+		profiles: defineCollection({
+			type: 'data',
+			source: {
+				include: 'profiles/**',
+			},
+			schema: z.object({
+				uuid: z.string(),
+				name: z.string(),
+				avatar: z.string().optional(),
 			}),
 		}),
 	},

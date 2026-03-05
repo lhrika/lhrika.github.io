@@ -3,11 +3,12 @@
 		{
 			"at": "2024-06-01T12:00:00Z",
 			"content": "Added dictionary lookup feature in blog posts. You can now select text in a blog post and look up its definition in a built-in dictionary.",
-			"avatar": "/avatars/lyhuong.png"
+			"user": "e5643320-d835-45a4-9bf5-bf6752884e13"
 		},
 		{
 			"at": "2024-06-02T12:00:00Z",
-			"content": "Added dictionary lookup feature in blog posts. You can now select text in a blog post and look up its definition in a built-in dictionary."
+			"content": "Added dictionary lookup feature in blog posts. You can now select text in a blog post and look up its definition in a built-in dictionary.",
+			"user": "e5643320-d835-45a4-9bf5-bf6752884e13"
 		}
 	]
 }

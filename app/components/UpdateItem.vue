@@ -2,7 +2,7 @@
 	<div class="py-4 pl-4 pr-8">
 		<div class="relative bg-muted rounded-lg p-2">
 			<UAvatar
-				:src="avatar"
+				:src="profile?.avatar"
 				icon="i-lucide-user"
 				class="absolute -bottom-4 -right-4"
 			/>
@@ -19,7 +19,7 @@
 const props = defineProps<{
 	content: string
 	at: string | Date | number
-	avatar?: string
+	user: string
 }>()
 
 // Locale to format date
@@ -29,4 +29,6 @@ const date = computed(() => {
 	if (!props.at) return ''
 	return new Date(props.at)
 })
+
+const { data: profile } = await useProfile(props.user)
 </script>
