@@ -55,5 +55,18 @@ export default defineContentConfig({
 				content: z.array(z.string()),
 			}),
 		}),
+		updates: defineCollection({
+			type: 'data',
+			source: {
+				include: 'updates/**',
+			},
+			schema: z.object({
+				items: z.object({
+					content: z.string(),
+					at: z.date(),
+					avatar: z.string().optional(),
+				}),
+			}),
+		}),
 	},
 })
