@@ -1,6 +1,6 @@
 <template>
 	<div class="py-4 pl-4 pr-8">
-		<div class="relative bg-muted rounded-lg py-2 px-4">
+		<div class="relative bg-muted rounded-lg pt-2 pb-4 px-4">
 			<UAvatar
 				:src="profile?.avatar"
 				icon="i-lucide-user"

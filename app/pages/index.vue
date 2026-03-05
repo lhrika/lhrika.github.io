@@ -1,7 +1,7 @@
 <template>
 	<UPage>
 		<UPageBody>
-			<!-- <OtmfcGallery /> -->
+			<OtmfcGallery />
 			<UpdateList />
 			<UpdateModal />
 			<UPageSection

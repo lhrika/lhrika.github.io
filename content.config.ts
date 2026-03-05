@@ -57,15 +57,11 @@ export default defineContentConfig({
 		}),
 		updates: defineCollection({
 			type: 'data',
-			source: {
-				include: 'updates/**',
-			},
+			source: 'updates.csv',
 			schema: z.object({
-				items: z.object({
-					content: z.string(),
-					at: z.date(),
-					user: z.string(),
-				}),
+				content: z.string(),
+				at: z.date(),
+				user: z.string(),
 			}),
 		}),
 		profiles: defineCollection({

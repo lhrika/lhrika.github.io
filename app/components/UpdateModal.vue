@@ -46,6 +46,7 @@ const onSubmit = () => {
 			if (res.status >= 200 && res.status < 300) {
 				content.value = ''
 				open.value = false
+				refreshNuxtData('latest-updates')
 			}
 		})
 }
