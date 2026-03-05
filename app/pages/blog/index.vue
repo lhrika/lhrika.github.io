@@ -15,14 +15,36 @@
 			<div class="text-center text-sm font-light">꧁──────ஓ๑♡๑ஓ──────꧂</div>
 		</UPageHeader>
 		<UPageBody>
-			<UContainer>
+			<UContainer class="lg:hidden space-x-2 space-y-2">
 				<USelect
 					v-model="tags"
 					:items="tagSelectItems"
 					multiple
 					placeholder="Filter by tags"
-					class="w-48 lg:hidden"
+					class="w-48"
 				/>
+				<UInputDate ref="inputDate" v-model="dateRange" :locale="locale" range>
+					<template #trailing>
+						<UPopover :reference="inputDate?.inputsRef[0]?.$el">
+							<UButton
+								color="neutral"
+								variant="link"
+								size="sm"
+								icon="i-lucide-calendar"
+								aria-label="Select a date range"
+								class="px-0"
+							/>
+							<template #content>
+								<UCalendar
+									v-model="dateRange"
+									class="p-2"
+									range
+									:locale="locale"
+								/>
+							</template>
+						</UPopover>
+					</template>
+				</UInputDate>
 			</UContainer>
 			<UContainer>
 				<UBlogPosts>
@@ -119,6 +141,9 @@
 import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date'
 // Locale used to format date
 const { locale, t } = useI18n()
+
+// Ref for date input to anchor popover
+const inputDate = useTemplateRef('inputDate')
 
 // SEO
 definePageMeta({
