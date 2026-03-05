@@ -14,6 +14,7 @@ export default defineNuxtConfig({
 	nitro: {
 		prerender: {
 			failOnError: false,
+			routes: ['/avatars/lyhuong.png'],
 		},
 	},
 	i18n: {
