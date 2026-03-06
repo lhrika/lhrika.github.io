@@ -100,23 +100,25 @@
 				}"
 			/>
 
-			<div v-if="user">
-				<UPageSection
-					:title="$t('privatePosts')"
-					description="Limited to logged in users"
-				/>
-				<UContainer>
-					<UBlogPosts>
-						<UBlogPost
-							v-for="(post, index) in privatePosts"
-							:key="index"
-							:title="post.title ?? 'No Title'"
-							:date="new Date(post.created_at)"
-							:to="`/blog/private/${post.slug}`"
-						/>
-					</UBlogPosts>
-				</UContainer>
-			</div>
+			<ClientOnly>
+				<div v-if="user">
+					<UPageSection
+						:title="$t('privatePosts')"
+						description="Limited to logged in users"
+					/>
+					<UContainer>
+						<UBlogPosts>
+							<UBlogPost
+								v-for="(post, index) in privatePosts"
+								:key="index"
+								:title="post.title ?? 'No Title'"
+								:date="new Date(post.created_at)"
+								:to="`/blog/private/${post.slug}`"
+							/>
+						</UBlogPosts>
+					</UContainer>
+				</div>
+			</ClientOnly>
 		</UPageBody>
 		<template #right>
 			<UPageAside>
@@ -144,7 +146,7 @@
 </template>
 
 <script setup lang="ts">
-import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date'
+import type { CalendarDate } from '@internationalized/date'
 // Locale used to format date
 const { locale, t } = useI18n()
 
