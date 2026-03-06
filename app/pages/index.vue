@@ -12,7 +12,7 @@
 				title="留言版"
 				description="欢迎留言。通过审核的留言将会展示在这里"
 			/>
-			<MessageBoard />
+			<!-- <MessageBoard />
 			<UContainer class="space-y-4">
 				<UCard
 					v-for="(message, index) in messages"
@@ -36,7 +36,7 @@
 						{{ message.content }}
 					</div>
 				</UCard>
-			</UContainer>
+			</UContainer> -->
 		</UPageBody>
 	</UPage>
 </template>
