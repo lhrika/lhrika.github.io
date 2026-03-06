@@ -29,7 +29,7 @@
 							{{ message.name }}
 						</div>
 						<div class="text-sm text-muted">
-							{{ new Date(message.date).toLocaleString() }}
+							{{ new Date(message.created_at).toLocaleString(locale) }}
 						</div>
 					</template>
 					<div>
@@ -43,14 +43,8 @@
 
 <script setup lang="ts">
 const user = useSupabaseUser()
-const { data: messagesData } = await useAsyncData('messages', () =>
-	queryCollection('messages').all(),
+const { locale } = useI18n()
+const { data: messages } = await useAsyncData('messages', () =>
+	queryCollection('messages').order('created_at', 'DESC').all(),
 )
-const messages = computed(() => {
-	if (!messagesData.value) return []
-	const items = messagesData.value.flatMap(item => item.messages)
-	return items.sort(
-		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-	)
-})
 </script>

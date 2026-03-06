@@ -34,15 +34,11 @@ export default defineContentConfig({
 		}),
 		messages: defineCollection({
 			type: 'data',
-			source: {
-				include: 'messages/**',
-			},
+			source: 'messages.csv',
 			schema: z.object({
-				messages: z.object({
-					name: z.string(),
-					content: z.string(),
-					date: z.date(),
-				}),
+				name: z.string(),
+				content: z.string(),
+				created_at: z.date(),
 			}),
 		}),
 		adv: defineCollection({
