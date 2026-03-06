@@ -99,7 +99,6 @@
 					list: 'justify-center',
 				}"
 			/>
-
 			<ClientOnly>
 				<div v-if="user">
 					<UPageSection
@@ -321,10 +320,6 @@ const { data: privatePosts } = useAsyncData(
 		}
 		return []
 	},
-	{ server: false },
+	{ server: false, watch: [user] },
 )
-
-onMounted(() => {
-	// refresh()
-})
 </script>
