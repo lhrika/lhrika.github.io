@@ -8,6 +8,8 @@ on:
 env:
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
   SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+  NUXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NUXT_PUBLIC_TURNSTILE_SITE_KEY }}
+  NUXT_TURNSTILE_SECRET_KEY: ${{ secrets.NUXT_TURNSTILE_SECRET_KEY }}
 jobs:
   build:
     runs-on: ubuntu-latest
