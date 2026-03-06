@@ -12,7 +12,7 @@
 				title="留言版"
 				description="欢迎留言。通过审核的留言将会展示在这里"
 			/>
-			<!-- <MessageBoard /> -->
+			<MessageBoard />
 			<UContainer class="space-y-4">
 				<UCard
 					v-for="(message, index) in messages"
@@ -29,7 +29,15 @@
 							{{ message.name }}
 						</div>
 						<div class="text-sm text-muted">
-							{{ new Date(message.created_at).toLocaleString(locale) }}
+							<NuxtTime
+								:datetime="message.created_at"
+								year="numeric"
+								month="short"
+								day="numeric"
+								hour="numeric"
+								minute="numeric"
+								:locale="locale"
+							/>
 						</div>
 					</template>
 					<div>

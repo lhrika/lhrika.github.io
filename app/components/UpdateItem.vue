@@ -9,7 +9,15 @@
 			<div
 				class="absolute -bottom-4 right-6 text-sm text-muted bg-default py-1 px-2 border-y border-muted"
 			>
-				{{ date.toLocaleString(locale) }}
+				<NuxtTime
+					:datetime="date"
+					year="numeric"
+					month="short"
+					day="numeric"
+					hour="numeric"
+					minute="numeric"
+					:locale="locale"
+				/>
 			</div>
 			{{ content }}
 		</div>

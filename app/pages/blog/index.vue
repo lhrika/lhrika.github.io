@@ -79,7 +79,13 @@
 							</div>
 						</template>
 						<template v-if="post.date" #date>
-							<span>{{ new Date(post.date).toLocaleDateString(locale) }}</span>
+							<NuxtTime
+								:datetime="post.date"
+								year="numeric"
+								month="short"
+								day="numeric"
+								:locale="locale"
+							/>
 						</template>
 					</UBlogPost>
 				</UBlogPosts>
