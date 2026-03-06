@@ -12,6 +12,7 @@
 			<UFormField name="content" :label="t('Message')">
 				<UTextarea v-model="state.content" class="flex" />
 			</UFormField>
+			<NuxtTurnstile v-model="token" />
 			<UButton type="submit" color="primary">
 				{{ t('Submit') }}
 			</UButton>
@@ -41,13 +42,19 @@ const state = reactive<Partial<Schema>>({
 	content: undefined,
 })
 
+// Cloudflare turnstile token
+const token = ref('')
+
 const supabase = useSupabaseClient()
 
 const handleSubmitMessage = async () => {
-	const { error } = await supabase
-		.from('messages')
-		.insert([{ name: state.name!, content: state.content! }])
-
+	const { error } = await supabase.functions.invoke('submit-message', {
+		body: {
+			token: token.value,
+			content: state.content,
+			name: state.name,
+		},
+	})
 	if (error) {
 		toast.add({
 			title: 'Error',
