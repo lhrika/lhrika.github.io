@@ -12,7 +12,9 @@
 			<UFormField name="content" :label="t('Message')">
 				<UTextarea v-model="state.content" class="flex" />
 			</UFormField>
-			<NuxtTurnstile v-model="token" />
+			<ClientOnly>
+				<NuxtTurnstile v-model="token" />
+			</ClientOnly>
 			<UButton type="submit" color="primary">
 				{{ t('Submit') }}
 			</UButton>
