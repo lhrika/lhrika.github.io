@@ -42,16 +42,7 @@
 							}
 						"
 					/>
-					<UInputDate
-						ref="inputDateRange"
-						v-model="dateRange"
-						range
-						@update:model-value="
-							() => {
-								refreshKakeiboData()
-							}
-						"
-					>
+					<UInputDate ref="inputDateRange" v-model="dateRange" range>
 						<template #trailing>
 							<UPopover :reference="inputDateRange?.inputsRef[0]?.$el">
 								<UButton
@@ -387,6 +378,12 @@ const formModalOpen = ref(false)
 const categoryFormModalOpen = ref(false)
 const entryDateCalendarOpen = shallowRef(false)
 
+// Model value of date range filter
+const dateRange = shallowRef({
+	start: today(getLocalTimeZone()).set({ day: 1 }),
+	end: today(getLocalTimeZone()),
+})
+
 // Shop select menu items
 const shopItems = ref(shops)
 const onCreateShopItem = (item: string) => {
@@ -553,7 +550,7 @@ const categorySelectMenuItems = computed(() =>
 )
 
 // Kakeibo entries data
-const { data: kakeiboData, refresh: refreshKakeiboData } = await useAsyncData(
+const { data: kakeiboData, refresh: refreshKakeiboData } = useAsyncData(
 	'kakeibo',
 	async () =>
 		await supabase
@@ -567,6 +564,7 @@ const { data: kakeiboData, refresh: refreshKakeiboData } = await useAsyncData(
 		transform: res => {
 			return res.data
 		},
+		watch: [user, dateRange],
 	},
 )
 
@@ -878,12 +876,6 @@ const submitCategory = async (event: FormSubmitEvent<CategorySchema>) => {
 		refreshCategoryData()
 	}
 }
-
-// Model value of date range filter
-const dateRange = shallowRef({
-	start: today(getLocalTimeZone()).set({ day: 1 }),
-	end: today(getLocalTimeZone()),
-})
 
 // Grouping settings
 const groupingOptions = ref<GroupingOptions>({
