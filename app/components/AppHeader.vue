@@ -22,21 +22,51 @@
 			root: 'border-0',
 			container: 'flex py-4',
 			center: 'justify-center',
+			body: 'space-y-4',
 		}"
 	>
+		<UNavigationMenu :items="items" />
 		<template #left>
 			<div class="font-bold text-lg">
 				{{ pageTitle }}
 			</div>
 		</template>
-		<UNavigationMenu :items="items" />
 		<template #right>
 			<LocaleMenu />
-			<UColorModeButton />
 			<ThemePalette />
+			<UColorModeButton />
+			<UUser
+				:name="user?.profile?.name"
+				:avatar="{
+					src: user?.profile?.avatar,
+					icon: 'i-lucide-user',
+				}"
+				class="hidden lg:flex"
+			/>
 		</template>
 		<template #body>
 			<UNavigationMenu :items="items" orientation="vertical" class="-mx-2.5" />
+			<USeparator />
+			<div class="flex justify-center items-center space-x-2">
+				<UUser
+					:name="user?.profile?.name"
+					:avatar="{
+						src: user?.profile?.avatar,
+						icon: 'i-lucide-user',
+					}"
+				/>
+				<UButton
+					size="sm"
+					variant="ghost"
+					color="neutral"
+					icon="i-lucide-log-out"
+					@click="
+						() => {
+							supabase.auth.signOut()
+						}
+					"
+				/>
+			</div>
 		</template>
 	</UHeader>
 	<ReuseTemplate classes="flex lg:hidden" />
@@ -56,6 +86,10 @@ const pageTitle = computed(() => (route.meta.title as string) || '')
 
 // I18n
 const { t } = useI18n()
+
+// Supabase
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 
 // Navigation Menu
 const items = computed<NavigationMenuItem[]>(() => [
