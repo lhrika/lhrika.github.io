@@ -58,7 +58,13 @@ export default defineNuxtConfig({
 		},
 	},
 	supabase: {
-		redirect: false,
+		redirect: true,
+		redirectOptions: {
+			login: '/login',
+			saveRedirectToCookie: true,
+			callback: '/login',
+			include: ['/kakeibo(/*)?'],
+		},
 		url: process.env.SUPABASE_URL,
 		key: process.env.SUPABASE_KEY,
 	},

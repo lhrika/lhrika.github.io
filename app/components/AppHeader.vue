@@ -69,11 +69,7 @@
 						src: user?.profile?.avatar,
 						icon: 'i-lucide-user',
 					}"
-					:to="
-						user
-							? undefined
-							: `/login?redirect=${encodeURIComponent(route.fullPath)}`
-					"
+					:to="user ? undefined : '/login'"
 					:ui="{
 						name: 'inline-flex items-center gap-2',
 					}"

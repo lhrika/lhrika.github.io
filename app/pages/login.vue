@@ -1,10 +1,34 @@
 <script setup lang="ts">
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
+import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui'
 
+// Localization
 const { t } = useI18n({
 	useScope: 'local',
 })
 
+// Nuxt UI composables
+const toast = useToast()
+
+// Auth form fields definitions
+const fields: AuthFormField[] = [
+	{
+		name: 'email',
+		type: 'email',
+		label: t('emailLabel'),
+		placeholder: 'Enter your email',
+		required: true,
+	},
+	{
+		name: 'password',
+		label: t('passwordLabel'),
+		type: 'password',
+		placeholder: 'Enter your password',
+		required: true,
+	},
+]
+
+// Form schema definition
 const schema = z.object({
 	email: z.email('Invalid email'),
 	password: z
@@ -12,59 +36,105 @@ const schema = z.object({
 		.min(8, 'Must be at least 8 characters'),
 })
 type Schema = z.output<typeof schema>
-const state = reactive<Partial<Schema>>({
-	email: undefined,
-	password: undefined,
-})
-const toast = useToast()
 
+// Supabase client
 const supabase = useSupabaseClient()
 
-const signInWithPassword = async () => {
+// Log in status
+const status = ref<'idle' | 'pending' | 'success' | 'error'>('idle')
+
+// Redirect info
+const redirect = useSupabaseCookieRedirect()
+
+// Log in logic
+const signInWithPassword = async (email: string, password: string) => {
 	const { error } = await supabase.auth.signInWithPassword({
-		email: state.email!,
-		password: state.password!,
+		email: email,
+		password: password,
 	})
 	if (error) {
+		status.value = 'error'
 		toast.add({
 			title: t('errorTitle'),
 			description: t('errorDescription'),
 			color: 'error',
 		})
 	} else {
+		status.value = 'success'
 		toast.add({
 			title: t('successTitle'),
 			description: t('sucessDescription'),
 			color: 'success',
 		})
 	}
-	const route = useRoute()
-	setTimeout(() => {
-		const redirect = route.query.redirect as string | undefined
-		navigateTo(redirect && !redirect.startsWith('/login') ? redirect : '/')
-	}, 1000)
+}
+
+// Redirect when the user changes
+const user = useSupabaseUser()
+watch(
+	user,
+	() => {
+		navigateTo(redirect.path ? redirect.pluck() : '/')
+	},
+	{
+		once: true,
+	},
+)
+
+// Form submit event handler
+const onSubmit = (payload: FormSubmitEvent<Schema>) => {
+	if (status.value !== 'pending') {
+		status.value = 'pending'
+		signInWithPassword(payload.data.email, payload.data.password)
+	}
 }
 </script>
 
 <template>
-	<div class="flex justify-center">
-		<UForm
-			:schema="schema"
-			:state="state"
-			class="space-y-4"
-			@submit="signInWithPassword"
-		>
-			<UFormField :label="t('emailLabel')" name="email">
-				<UInput v-model="state.email" />
-			</UFormField>
-			<UFormField :label="t('passwordLabel')" name="password">
-				<UInput v-model="state.password" type="password" />
-			</UFormField>
-			<UButton type="submit">
-				{{ t('submitButton') }}
-			</UButton>
-		</UForm>
-	</div>
+	<UPage>
+		<UPageBody>
+			<UContainer>
+				<UPageCard class="max-w-md mx-auto">
+					<UAuthForm
+						:schema="schema"
+						:fields="fields"
+						title="Welcome back!"
+						icon="i-lucide-lock"
+						:submit="{
+							color:
+								status === 'idle' || status === 'pending' ? 'primary' : status,
+							loading: status === 'pending',
+						}"
+						@submit="onSubmit"
+					>
+						<template #description>
+							Don't have an account?
+							<ULink to="#" class="text-primary font-medium">Sign up</ULink>.
+						</template>
+						<template #password-hint>
+							<ULink to="#" class="text-primary font-medium" tabindex="-1"
+								>Forgot password?</ULink
+							>
+						</template>
+						<template #validation>
+							<UAlert
+								v-if="status === 'error'"
+								color="error"
+								icon="i-lucide-info"
+								title="Error signing in"
+							/>
+						</template>
+						<template #footer>
+							By signing in, you agree to our
+							<ULink to="#" class="text-primary font-medium"
+								>Terms of Service</ULink
+							>.
+						</template>
+					</UAuthForm>
+				</UPageCard>
+			</UContainer>
+		</UPageBody>
+	</UPage>
 </template>
 
 <i18n lang="json">
