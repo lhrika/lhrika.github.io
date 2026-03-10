@@ -55,6 +55,7 @@ export default defineContentConfig({
 			type: 'data',
 			source: 'updates.csv',
 			schema: z.object({
+				id: z.string(),
 				content: z.string(),
 				at: z.date(),
 				user: z.string(),

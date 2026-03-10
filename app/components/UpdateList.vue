@@ -47,7 +47,7 @@ const { data: localUpdates, ...localUpdatesData } = useAsyncData(
 	'local-updates',
 	() => {
 		return queryCollection('updates')
-			.select('at', 'content', 'user')
+			.select('id', 'at', 'content', 'user')
 			.order('at', 'DESC')
 			.skip(localState.count)
 			.limit(restItemsToLoad.value)
@@ -56,7 +56,12 @@ const { data: localUpdates, ...localUpdatesData } = useAsyncData(
 	{
 		transform: data => {
 			if (!data) return []
-			return data as Update[]
+			return data.map(item => ({
+				id: parseInt(item.id),
+				content: item.content,
+				user: item.user,
+				at: item.at,
+			}))
 		},
 		immediate: false,
 	},
