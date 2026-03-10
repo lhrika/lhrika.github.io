@@ -2,8 +2,8 @@
 	<UContainer class="space-y-4">
 		<div class="space-y-4">
 			<UpdateItem
-				v-for="(update, index) in updates"
-				:key="index"
+				v-for="update in updates"
+				:key="update.id"
 				:content="update.content"
 				:at="update.at"
 				:user="update.user"
@@ -35,6 +35,7 @@ const localState = reactive({
 const startTime = ref(Date.now())
 
 type Update = {
+	id: number
 	content: string
 	at: string
 	user: string
@@ -73,6 +74,7 @@ const { data: remoteUpdates, ...remoteUpdatesData } = useAsyncData(
 		transform: ({ data }) => {
 			if (!data) return []
 			return data.map(item => ({
+				id: item.id,
 				content: item.content,
 				at: item.created_at,
 				user: item.user_id,
@@ -103,6 +105,7 @@ const { data: latestUpdates } = useAsyncData(
 		transform: data => {
 			if (!data || !data.data) return []
 			return data.data.map(item => ({
+				id: item.id,
 				content: item.content,
 				at: item.created_at,
 				user: item.user_id,
