@@ -109,7 +109,9 @@ const onSubmit = (payload: FormSubmitEvent<Schema>) => {
 					>
 						<template #description>
 							Don't have an account?
-							<ULink to="#" class="text-primary font-medium">Sign up</ULink>.
+							<ULink to="/signup" class="text-primary font-medium"
+								>Sign up</ULink
+							>.
 						</template>
 						<template #password-hint>
 							<ULink to="#" class="text-primary font-medium" tabindex="-1"
