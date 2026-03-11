@@ -62,23 +62,7 @@
 			<UNavigationMenu :items="items" orientation="vertical" class="-mx-2.5" />
 			<USeparator />
 			<div class="flex justify-center items-center space-x-2">
-				<UUser
-					v-if="route.path !== '/login'"
-					:name="user?.profile?.name ?? $t('login')"
-					:avatar="{
-						src: user?.profile?.avatar,
-						icon: 'i-lucide-user',
-					}"
-					:to="user ? undefined : '/login'"
-					:ui="{
-						name: 'inline-flex items-center gap-2',
-					}"
-				>
-					<template #name>
-						{{ user?.profile?.name ?? $t('login') }}
-						<UIcon v-if="!user" name="i-lucide-log-in" class="size-4" />
-					</template>
-				</UUser>
+				<LoggedInUser v-if="route.path !== '/login'" />
 				<UButton
 					v-if="user"
 					size="sm"
