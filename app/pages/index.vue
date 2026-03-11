@@ -3,6 +3,7 @@
 		<UPageBody>
 			<!-- <OtmfcGallery /> -->
 			<UPageSection
+				ref="updateSection"
 				title="动态"
 				description="喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵"
 				orientation="horizontal"
@@ -19,12 +20,21 @@
 					<UpdateList />
 				</UScrollArea>
 			</UPageSection>
-			<UpdateModal v-if="user" />
 			<MessageBoard />
 		</UPageBody>
+		<UpdateModal v-if="user && updateSectionVisible" />
 	</UPage>
 </template>
 
 <script setup lang="ts">
+import { useElementVisibility } from '@vueuse/core'
+
+// Supabase user
 const user = useSupabaseUser()
+
+// Template refs
+const updateSection = useTemplateRef('updateSection')
+
+// Visibility of updateSection to show/hide FAB
+const updateSectionVisible = useElementVisibility(updateSection)
 </script>
