@@ -18,6 +18,7 @@ export default defineNuxtConfig({
 			routes: [
 				'/_ipx/s_32x32/avatars/lyhuong.png',
 				'/_ipx/s_64x64/avatars/lyhuong.png',
+				'/profile',
 			],
 		},
 	},

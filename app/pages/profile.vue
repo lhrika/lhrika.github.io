@@ -146,7 +146,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 				],
 				'password',
 			)
-			return false
+			return
 		}
 	}
 	await supabase.auth

@@ -35,28 +35,20 @@
 			<LocaleMenu />
 			<ThemePalette />
 			<UColorModeButton />
-			<UUser
-				v-if="route.path !== '/login'"
-				:name="user?.profile?.name ?? $t('login')"
-				:avatar="{
-					src: user?.profile?.avatar,
-					icon: 'i-lucide-user',
-				}"
-				:to="
-					user
-						? undefined
-						: `/login?redirect=${encodeURIComponent(route.fullPath)}`
+			<USeparator orientation="vertical" class="h-8" />
+			<LoggedInUser v-if="route.path !== '/login'" />
+			<UButton
+				v-if="user"
+				size="sm"
+				variant="ghost"
+				color="neutral"
+				icon="i-lucide-log-out"
+				@click="
+					() => {
+						supabase.auth.signOut()
+					}
 				"
-				:ui="{
-					name: 'inline-flex items-center gap-2',
-				}"
-				class="hidden lg:flex"
-			>
-				<template #name>
-					{{ user?.profile?.name ?? $t('login') }}
-					<UIcon v-if="!user" name="i-lucide-log-in" class="size-4" />
-				</template>
-			</UUser>
+			/>
 		</template>
 		<template #body>
 			<UNavigationMenu :items="items" orientation="vertical" class="-mx-2.5" />
