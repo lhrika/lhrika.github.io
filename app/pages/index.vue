@@ -8,6 +8,7 @@
 				description="喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵喵"
 				orientation="horizontal"
 				:ui="{
+					container: 'pt-4 sm:pt-8 lg:pt-16',
 					title: 'text-center lg:text-start',
 					wrapper: 'lg:order-last',
 					footer: 'hidden lg:block',
