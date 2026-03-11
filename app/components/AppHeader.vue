@@ -35,14 +35,15 @@
 			<LocaleMenu />
 			<ThemePalette />
 			<UColorModeButton />
-			<USeparator orientation="vertical" class="h-8" />
-			<LoggedInUser v-if="route.path !== '/login'" />
+			<USeparator orientation="vertical" class="h-8 hidden lg:block" />
+			<LoggedInUser v-if="route.path !== '/login'" class="hidden lg:flex" />
 			<UButton
 				v-if="user"
 				size="sm"
 				variant="ghost"
 				color="neutral"
 				icon="i-lucide-log-out"
+				class="hidden lg:flex"
 				@click="
 					() => {
 						supabase.auth.signOut()
