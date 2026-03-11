@@ -7,14 +7,20 @@
 			@submit="handleSubmitMessage"
 		>
 			<UFormField name="name" :label="t('Name')">
-				<UInput v-model="state.name" class="flex" />
+				<UInput v-model="state.name" class="w-full" />
 			</UFormField>
 			<UFormField name="content" :label="t('Message')">
-				<UTextarea v-model="state.content" class="flex" />
+				<UTextarea v-model="state.content" class="w-full" />
 			</UFormField>
-			<div class="flex items-center gap-4 justify-between">
+			<div class="flex flex-col sm:flex-row items-center gap-4 justify-between">
 				<ClientOnly>
-					<NuxtTurnstile v-model="token" />
+					<NuxtTurnstile
+						v-model="token"
+						:options="{
+							appearance: 'interaction-only',
+							size: 'flexible',
+						}"
+					/>
 				</ClientOnly>
 				<UButton
 					type="submit"
