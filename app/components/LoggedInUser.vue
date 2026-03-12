@@ -1,7 +1,6 @@
 <template>
-	<ClientOnly>
+	<div class="flex">
 		<UUser
-			:name="user?.profile?.name ?? $t('login')"
 			:avatar="{
 				src: user?.profile?.avatar,
 				icon: 'i-lucide-user',
@@ -16,12 +15,32 @@
 				<UIcon v-if="!user" name="i-lucide-log-in" class="size-4" />
 			</template>
 		</UUser>
-		<template #fallback>
-			<ULink to="/login">Login</ULink>
-		</template>
-	</ClientOnly>
+		<UButton
+			v-if="user"
+			size="sm"
+			variant="ghost"
+			color="neutral"
+			icon="i-lucide-log-out"
+			@click="
+				() => {
+					supabase.auth.signOut()
+				}
+			"
+		/>
+	</div>
 </template>
 
 <script setup lang="ts">
-const user = useSupabaseUser()
+const supabase = useSupabaseClient()
+const supabaseUser = useSupabaseUser()
+const mounted = ref(false)
+const user = computed(() => {
+	if (mounted.value) {
+		return supabaseUser.value
+	}
+	return null
+})
+onMounted(() => {
+	mounted.value = true
+})
 </script>

@@ -37,37 +37,12 @@
 			<UColorModeButton />
 			<USeparator orientation="vertical" class="h-8 hidden lg:block" />
 			<LoggedInUser v-if="route.path !== '/login'" class="hidden lg:flex" />
-			<UButton
-				v-if="user"
-				size="sm"
-				variant="ghost"
-				color="neutral"
-				icon="i-lucide-log-out"
-				class="hidden lg:flex"
-				@click="
-					() => {
-						supabase.auth.signOut()
-					}
-				"
-			/>
 		</template>
 		<template #body>
 			<UNavigationMenu :items="items" orientation="vertical" class="-mx-2.5" />
 			<USeparator />
 			<div class="flex justify-center items-center space-x-2">
 				<LoggedInUser v-if="route.path !== '/login'" />
-				<UButton
-					v-if="user"
-					size="sm"
-					variant="ghost"
-					color="neutral"
-					icon="i-lucide-log-out"
-					@click="
-						() => {
-							supabase.auth.signOut()
-						}
-					"
-				/>
 			</div>
 		</template>
 	</UHeader>
@@ -88,10 +63,6 @@ const pageTitle = computed(() => (route.meta.title as string) || '')
 
 // I18n
 const { t } = useI18n()
-
-// Supabase
-const supabase = useSupabaseClient()
-const user = useSupabaseUser()
 
 // Navigation Menu
 const items = computed<NavigationMenuItem[]>(() => [
