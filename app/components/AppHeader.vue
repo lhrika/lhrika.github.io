@@ -27,9 +27,16 @@
 	>
 		<UNavigationMenu :items="items" />
 		<template #left>
+			<NuxtImg
+				src="/img/logo.png"
+				width="32"
+				height="32"
+				class="rotate-y-180"
+			/>
 			<div class="font-bold text-lg">
 				{{ pageTitle }}
 			</div>
+			<NuxtImg src="/img/logo.png" width="32" height="32" />
 		</template>
 		<template #right>
 			<LocaleMenu />

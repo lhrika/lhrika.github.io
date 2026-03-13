@@ -30,6 +30,10 @@
 <script setup lang="ts">
 import { useElementVisibility } from '@vueuse/core'
 
+definePageMeta({
+	title: 'Home',
+})
+
 // Supabase user
 const user = useSupabaseUser()
 
