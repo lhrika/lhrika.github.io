@@ -87,6 +87,11 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 import { createReusableTemplate } from '@vueuse/core'
 
+// Set page meta
+definePageMeta({
+	title: 'Library',
+})
+
 const route = useRoute()
 
 // Locale to format date
