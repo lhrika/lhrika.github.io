@@ -12,7 +12,16 @@
 						:key="libraryItem.id"
 						:title="libraryItem.title"
 					>
-						<div class="flex flex-col items-center cursor-pointer">
+						<div class="relative flex flex-col items-center cursor-pointer">
+							<UBadge
+								:label="
+									$t(
+										`library.${libraryItem.stem.split('/').at(1)}.status.${libraryItem.status ?? 'ongoing'}`,
+									)
+								"
+								:color="statusColor[libraryItem.status]"
+								class="absolute top-2 left-2 z-1000"
+							/>
 							<UCarousel
 								v-slot="{ item }"
 								:items="
@@ -68,6 +77,16 @@ const navigationMenuItems: NavigationMenuItem[] = [
 		to: '/library/book',
 	},
 ]
+
+// Color for status
+type Status = 'ongoing' | 'completed' | 'pending' | 'interested'
+type Color = 'primary' | 'secondary' | 'success' | 'info' | 'neutral'
+const statusColor: Record<Status, Color> = {
+	ongoing: 'primary',
+	completed: 'success',
+	pending: 'secondary',
+	interested: 'info',
+}
 
 const { data: libraryData } = useAsyncData(
 	route.path,
