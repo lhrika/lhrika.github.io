@@ -77,6 +77,7 @@
 							</p>
 						</template>
 					</UModal>
+					<div ref="list-bottom" class="absolute bottom-0" />
 				</UPageGrid>
 			</UContainer>
 		</UPageBody>
@@ -85,7 +86,7 @@
 
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
-import { createReusableTemplate } from '@vueuse/core'
+import { createReusableTemplate, useElementVisibility } from '@vueuse/core'
 
 // Set page meta
 definePageMeta({
@@ -100,6 +101,13 @@ const { locale } = useI18n()
 const [DefineTemplate, ReuseTemplate] = createReusableTemplate<{
 	image: string | string[]
 }>()
+
+// Max list items count
+const limit = ref(3)
+
+// Whether the bottom of the list is visible
+const bottomRef = useTemplateRef('list-bottom')
+const bottomIsVisible = useElementVisibility(bottomRef)
 
 const navigationMenuItems: NavigationMenuItem[] = [
 	{
@@ -130,17 +138,23 @@ const statusColor: Record<Status, Color> = {
 	interested: 'info',
 }
 
-const { data: libraryData } = useAsyncData(
+const { data: libraryData, status: loadStatus } = useAsyncData(
 	route.path,
 	() => {
 		const query = queryCollection('library')
 		if (typeof route.params.slug === 'object') {
 			query.where('stem', 'LIKE', `library/${route.params.slug.join('/')}%`)
 		}
-		return query.all()
+		return query.limit(limit.value).all()
 	},
 	{
-		watch: [() => route.params.slug],
+		watch: [limit],
 	},
 )
+
+watchEffect(() => {
+	if (loadStatus.value === 'success' && bottomIsVisible.value) {
+		limit.value += 1
+	}
+})
 </script>
