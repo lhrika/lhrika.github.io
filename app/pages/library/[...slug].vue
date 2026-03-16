@@ -22,14 +22,27 @@
 								:color="statusColor[libraryItem.status]"
 								class="absolute top-2 left-2 z-1000"
 							/>
+							<NuxtImg
+								v-if="typeof libraryItem.image === 'string'"
+								:src="libraryItem.image"
+								class="w-75 h-auto max-w-full"
+								:provider="
+									libraryItem.image.startsWith('http') ||
+									libraryItem.image.startsWith('/')
+										? 'ipx'
+										: 'google'
+								"
+								width="300"
+							/>
 							<UCarousel
+								v-else
 								v-slot="{ item }"
 								:items="
 									typeof libraryItem.image === 'string'
 										? [libraryItem.image]
 										: libraryItem.image
 								"
-								class="aspect-3/4 w-75 max-w-full mx-auto bg-muted"
+								class="w-75 max-w-full bg-muted"
 								:ui="{
 									root: 'flex flex-col justify-center',
 								}"
