@@ -7,36 +7,38 @@
 		<UPageBody>
 			<UContainer>
 				<UPageGrid>
-					<div
+					<UModal
 						v-for="libraryItem in libraryData"
 						:key="libraryItem.id"
-						class="flex flex-col items-center"
+						:title="libraryItem.title"
 					>
-						<UCarousel
-							v-slot="{ item }"
-							:items="
-								typeof libraryItem.image === 'string'
-									? [libraryItem.image]
-									: libraryItem.image
-							"
-							class="aspect-3/4 w-75 max-w-full mx-auto bg-muted"
-							:ui="{
-								root: 'flex flex-col justify-center',
-							}"
-						>
-							<NuxtImg
-								:src="item"
-								class="w-75 h-auto max-w-full"
-								:provider="
-									item.startsWith('http') || item.startsWith('/')
-										? 'ipx'
-										: 'google'
+						<div class="flex flex-col items-center cursor-pointer">
+							<UCarousel
+								v-slot="{ item }"
+								:items="
+									typeof libraryItem.image === 'string'
+										? [libraryItem.image]
+										: libraryItem.image
 								"
-								width="300"
-							/>
-						</UCarousel>
-						<div>{{ libraryItem.title }}</div>
-					</div>
+								class="aspect-3/4 w-75 max-w-full mx-auto bg-muted"
+								:ui="{
+									root: 'flex flex-col justify-center',
+								}"
+							>
+								<NuxtImg
+									:src="item"
+									class="w-75 h-auto max-w-full"
+									:provider="
+										item.startsWith('http') || item.startsWith('/')
+											? 'ipx'
+											: 'google'
+									"
+									width="300"
+								/>
+							</UCarousel>
+							<div>{{ libraryItem.title }}</div>
+						</div>
+					</UModal>
 				</UPageGrid>
 			</UContainer>
 		</UPageBody>
