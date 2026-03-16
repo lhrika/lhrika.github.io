@@ -62,6 +62,19 @@
 						</div>
 						<template #body>
 							<ReuseTemplate :image="libraryItem.image" />
+							<p v-if="libraryItem.startDate || libraryItem.completeDate">
+								<NuxtTime
+									v-if="libraryItem.startDate"
+									:datetime="libraryItem.startDate"
+									:locale="locale"
+								/>
+								~
+								<NuxtTime
+									v-if="libraryItem.completeDate"
+									:datetime="libraryItem.completeDate"
+									:locale="locale"
+								/>
+							</p>
 						</template>
 					</UModal>
 				</UPageGrid>
@@ -75,6 +88,9 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 import { createReusableTemplate } from '@vueuse/core'
 
 const route = useRoute()
+
+// Locale to format date
+const { locale } = useI18n()
 
 const [DefineTemplate, ReuseTemplate] = createReusableTemplate<{
 	image: string | string[]

@@ -79,6 +79,8 @@ export default defineContentConfig({
 				title: z.string(),
 				image: z.string().or(z.array(z.string())),
 				status: z.enum(['pending', 'ongoing', 'completed', 'interested']),
+				startDate: z.date(),
+				completeDate: z.date(),
 			}),
 		}),
 	},
