@@ -7,6 +7,39 @@
 		<UPageBody>
 			<UContainer>
 				<UPageGrid>
+					<DefineTemplate v-slot="{ image }">
+						<NuxtImg
+							v-if="typeof image === 'string'"
+							:src="image"
+							class="w-75 h-auto max-w-full"
+							:provider="
+								image.startsWith('http') || image.startsWith('/')
+									? 'ipx'
+									: 'google'
+							"
+							width="300"
+						/>
+						<UCarousel
+							v-else
+							v-slot="{ item }"
+							:items="image"
+							class="w-75 max-w-full bg-muted"
+							:ui="{
+								root: 'flex flex-col justify-center',
+							}"
+						>
+							<NuxtImg
+								:src="item"
+								class="w-75 h-auto max-w-full"
+								:provider="
+									item.startsWith('http') || item.startsWith('/')
+										? 'ipx'
+										: 'google'
+								"
+								width="300"
+							/>
+						</UCarousel>
+					</DefineTemplate>
 					<UModal
 						v-for="libraryItem in libraryData"
 						:key="libraryItem.id"
@@ -24,44 +57,12 @@
 								:color="statusColor[libraryItem.status]"
 								class="absolute top-2 left-2"
 							/>
-							<NuxtImg
-								v-if="typeof libraryItem.image === 'string'"
-								:src="libraryItem.image"
-								class="w-75 h-auto max-w-full"
-								:provider="
-									libraryItem.image.startsWith('http') ||
-									libraryItem.image.startsWith('/')
-										? 'ipx'
-										: 'google'
-								"
-								width="300"
-							/>
-							<UCarousel
-								v-else
-								v-slot="{ item }"
-								:items="
-									typeof libraryItem.image === 'string'
-										? [libraryItem.image]
-										: libraryItem.image
-								"
-								class="w-75 max-w-full bg-muted"
-								:ui="{
-									root: 'flex flex-col justify-center',
-								}"
-							>
-								<NuxtImg
-									:src="item"
-									class="w-75 h-auto max-w-full"
-									:provider="
-										item.startsWith('http') || item.startsWith('/')
-											? 'ipx'
-											: 'google'
-									"
-									width="300"
-								/>
-							</UCarousel>
+							<ReuseTemplate :image="libraryItem.image" />
 							<div class="px-4">{{ libraryItem.title }}</div>
 						</div>
+						<template #body>
+							<ReuseTemplate :image="libraryItem.image" />
+						</template>
 					</UModal>
 				</UPageGrid>
 			</UContainer>
@@ -71,8 +72,13 @@
 
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
+import { createReusableTemplate } from '@vueuse/core'
 
 const route = useRoute()
+
+const [DefineTemplate, ReuseTemplate] = createReusableTemplate<{
+	image: string | string[]
+}>()
 
 const navigationMenuItems: NavigationMenuItem[] = [
 	{
