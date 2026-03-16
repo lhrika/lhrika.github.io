@@ -12,7 +12,9 @@
 						:key="libraryItem.id"
 						:title="libraryItem.title"
 					>
-						<div class="relative flex flex-col items-center cursor-pointer">
+						<div
+							class="relative flex flex-col items-center cursor-pointer w-75 max-w-full"
+						>
 							<UBadge
 								:label="
 									$t(
@@ -20,7 +22,7 @@
 									)
 								"
 								:color="statusColor[libraryItem.status]"
-								class="absolute top-2 left-2 z-1000"
+								class="absolute top-2 left-2"
 							/>
 							<NuxtImg
 								v-if="typeof libraryItem.image === 'string'"
@@ -58,7 +60,7 @@
 									width="300"
 								/>
 							</UCarousel>
-							<div>{{ libraryItem.title }}</div>
+							<div class="px-4">{{ libraryItem.title }}</div>
 						</div>
 					</UModal>
 				</UPageGrid>
