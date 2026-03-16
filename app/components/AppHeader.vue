@@ -84,19 +84,14 @@ const items = computed<NavigationMenuItem[]>(() => [
 		icon: 'i-lucide-book-open',
 	},
 	{
-		label: t('dictionary'),
-		to: '/dictionary',
-		icon: 'i-lucide-book',
+		label: 'Library',
+		to: '/library',
+		icon: 'i-lucide-library',
 	},
 	{
 		label: t('about'),
 		to: '/about',
 		icon: 'i-lucide-user-circle',
-	},
-	{
-		label: t('contact'),
-		to: '/contact',
-		icon: 'i-lucide-mail',
 	},
 	{
 		label: 'APP',
@@ -106,6 +101,11 @@ const items = computed<NavigationMenuItem[]>(() => [
 				label: '家計簿',
 				to: '/kakeibo',
 				icon: 'i-lucide-wallet',
+			},
+			{
+				label: t('dictionary'),
+				to: '/dictionary',
+				icon: 'i-lucide-book',
 			},
 			{
 				label: t('adv'),
