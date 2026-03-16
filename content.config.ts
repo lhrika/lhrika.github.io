@@ -72,5 +72,13 @@ export default defineContentConfig({
 				avatar: z.string().optional(),
 			}),
 		}),
+		library: defineCollection({
+			type: 'data',
+			source: 'library/**',
+			schema: z.object({
+				title: z.string(),
+				image: z.string().or(z.array(z.string())),
+			}),
+		}),
 	},
 })
