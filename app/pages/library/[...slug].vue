@@ -18,6 +18,7 @@
 									: 'google'
 							"
 							width="300"
+							loading="lazy"
 						/>
 						<UCarousel
 							v-else
@@ -37,6 +38,7 @@
 										: 'google'
 								"
 								width="300"
+								loading="lazy"
 							/>
 						</UCarousel>
 					</DefineTemplate>
@@ -153,8 +155,14 @@ const { data: libraryData, status: loadStatus } = useAsyncData(
 )
 
 watchEffect(() => {
-	if (loadStatus.value === 'success' && bottomIsVisible.value) {
-		limit.value += 1
+	if (
+		loadStatus.value === 'success' &&
+		bottomIsVisible.value &&
+		libraryData.value &&
+		libraryData.value.length === limit.value
+	) {
+		limit.value += 3
+		console.log(limit.value)
 	}
 })
 </script>
