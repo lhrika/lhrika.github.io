@@ -2,14 +2,19 @@
 	<NuxtImg
 		v-slot="{ src: innerSrc, isLoaded, imgAttrs }"
 		:src="src"
-		class="w-75 max-w-full"
 		:provider="src.startsWith('http') || src.startsWith('/') ? 'ipx' : 'google'"
 		width="300"
-		loading="lazy"
 		:custom="true"
 	>
-		<img v-if="isLoaded" ref="img" v-bind="imgAttrs" :src="innerSrc" />
-		<USkeleton v-if="!isRendered" class="w-75 h-100" />
+		<img
+			v-if="isLoaded"
+			ref="img"
+			v-bind="imgAttrs"
+			:src="innerSrc"
+			loading="lazy"
+			class="w-75 max-w-full"
+		/>
+		<USkeleton v-if="!isRendered" class="w-75 h-100 aspect-3/4 max-w-full" />
 	</NuxtImg>
 </template>
 
