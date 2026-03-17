@@ -19,6 +19,7 @@
 							"
 							width="300"
 							loading="lazy"
+							:placeholder="[300, 400]"
 						/>
 						<UCarousel
 							v-else
@@ -39,6 +40,7 @@
 								"
 								width="300"
 								loading="lazy"
+								:placeholder="[300, 400]"
 							/>
 						</UCarousel>
 					</DefineTemplate>
