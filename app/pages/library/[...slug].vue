@@ -141,7 +141,6 @@ watchEffect(() => {
 		libraryData.value.length === limit.value
 	) {
 		limit.value += 3
-		console.log(limit.value)
 	}
 })
 </script>
