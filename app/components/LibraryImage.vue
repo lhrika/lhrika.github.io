@@ -12,16 +12,22 @@
 		<USkeleton v-if="!isRendered" class="w-75 h-100" />
 	</NuxtImg>
 </template>
+
 <script setup lang="ts">
+import { useElementSize } from '@vueuse/core'
+
 const { src } = defineProps<{
 	src: string
 }>()
-const imgRef = useTemplateRef('img')
+
 const isRendered = ref(false)
-watchEffect(() => {
-	if (!isRendered.value && imgRef.value && imgRef.value.scrollHeight > 10) {
-		console.log(imgRef.value, imgRef.value.scrollHeight)
+const imgRef = useTemplateRef('img')
+const imgSize = useElementSize(imgRef)
+
+watch(imgSize.height, (value, oldValue) => {
+	if (value > oldValue) {
 		isRendered.value = true
+		imgSize.stop()
 	}
 })
 </script>
