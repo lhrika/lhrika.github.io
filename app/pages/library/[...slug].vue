@@ -81,7 +81,9 @@ const { locale } = useI18n()
 
 const [DefineTemplate, ReuseTemplate] = createReusableTemplate<{
 	image: string | string[]
-}>()
+}>({
+	inheritAttrs: false,
+})
 
 // Max list items count
 const limit = ref(3)
@@ -130,6 +132,20 @@ const { data: libraryData, status: loadStatus } = useAsyncData(
 	},
 	{
 		watch: [limit],
+		transform: data => {
+			if (import.meta.dev) {
+				data.forEach(item => {
+					if (typeof item.image === 'string') {
+						item.image = 'https://dummyimage.com/300x400/000/fff'
+					} else {
+						item.image = Array(item.image.length).fill(
+							'https://dummyimage.com/300x400/000/fff',
+						)
+					}
+				})
+			}
+			return data
+		},
 	},
 )
 
