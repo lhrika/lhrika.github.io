@@ -23,7 +23,7 @@
 				hidden: !isRendered,
 			}"
 		/>
-		<USkeleton v-else class="w-75 h-100" />
+		<USkeleton v-if="!isRendered" class="w-75 h-100" />
 	</NuxtImg>
 </template>
 <script setup lang="ts">
