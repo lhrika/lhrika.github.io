@@ -8,19 +8,7 @@
 			<UContainer>
 				<UPageGrid>
 					<DefineTemplate v-slot="{ image }">
-						<NuxtImg
-							v-if="typeof image === 'string'"
-							:src="image"
-							class="w-75 h-auto max-w-full"
-							:provider="
-								image.startsWith('http') || image.startsWith('/')
-									? 'ipx'
-									: 'google'
-							"
-							width="300"
-							loading="lazy"
-							:placeholder="[300, 400]"
-						/>
+						<LibraryImage v-if="typeof image === 'string'" :src="image" />
 						<UCarousel
 							v-else
 							v-slot="{ item }"
@@ -30,18 +18,7 @@
 								root: 'flex flex-col justify-center',
 							}"
 						>
-							<NuxtImg
-								:src="item"
-								class="w-75 h-auto max-w-full"
-								:provider="
-									item.startsWith('http') || item.startsWith('/')
-										? 'ipx'
-										: 'google'
-								"
-								width="300"
-								loading="lazy"
-								:placeholder="[300, 400]"
-							/>
+							<LibraryImage :src="item" />
 						</UCarousel>
 					</DefineTemplate>
 					<UModal
