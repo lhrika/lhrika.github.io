@@ -1,6 +1,8 @@
 <template>
 	<UPage>
-		<UPageHeader title="家計簿" class="p-4" />
+		<UContainer>
+			<UPageHeader title="家計簿" />
+		</UContainer>
 		<UPageBody>
 			<UContainer>
 				<UScrollArea orientation="horizontal">
@@ -204,39 +206,91 @@
 						class="space-y-4"
 						@submit="submitEntry"
 					>
+						<div class="flex justify-between">
+							<UFormField
+								name="date"
+								label="日付"
+								:ui="{
+									root: 'justify-start',
+									labelWrapper: 'hidden',
+								}"
+							>
+								<UInputDate
+									ref="inputDate"
+									v-model="entryDate"
+									variant="outline"
+								>
+									<template #trailing>
+										<UPopover
+											v-model:open="entryDateCalendarOpen"
+											:reference="inputDate?.inputsRef[3]?.$el"
+										>
+											<UButton
+												color="neutral"
+												variant="link"
+												size="sm"
+												icon="i-lucide-calendar"
+												aria-label="Select a date"
+												class="px-0"
+											/>
+											<template #content>
+												<UCalendar
+													v-model="entryDate"
+													variant="soft"
+													class="p-2"
+													@update:model-value="entryDateCalendarOpen = false"
+												/>
+											</template>
+										</UPopover>
+									</template>
+								</UInputDate>
+							</UFormField>
+							<UButton
+								icon="i-lucide-send"
+								type="submit"
+								:label="entryState.id === undefined ? '追加' : '修正'"
+								class="justify-center"
+							/>
+						</div>
 						<UFormField
-							name="date"
-							label="日付"
-							orientation="horizontal"
+							name="amount"
+							label="金額"
 							:ui="{
-								root: 'justify-start',
+								labelWrapper: 'hidden',
 							}"
 						>
-							<UInputDate ref="inputDate" v-model="entryDate">
-								<template #trailing>
-									<UPopover
-										v-model:open="entryDateCalendarOpen"
-										:reference="inputDate?.inputsRef[3]?.$el"
-									>
-										<UButton
-											color="neutral"
-											variant="link"
-											size="sm"
-											icon="i-lucide-calendar"
-											aria-label="Select a date"
-											class="px-0"
-										/>
-										<template #content>
-											<UCalendar
-												v-model="entryDate"
-												variant="soft"
-												class="p-2"
-												@update:model-value="entryDateCalendarOpen = false"
-											/>
-										</template>
-									</UPopover>
-								</template>
-							</UInputDate>
+							<UFieldGroup class="flex">
+								<UInputNumber
+									v-model="entryState.amount"
+									:min="0"
+									class="flex-1"
+									:step="entryState.currency === 'JPY' ? 1 : 0.01"
+									:increment="false"
+									:decrement="false"
+									:format-options="{
+										style: 'currency',
+										currency: entryState.currency,
+										currencyDisplay: 'symbol',
+										currencySign: 'accounting',
+									}"
+									variant="underline"
+									color="primary"
+									size="xl"
+									autofocus
+									:ui="{
+										base: 'text-3xl font-bold',
+									}"
+								/>
+								<USelect
+									v-model="entryState.currency"
+									default-value="JPY"
+									variant="ghost"
+									:items="['JPY', 'CNY', 'USD']"
+									:ui="{
+										base: 'ring-0',
+									}"
+								/>
+							</UFieldGroup>
 						</UFormField>
 						<UFormField name="category" label="カテゴリー">
 							<UDropdownMenu
@@ -246,30 +300,14 @@
 									align: 'start',
 								}"
 							>
-								<UButton variant="outline" :label="categoryLabel" />
+								<UButton
+									variant="outline"
+									color="neutral"
+									:label="categoryLabel"
+								/>
 							</UDropdownMenu>
 						</UFormField>
-						<UFormField name="amount" label="金額">
-							<UFieldGroup class="flex">
-								<UInputNumber
-									v-model="entryState.amount"
-									:min="0"
-									class="flex-1"
-									:step="entryState.currency === 'JPY' ? 1 : 0.01"
-									:format-options="{
-										style: 'currency',
-										currency: entryState.currency,
-										currencyDisplay: 'symbol',
-										currencySign: 'accounting',
-									}"
-								/>
-								<USelect
-									v-model="entryState.currency"
-									default-value="JPY"
-									:items="['JPY', 'CNY', 'USD']"
-								/>
-							</UFieldGroup>
-						</UFormField>
+
 						<UFormField name="shop" label="店舗">
 							<UInputMenu
 								v-model="entryState.shop"
@@ -406,7 +444,7 @@ type EntrySchema = z.output<typeof entrySchema>
 // Kakeibo entry form state
 const entryState = reactive<Partial<EntrySchema>>({
 	date: new Date(),
-	amount: 0,
+	amount: undefined,
 	currency: 'JPY',
 })
 // Model value for UInputDate
@@ -429,7 +467,7 @@ const entryDate = computed({
 // Initalize entry form state without resetting date
 const initializeEntryState = () => {
 	entryState.id = undefined
-	entryState.amount = 0
+	entryState.amount = undefined
 	entryState.currency = 'JPY'
 	entryState.category = undefined
 	entryState.note = undefined
