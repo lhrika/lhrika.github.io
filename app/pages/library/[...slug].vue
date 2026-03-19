@@ -63,6 +63,11 @@
 									:locale="locale"
 								/>
 							</p>
+							<ul>
+								<li v-for="link in libraryItem.links" :key="link.to">
+									<ULink :to="link.to">{{ link.label }}</ULink>
+								</li>
+							</ul>
 						</template>
 					</UModal>
 					<div ref="list-bottom" class="absolute bottom-0" />
