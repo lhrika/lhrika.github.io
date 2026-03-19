@@ -156,19 +156,19 @@ const bottomIsVisible = useElementVisibility(bottomRef)
 
 const navigationMenuItems: NavigationMenuItem[] = [
 	{
-		label: 'All',
+		label: $t('page.library.common.navigation.all'),
 		to: '/library',
 	},
 	{
-		label: 'Anime',
+		label: $t('page.library.common.navigation.anime'),
 		to: '/library/anime',
 	},
 	{
-		label: 'Game',
+		label: $t('page.library.common.navigation.game'),
 		to: '/library/game',
 	},
 	{
-		label: 'Book',
+		label: $t('page.library.common.navigation.book'),
 		to: '/library/book',
 	},
 ]

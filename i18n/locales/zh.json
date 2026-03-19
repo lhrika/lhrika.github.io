@@ -10,10 +10,18 @@
 	"page": {
 		"library": {
 			"common": {
-				"pending": "未开始",
-				"ongoing": "进行中",
-				"completed": "已完成",
-				"interested": "感兴趣"
+				"navigation": {
+					"all": "全部",
+					"anime": "动画",
+					"game": "游戏",
+					"book": "书籍"
+				},
+				"status": {
+					"pending": "未开始",
+					"ongoing": "进行中",
+					"completed": "已完成",
+					"interested": "感兴趣"
+				}
 			},
 			"game": {
 				"status": {
