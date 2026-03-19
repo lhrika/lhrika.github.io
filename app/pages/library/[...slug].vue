@@ -1,8 +1,17 @@
 <template>
 	<UPage>
 		<UContainer>
-			<UNavigationMenu :items="navigationMenuItems" highlight />
 			<UPageHeader title="Library" />
+			<UNavigationMenu :items="navigationMenuItems" highlight />
+			<div>
+				<USelect
+					v-model="selectedStatus"
+					:items="statusSelectItems"
+					value-key="value"
+					multiple
+					class="w-48"
+				/>
+			</div>
 		</UContainer>
 		<UPageBody>
 			<UContainer>
@@ -31,9 +40,7 @@
 						>
 							<UBadge
 								:label="
-									$t(
-										`library.${libraryItem.stem.split('/').at(1)}.status.${libraryItem.status ?? 'ongoing'}`,
-									)
+									$t(`${i18nPrefix}status.${libraryItem.status ?? 'ongoing'}`)
 								"
 								:color="statusColor[libraryItem.status]"
 								class="absolute top-2 left-2"
@@ -66,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import type { NavigationMenuItem } from '@nuxt/ui'
+import type { NavigationMenuItem, SelectItem } from '@nuxt/ui'
 import { createReusableTemplate, useElementVisibility } from '@vueuse/core'
 
 // Set page meta
@@ -76,6 +83,17 @@ definePageMeta({
 
 const route = useRoute()
 
+const i18nPrefix = computed(() => {
+	if (!route.params.slug) {
+		return 'page.library.common.'
+	}
+	if (typeof route.params.slug === 'string') {
+		return `page.library.${route.params.slug}.`
+	} else {
+		return `page.library.${route.params.slug.join('.')}.`
+	}
+})
+
 // Locale to format date
 const { locale } = useI18n()
 
@@ -84,6 +102,50 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate<{
 }>({
 	inheritAttrs: false,
 })
+
+// Color for status
+type Status = 'ongoing' | 'completed' | 'pending' | 'interested'
+type Color = 'primary' | 'secondary' | 'success' | 'info' | 'neutral'
+const statusColor: Record<Status, Color> = {
+	ongoing: 'primary',
+	completed: 'success',
+	pending: 'secondary',
+	interested: 'info',
+}
+
+// Status select items
+const statusSelectItems = ref([
+	{
+		label: $t(`${i18nPrefix.value}status.pending`),
+		value: 'pending',
+		chip: {
+			color: statusColor['pending'],
+		},
+	},
+	{
+		label: $t(`${i18nPrefix.value}status.ongoing`),
+		value: 'ongoing',
+		chip: {
+			color: statusColor['ongoing'],
+		},
+	},
+	{
+		label: $t(`${i18nPrefix.value}status.completed`),
+		value: 'completed',
+		chip: {
+			color: statusColor['completed'],
+		},
+	},
+	{
+		label: $t(`${i18nPrefix.value}status.interested`),
+		value: 'interested',
+		chip: {
+			color: statusColor['interested'],
+		},
+	},
+] satisfies SelectItem[])
+// Status select value
+const selectedStatus = ref<string[]>([])
 
 // Max list items count
 const limit = ref(3)
@@ -111,16 +173,6 @@ const navigationMenuItems: NavigationMenuItem[] = [
 	},
 ]
 
-// Color for status
-type Status = 'ongoing' | 'completed' | 'pending' | 'interested'
-type Color = 'primary' | 'secondary' | 'success' | 'info' | 'neutral'
-const statusColor: Record<Status, Color> = {
-	ongoing: 'primary',
-	completed: 'success',
-	pending: 'secondary',
-	interested: 'info',
-}
-
 const { data: libraryData, status: loadStatus } = useAsyncData(
 	route.path,
 	() => {
@@ -128,10 +180,17 @@ const { data: libraryData, status: loadStatus } = useAsyncData(
 		if (typeof route.params.slug === 'object') {
 			query.where('stem', 'LIKE', `library/${route.params.slug.join('/')}%`)
 		}
+		if (selectedStatus.value.length > 0) {
+			query.orWhere(q =>
+				selectedStatus.value.reduce((acc, cur) => {
+					return acc.where('status', '=', cur)
+				}, q),
+			)
+		}
 		return query.limit(limit.value).all()
 	},
 	{
-		watch: [limit],
+		watch: [limit, selectedStatus],
 		transform: data => {
 			if (import.meta.dev) {
 				data.forEach(item => {

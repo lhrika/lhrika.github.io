@@ -7,21 +7,29 @@
 	"contact": "联系",
 	"login": "登陆",
 	"adv": "阅读",
-	"library": {
-		"game": {
-			"status": {
-				"ongoing": "正在打",
-				"interested": "想玩",
-				"pending": "买了没打",
-				"completed": "打完了"
-			}
-		},
-		"anime": {
-			"status": {
-				"ongoing": "正在看",
-				"interested": "想看",
-				"pending": "还没看",
-				"completed": "看完了"
+	"page": {
+		"library": {
+			"common": {
+				"pending": "未开始",
+				"ongoing": "进行中",
+				"completed": "已完成",
+				"interested": "感兴趣"
+			},
+			"game": {
+				"status": {
+					"ongoing": "正在打",
+					"interested": "想玩",
+					"pending": "买了没打",
+					"completed": "打完了"
+				}
+			},
+			"anime": {
+				"status": {
+					"ongoing": "正在看",
+					"interested": "想看",
+					"pending": "还没看",
+					"completed": "看完了"
+				}
 			}
 		}
 	}
