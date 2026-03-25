@@ -21,6 +21,9 @@
 					"ongoing": "进行中",
 					"completed": "已完成",
 					"interested": "感兴趣"
+				},
+				"statusSelect": {
+					"placeholder": "选择进度"
 				}
 			},
 			"game": {

@@ -12,6 +12,11 @@ export default defineAppConfig({
 			primary: 'cyan',
 			neutral: 'stone',
 		},
+		button: {
+			slots: {
+				base: 'justify-center',
+			},
+		},
 		inputNumber: {
 			variants: {
 				variant: {
@@ -31,6 +36,12 @@ export default defineAppConfig({
 					class: `ring-0 border-${color}`,
 				})),
 			],
+		},
+		pageHeader: {
+			slots: {
+				root: 'py-0 px-4 sm:px-6 lg:px-8 border-0',
+				container: 'border-b border-default py-8',
+			},
 		},
 	},
 })

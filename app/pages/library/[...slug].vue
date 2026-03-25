@@ -1,19 +1,20 @@
 <template>
 	<UPage>
-		<UContainer>
-			<UPageHeader title="Library" />
-			<UNavigationMenu :items="navigationMenuItems" highlight />
-			<div>
-				<USelect
-					v-model="selectedStatus"
-					:items="statusSelectItems"
-					value-key="value"
-					multiple
-					class="w-48"
-				/>
-			</div>
-		</UContainer>
+		<UPageHeader title="Library" />
 		<UPageBody>
+			<UContainer class="space-y-8">
+				<UNavigationMenu :items="navigationMenuItems" highlight />
+				<div>
+					<USelect
+						v-model="selectedStatus"
+						:items="statusSelectItems"
+						:placeholder="$t('page.library.common.statusSelect.placeholder')"
+						value-key="value"
+						multiple
+						class="w-48"
+					/>
+				</div>
+			</UContainer>
 			<UContainer>
 				<UPageGrid>
 					<DefineTemplate v-slot="{ image }">

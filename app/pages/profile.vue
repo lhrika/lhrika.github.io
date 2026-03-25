@@ -1,8 +1,6 @@
 <template>
 	<UPage>
-		<UContainer>
-			<UPageHeader title="Profile" />
-		</UContainer>
+		<UPageHeader title="Profile" />
 		<UPageBody>
 			<UContainer>
 				<UPageCard>

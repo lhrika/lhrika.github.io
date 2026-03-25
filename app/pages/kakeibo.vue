@@ -1,8 +1,6 @@
 <template>
 	<UPage>
-		<UContainer>
-			<UPageHeader title="家計簿" />
-		</UContainer>
+		<UPageHeader title="家計簿" />
 		<UPageBody>
 			<UContainer>
 				<UScrollArea orientation="horizontal">

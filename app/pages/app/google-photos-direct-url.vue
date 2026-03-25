@@ -1,8 +1,9 @@
 <template>
 	<UPage>
-		<UContainer>
-			<UPageHeader title="Google Photos Direct URL" />
-		</UContainer>
+		<UPageHeader
+			title="Google Photos Direct URL"
+			description="Convert Google Photos share URL to direct URL"
+		/>
 		<UPageBody>
 			<UContainer class="space-y-4">
 				<UFormField label="Share URL">
