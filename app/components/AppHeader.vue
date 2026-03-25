@@ -117,6 +117,11 @@ const items = computed<NavigationMenuItem[]>(() => [
 				icon: 'i-lucide-aperture',
 				to: '/app/google-photos-direct-url',
 			},
+			{
+				icon: 'i-lucide-book-heart',
+				label: 'Diary',
+				to: '/app/diary',
+			},
 		],
 	},
 ])
