@@ -31,6 +31,7 @@
 									:ui="{
 										base: 'max-h-80',
 									}"
+									@update:model-value="updateTextareaSize"
 								/>
 							</UFormField>
 							<div class="flex justify-end">
@@ -137,16 +138,13 @@ const onSubmit = async (e: FormSubmitEvent<Schema>) => {
 
 // Resize textarea on content change
 const textareaRef = useTemplateRef('textarea')
-watch(
-	() => state.content,
-	() => {
-		const textarea = textareaRef.value?.textareaRef
-		if (textarea) {
-			textarea.style.height = 'auto'
-			textarea.style.height = `${textarea.scrollHeight}px`
-		}
-	},
-)
+const updateTextareaSize = () => {
+	const textarea = textareaRef.value?.textareaRef
+	if (textarea) {
+		textarea.style.height = 'auto'
+		textarea.style.height = `${textarea.scrollHeight}px`
+	}
+}
 
 onMounted(() => {
 	updateDiaryContent()
