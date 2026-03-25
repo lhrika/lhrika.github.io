@@ -65,7 +65,13 @@
 							</p>
 							<ul>
 								<li v-for="link in libraryItem.links" :key="link.to">
-									<ULink :to="link.to">{{ link.label }}</ULink>
+									<UButton
+										:to="link.to"
+										:label="link.label"
+										icon="i-lucide-link"
+										variant="ghost"
+										color="neutral"
+									/>
 								</li>
 							</ul>
 						</template>
