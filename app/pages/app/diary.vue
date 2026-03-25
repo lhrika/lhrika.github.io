@@ -26,7 +26,7 @@
 							>
 								<UTextarea
 									ref="textarea"
-									v-model.trim="state.content"
+									v-model="state.content"
 									class="w-full"
 									:ui="{
 										base: 'max-h-80',
