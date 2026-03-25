@@ -38,6 +38,27 @@ export type Database = {
         }
         Relationships: []
       }
+      diary: {
+        Row: {
+          content: string
+          created_at: string
+          id: number
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: number
+          user_id?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       google_photos_urls: {
         Row: {
           created_at: string
@@ -56,6 +77,30 @@ export type Database = {
           direct_url?: string
           id?: number
           share_url?: string
+        }
+        Relationships: []
+      }
+      invite_codes: {
+        Row: {
+          code: string
+          expires_at: string | null
+          id: number
+          starts_at: string | null
+          used: boolean
+        }
+        Insert: {
+          code: string
+          expires_at?: string | null
+          id?: number
+          starts_at?: string | null
+          used?: boolean
+        }
+        Update: {
+          code?: string
+          expires_at?: string | null
+          id?: number
+          starts_at?: string | null
+          used?: boolean
         }
         Relationships: []
       }
@@ -169,6 +214,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar: string | null
+          id: number
+          name: string
+          user_id: string
+        }
+        Insert: {
+          avatar?: string | null
+          id?: number
+          name: string
+          user_id: string
+        }
+        Update: {
+          avatar?: string | null
+          id?: number
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       role_permissions: {
         Row: {
           id: number
@@ -238,6 +304,7 @@ export type Database = {
         Returns: boolean
       }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
+      verify_password: { Args: { password: string }; Returns: boolean }
     }
     Enums: {
       app_permission:
@@ -249,6 +316,10 @@ export type Database = {
         | "kakeibo_categories.insert"
         | "kakeibo_categories.update"
         | "kakeibo_categories.delete"
+        | "diary.select"
+        | "diary.insert"
+        | "diary.update"
+        | "diary.delete"
       app_role: "admin" | "guest"
     }
     CompositeTypes: {
@@ -386,6 +457,10 @@ export const Constants = {
         "kakeibo_categories.insert",
         "kakeibo_categories.update",
         "kakeibo_categories.delete",
+        "diary.select",
+        "diary.insert",
+        "diary.update",
+        "diary.delete",
       ],
       app_role: ["admin", "guest"],
     },
