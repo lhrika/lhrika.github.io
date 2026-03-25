@@ -61,6 +61,12 @@ export default defineNuxtConfig({
 			},
 		},
 	},
+	site: {
+		url: 'https://lhrika.github.io',
+		name: 'Huyễn Cảnh Lưu Ly',
+		description: 'Personal site of Ly Hương',
+		defaultLocale: 'zh',
+	},
 	supabase: {
 		redirect: false,
 		redirectOptions: {
