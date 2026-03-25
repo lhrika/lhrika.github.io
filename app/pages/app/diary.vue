@@ -99,6 +99,7 @@ const updateDiaryContent = async () => {
 		state.id = undefined
 		activeTab.value = 'edit'
 	}
+	updateTextareaSize()
 }
 
 watch(date, () => {
