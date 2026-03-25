@@ -41,19 +41,19 @@ export type Database = {
       diary: {
         Row: {
           content: string
-          created_at: string
+          date: string
           id: number
           user_id: string
         }
         Insert: {
           content?: string
-          created_at?: string
+          date: string
           id?: number
           user_id?: string
         }
         Update: {
           content?: string
-          created_at?: string
+          date?: string
           id?: number
           user_id?: string
         }
