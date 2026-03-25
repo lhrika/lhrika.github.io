@@ -8,6 +8,7 @@ export default defineNuxtConfig({
 		'@nuxtjs/i18n',
 		'@nuxtjs/supabase',
 		'@nuxtjs/turnstile',
+		'@nuxtjs/seo',
 	],
 	devtools: { enabled: true },
 	css: ['~/assets/css/main.css'],

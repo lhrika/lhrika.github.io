@@ -21,6 +21,7 @@
 		"@nuxt/scripts": "^0.12.2",
 		"@nuxt/ui": "^4.5.1",
 		"@nuxtjs/i18n": "^10.2.3",
+		"@nuxtjs/seo": "^4.0.2",
 		"@nuxtjs/supabase": "^2.0.4",
 		"@nuxtjs/turnstile": "^1.1.1",
 		"better-sqlite3": "^12.6.2",
