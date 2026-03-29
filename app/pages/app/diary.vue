@@ -34,7 +34,15 @@
 									@update:model-value="updateTextareaSize"
 								/>
 							</UFormField>
-							<div class="flex justify-end">
+							<div class="flex justify-end gap-2">
+								<UButton
+									v-if="state.id"
+									type="button"
+									label="Delete"
+									variant="outline"
+									color="error"
+									@click="deleteDiary"
+								/>
 								<UButton type="submit" label="Submit" />
 							</div>
 						</UForm>
@@ -104,6 +112,18 @@ const updateDiaryContent = async () => {
 	})
 }
 
+const deleteDiary = async () => {
+	if (state.id) {
+		const res = await supabase.from('diary').delete().eq('id', state.id)
+		if (res.status >= 200 && res.status < 300) {
+			diaryContent.value = ''
+			state.content = ''
+			state.id = undefined
+			activeTab.value = 'edit'
+		}
+	}
+}
+
 watch(date, () => {
 	updateDiaryContent()
 })
@@ -123,19 +143,21 @@ const state = reactive<Partial<Schema>>({
 // Form submit event handler
 const onSubmit = async (e: FormSubmitEvent<Schema>) => {
 	const content = e.data.content
-	const response = await supabase
-		.from('diary')
-		.upsert({
-			id: state.id,
-			content,
-			date: date.value.toString(),
-		})
-		.select('id,content')
-		.maybeSingle()
-	if (response.data) {
-		diaryContent.value = response.data.content
-		state.id = response.data.id
-		activeTab.value = 'preview'
+	if (content) {
+		const response = await supabase
+			.from('diary')
+			.upsert({
+				id: state.id,
+				content,
+				date: date.value.toString(),
+			})
+			.select('id,content')
+			.maybeSingle()
+		if (response.data) {
+			diaryContent.value = response.data.content
+			state.id = response.data.id
+			activeTab.value = 'preview'
+		}
 	}
 }
 
