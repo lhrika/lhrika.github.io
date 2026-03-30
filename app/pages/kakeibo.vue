@@ -42,7 +42,12 @@
 							}
 						"
 					/>
-					<UInputDate ref="inputDateRange" v-model="dateRange" range>
+					<UInputDate
+						ref="inputDateRange"
+						v-model="dateRange"
+						:locale="locale"
+						range
+					>
 						<template #trailing>
 							<UPopover :reference="inputDateRange?.inputsRef[0]?.$el">
 								<UButton
@@ -57,6 +62,7 @@
 									<UCalendar
 										v-model="dateRange"
 										range
+										:locale="locale"
 										variant="soft"
 										class="p-2"
 									/>
@@ -217,6 +223,7 @@
 								<UInputDate
 									ref="inputDate"
 									v-model="entryDate"
+									:locale="locale"
 									variant="outline"
 								>
 									<template #trailing>
@@ -236,6 +243,7 @@
 												<UCalendar
 													v-model="entryDate"
 													variant="soft"
+													:locale="locale"
 													class="p-2"
 													@update:model-value="entryDateCalendarOpen = false"
 												/>
@@ -400,6 +408,9 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 // Nuxt UI composable
 const toast = useToast()
+
+// Locale to format date
+const { locale } = useI18n()
 
 // Template refs
 const inputDate = useTemplateRef('inputDate')
