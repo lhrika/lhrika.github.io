@@ -199,6 +199,7 @@
 				</UButton>
 				<template #content>
 					<UForm
+						ref="entryForm"
 						:schema="entrySchema"
 						:state="entryState"
 						class="space-y-4"
@@ -287,6 +288,7 @@
 									:ui="{
 										base: 'ring-0',
 									}"
+									tabindex="-1"
 								/>
 							</UFieldGroup>
 						</UFormField>
@@ -302,6 +304,7 @@
 									variant="outline"
 									color="neutral"
 									:label="categoryLabel"
+									class="justify-start"
 								/>
 							</UDropdownMenu>
 						</UFormField>
@@ -402,6 +405,7 @@ const toast = useToast()
 const inputDate = useTemplateRef('inputDate')
 const inputDateRange = useTemplateRef('inputDateRange')
 const table = useTemplateRef('table')
+const entryForm = useTemplateRef('entryForm')
 
 // Currencies and exchanges
 const currency = ref<string>('')
@@ -945,4 +949,14 @@ const handleCurrencyChange = async () => {
 		}
 	})
 }
+
+// Keyboard shortcuts
+defineShortcuts({
+	enter: () => {
+		entryForm.value?.submit()
+	},
+	meta_a: () => {
+		formModalOpen.value = true
+	},
+})
 </script>
