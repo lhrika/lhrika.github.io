@@ -6,3 +6,29 @@
 	--font-fancy: 'Charmonman', cursive, serif;
 	--font-vintage: 'Cormorant SC', serif;
 }
+
+@theme static {
+	/* Custom colors */
+	--color-royalblue-50: oklch(0.957 0.016 278.56);
+	--color-royalblue-100: oklch(0.914 0.034 278.5);
+	--color-royalblue-200: oklch(0.821 0.072 276.89);
+	--color-royalblue-300: oklch(0.736 0.11 274.74);
+	--color-royalblue-400: oklch(0.644 0.15 271.37);
+	--color-royalblue-500: oklch(0.56 0.188 266.4);
+	--color-royalblue-600: oklch(0.474 0.163 266.36);
+	--color-royalblue-700: oklch(0.396 0.135 266.08);
+	--color-royalblue-800: oklch(0.307 0.106 265.95);
+	--color-royalblue-900: oklch(0.229 0.077 265.68);
+	--color-royalblue-950: oklch(0.18 0.061 265.08);
+	--color-cornflowerblue-50: oklch(0.965 0.014 272.74);
+	--color-cornflowerblue-100: oklch(0.931 0.027 269.69);
+	--color-cornflowerblue-200: oklch(0.872 0.052 269.64);
+	--color-cornflowerblue-300: oklch(0.803 0.081 266.66);
+	--color-cornflowerblue-400: oklch(0.744 0.108 264.56);
+	--color-cornflowerblue-500: oklch(0.675 0.141 261.34);
+	--color-cornflowerblue-600: oklch(0.571 0.149 258.36);
+	--color-cornflowerblue-700: oklch(0.461 0.12 258);
+	--color-cornflowerblue-800: oklch(0.356 0.094 258.31);
+	--color-cornflowerblue-900: oklch(0.242 0.063 258.45);
+	--color-cornflowerblue-950: oklch(0.188 0.049 258.09);
+}

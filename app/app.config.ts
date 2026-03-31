@@ -5,12 +5,18 @@ const themeColors = [
 	'info',
 	'warning',
 	'error',
+	'neutral',
 ]
 export default defineAppConfig({
 	ui: {
 		colors: {
-			primary: 'cyan',
-			neutral: 'stone',
+			primary: 'cornflowerblue',
+			secondary: 'lime',
+			success: 'emerald',
+			danger: 'red',
+			info: 'sky',
+			warning: 'orange',
+			neutral: 'slate',
 		},
 		button: {
 			slots: {
