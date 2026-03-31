@@ -1,12 +1,4 @@
-const themeColors = [
-	'primary',
-	'secondary',
-	'success',
-	'info',
-	'warning',
-	'error',
-	'neutral',
-]
+import { semanticColors } from '#shared/theme'
 export default defineAppConfig({
 	ui: {
 		colors: {
@@ -30,12 +22,12 @@ export default defineAppConfig({
 				},
 			},
 			compoundVariants: [
-				...themeColors.map(color => ({
+				...semanticColors.map(color => ({
 					color,
 					variant: 'underline',
 					class: `focus-visible:border-b-2 focus-visible:border-${color} border-${color}`,
 				})),
-				...themeColors.map(color => ({
+				...semanticColors.map(color => ({
 					color,
 					highlight: true,
 					variant: 'underline',
