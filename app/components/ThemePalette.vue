@@ -13,13 +13,9 @@
 			>
 				<USelect
 					v-model="semanticColorName"
-					:items="semanticColors"
+					:items="semanticColorSelectItems"
 					class="w-32 sm:w-48"
-				>
-					<template #item-label="{ item }">
-						{{ item }}
-					</template>
-				</USelect>
+				/>
 			</UFormField>
 			<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
 				<UButton
@@ -40,7 +36,7 @@
 							`--color-dark: var(--color-${color}-400)`,
 						]"
 					/>
-					{{ color }}
+					{{ titleCase(color) }}
 				</UButton>
 			</div>
 		</template>
@@ -53,9 +49,15 @@ import {
 	type SemanticColor,
 	type ThemeColor,
 } from '#shared/theme'
+import type { SelectItem } from '@nuxt/ui'
+import { titleCase } from 'text-case'
 
 const appConfig = useAppConfig()
 
+const semanticColorSelectItems: SelectItem[] = semanticColors.map(color => ({
+	label: titleCase(color),
+	value: color,
+}))
 const semanticColorName = ref<SemanticColor>('primary')
 
 const setColor = (color: ThemeColor, name: SemanticColor) => {
