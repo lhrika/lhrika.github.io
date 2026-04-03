@@ -74,7 +74,6 @@ const onSettingsSubmit = () => {
 
 // Current page
 const pageNumber = ref(1)
-const pdfPage = shallowRef<PDFPageProxy>()
 
 // Page non-white bouding (pdf point)
 const pageBounding = reactive({
@@ -147,20 +146,19 @@ const adjustScale = () => {
 	}
 }
 
-// Function to load PDF page
-const loadPage = async () => {
-	pdfPage.value = await pdf.document.value?.getPage(pageNumber.value)
-	await detectWhitespaceCrop()
-}
-
-watch(pdf.document, () => {
-	if (pdf.document.value) {
-		loadPage().then(render)
+watch(pdf.document, newValue => {
+	if (newValue) {
+		pdf.pageNumber = 1
 	}
 })
 
-watch(pageNumber, () => {
-	loadPage().then(render)
+watch(pageNumber, newValue => {
+	pdf.pageNumber = newValue
+})
+
+watch(pdf.page, async () => {
+	await detectWhitespaceCrop()
+	await render()
 })
 
 watch(isSettingsOpen, value => {
@@ -173,7 +171,7 @@ watch(isSettingsOpen, value => {
 const isRendering = ref(false)
 
 const detectWhitespaceCrop = async () => {
-	const page = pdfPage.value
+	const page = pdf.page.value
 	if (!page) {
 		return
 	}
@@ -285,7 +283,7 @@ const detectWhitespaceCrop = async () => {
 }
 
 const render = async () => {
-	if (!pdfPage.value || isRendering.value || !canvasRef.value) {
+	if (!pdf.page.value || isRendering.value || !canvasRef.value) {
 		return
 	}
 	isRendering.value = true
@@ -293,7 +291,7 @@ const render = async () => {
 		const margin = settings.margin
 		const y = sectionOffset.value + margin
 		const height = settings.sectionHeight + 2 * margin
-		await renderPageRegion(pdfPage.value, {
+		await renderPageRegion(pdf.page.value, {
 			x: settings.cropX,
 			y: y,
 			width: settings.cropWidth,
@@ -301,7 +299,7 @@ const render = async () => {
 			scale: settings.scale,
 		})
 	} else if (renderMode.value === 'page') {
-		const task = renderPage(pdfPage.value, canvasRef.value, settings.scale)
+		const task = renderPage(pdf.page.value, canvasRef.value, settings.scale)
 		await task.promise
 	}
 	isRendering.value = false
