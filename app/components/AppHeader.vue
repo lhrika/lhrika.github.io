@@ -122,6 +122,11 @@ const items = computed<NavigationMenuItem[]>(() => [
 				label: 'Diary',
 				to: '/app/diary',
 			},
+			{
+				icon: 'i-lucide-file-text',
+				label: 'PDF Reader',
+				to: '/app/pdf',
+			},
 		],
 	},
 ])

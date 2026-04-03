@@ -357,10 +357,7 @@ const renderPageRegion = async (
 	}
 }
 
-const isLibImported = ref(false)
-onMounted(async () => {
-	isLibImported.value = true
-})
+onMounted(async () => {})
 
 watch(
 	() => props.url,
@@ -376,7 +373,6 @@ watch(
 	<ClientOnly>
 		<div class="flex flex-col items-center gap-2">
 			<div
-				v-if="isLibImported"
 				ref="viewport"
 				class="w-full relative overflow-clip bg-muted min-h-48 flex flex-col justify-center items-center"
 			>
