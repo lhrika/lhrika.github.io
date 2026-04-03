@@ -15,8 +15,10 @@ const settingsFormRef = useTemplateRef('settingsForm')
 // Viewport size
 const viewportSize = useElementSize(viewportRef)
 
+const pdf = usePDF(props.url)
+
 // PDF document
-const pdfDocument = shallowRef<PDFDocumentProxy>()
+const pdfDocument = pdf.document
 
 // Total pages
 const totalPages = computed(() => {
@@ -55,7 +57,7 @@ const onSettingsSubmit = () => {
 }
 
 // Current page
-const pageNumber = ref(400)
+const pageNumber = ref(1)
 const pdfPage = shallowRef<PDFPageProxy>()
 
 // Page non-white bouding (pdf point)
@@ -357,14 +359,17 @@ const renderPageRegion = async (
 
 const isLibImported = ref(false)
 onMounted(async () => {
-	const pdfjsLib = await import('pdfjs-dist')
-	pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
-	const loadingTask = pdfjsLib.getDocument(props.url)
-	loadingTask.promise.then(pdf => {
-		pdfDocument.value = pdf
-	})
 	isLibImported.value = true
 })
+
+watch(
+	() => props.url,
+	() => {
+		pageNumber.value = 1
+		sectionIndex.value = 1
+		pdf.load(props.url)
+	},
+)
 </script>
 
 <template>
