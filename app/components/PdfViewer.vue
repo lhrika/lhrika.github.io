@@ -17,11 +17,6 @@ const viewportSize = useElementSize(viewportRef)
 // Reactive PDF
 const pdf = usePDF(props.url)
 
-// Total pages
-const totalPages = computed(() => {
-	return pdf.document.value?.numPages ?? 0
-})
-
 const renderMode = ref<'page' | 'section'>('page')
 const getRenderModeIcon = () => {
 	switch (renderMode.value) {
@@ -106,7 +101,7 @@ const nextSection = () => {
 	if (sectionIndex.value < totalSections.value) {
 		sectionIndex.value += 1
 		render()
-	} else if (pdf.pageNumber.value < totalPages.value) {
+	} else if (pdf.pageNumber.value < pdf.numPages) {
 		pdf.pageNumber.value += 1
 		sectionIndex.value = 1
 	}
@@ -115,7 +110,7 @@ const nextSection = () => {
 const hasNextSection = computed(() => {
 	return (
 		sectionIndex.value < totalSections.value ||
-		pdf.pageNumber.value < totalPages.value
+		pdf.pageNumber.value < pdf.numPages
 	)
 })
 
@@ -428,9 +423,10 @@ watch(
 				</UFieldGroup>
 			</div>
 			<UPagination
+				v-if="pdf.numPages"
 				v-model:page="pdf.pageNumber.value"
 				:items-per-page="1"
-				:total="totalPages"
+				:total="pdf.numPages"
 				:disabled="isRendering"
 			/>
 		</div>

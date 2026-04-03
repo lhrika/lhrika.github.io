@@ -59,6 +59,10 @@ class ReactivePDF {
 		}
 	}
 
+	public get numPages() {
+		return this.document.value?.numPages ?? 0
+	}
+
 	public renderPage(canvas: HTMLCanvasElement, scale: number = 1) {
 		const page = this.page.value
 		if (!page) return
