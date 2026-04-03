@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { defineNuxtConfig } from 'nuxt/config'
+
 export default defineNuxtConfig({
 	modules: [
 		'@nuxt/content',
@@ -13,6 +15,16 @@ export default defineNuxtConfig({
 	devtools: { enabled: true },
 	css: ['~/assets/css/main.css'],
 	compatibilityDate: '2025-07-15',
+	vite: {
+		optimizeDeps: {
+			include: [
+				'@vue/devtools-core',
+				'@vue/devtools-kit',
+				'@vueuse/core',
+				'text-case',
+			],
+		},
+	},
 	nitro: {
 		prerender: {
 			failOnError: false,
