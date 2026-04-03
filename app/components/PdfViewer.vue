@@ -11,6 +11,9 @@ const canvasRef = useTemplateRef('canvas')
 const viewportRef = useTemplateRef('viewport')
 const settingsFormRef = useTemplateRef('settingsForm')
 
+// Jump page target
+const jumpTargetPage = ref(1)
+
 // Viewport size
 const viewportSize = useElementSize(viewportRef)
 
@@ -129,6 +132,13 @@ const prevSection = () => {
 const hasPrevSection = computed(() => {
 	return sectionIndex.value > 1 || pdf.pageNumber.value > 1
 })
+
+const jumpPage = () => {
+	if (jumpTargetPage.value) {
+		pdf.pageNumber.value = jumpTargetPage.value
+	}
+	isSettingsOpen.value = false
+}
 
 // Function to adjust scale based on viewport width
 const adjustScale = () => {
@@ -343,11 +353,17 @@ watch(
 				ref="viewport"
 				class="w-full relative overflow-clip bg-muted min-h-48 flex flex-col justify-center items-center"
 			>
-				<div class="absolute top-4 right-4 flex flex-col gap-2">
+				<div class="absolute top-4 right-4 flex gap-2">
+					<UButton
+						:icon="getRenderModeIcon()"
+						variant="subtle"
+						color="neutral"
+						@click="switchRenderMode"
+					/>
 					<UPopover
 						v-model:open="isSettingsOpen"
 						:ui="{
-							content: 'p-4 max-w-xs',
+							content: 'p-4 max-w-xs space-y-4',
 						}"
 					>
 						<UButton icon="i-lucide-settings" variant="soft" color="neutral" />
@@ -393,14 +409,25 @@ watch(
 									</UFieldGroup>
 								</UFormField>
 							</UForm>
+							<UFormField
+								label="Go to page"
+								orientation="horizontal"
+								:ui="{
+									label: 'text-nowrap',
+								}"
+							>
+								<UFieldGroup>
+									<UInputNumber
+										v-model="jumpTargetPage"
+										:increment="false"
+										:decrement="false"
+										:default-value="1"
+									/>
+									<UButton icon="i-lucide-check" @click="jumpPage" />
+								</UFieldGroup>
+							</UFormField>
 						</template>
 					</UPopover>
-					<UButton
-						:icon="getRenderModeIcon()"
-						variant="subtle"
-						color="neutral"
-						@click="switchRenderMode"
-					/>
 				</div>
 				<canvas ref="canvas" @click="nextSection" />
 				<UFieldGroup
