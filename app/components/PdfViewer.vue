@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useElementSize } from '@vueuse/core'
+import { useElementSize, useScreenOrientation } from '@vueuse/core'
 import * as z from 'zod/v4'
 
 const props = defineProps<{
@@ -16,6 +16,9 @@ const jumpTargetPage = ref(1)
 
 // Viewport size
 const viewportSize = useElementSize(viewportRef)
+
+// Screen orientation
+const screenOrientation = useScreenOrientation()
 
 // Reactive PDF
 const pdf = usePDF(props.url)
@@ -363,7 +366,7 @@ watch(
 					<UPopover
 						v-model:open="isSettingsOpen"
 						:ui="{
-							content: 'p-4 max-w-xs space-y-4',
+							content: `p-4 max-w-xs space-y-4 ${screenOrientation.orientation.value === 'landscape-primary' ? 'overflow-y-auto max-h-xs' : ''}`,
 						}"
 					>
 						<UButton icon="i-lucide-settings" variant="soft" color="neutral" />
