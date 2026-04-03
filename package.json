@@ -24,6 +24,7 @@
 		"@nuxtjs/seo": "^4.0.2",
 		"@nuxtjs/supabase": "^2.0.4",
 		"@nuxtjs/turnstile": "^1.1.2",
+		"@pinia/nuxt": "^0.11.3",
 		"@takumi-rs/core": "^1.0.0-beta.16",
 		"better-sqlite3": "^12.8.0",
 		"eslint": "^9.39.4",
