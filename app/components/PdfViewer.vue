@@ -17,13 +17,14 @@ const viewportSize = useElementSize(viewportRef)
 // Reactive PDF
 const pdf = usePDF(props.url)
 
-const renderMode = ref<'page' | 'section'>('page')
+// Render mode (page or section)
+const renderMode = ref<'page' | 'section'>('section')
 const getRenderModeIcon = () => {
 	switch (renderMode.value) {
 		case 'page':
-			return 'i-lucide-maximize'
-		case 'section':
 			return 'i-lucide-crop'
+		case 'section':
+			return 'i-lucide-maximize'
 	}
 }
 const switchRenderMode = () => {
@@ -145,6 +146,9 @@ watch(pdf.document, newValue => {
 
 watch(pdf.page, async () => {
 	await detectWhitespaceCrop()
+	if (sectionIndex.value > totalSections.value) {
+		sectionIndex.value = totalSections.value
+	}
 	await render()
 })
 
@@ -321,8 +325,6 @@ const drawGradientOverlay = (canvas: HTMLCanvasElement, height: number) => {
 	ctx.fillStyle = gradBottom
 	ctx.fillRect(0, canvas.height - height * dpr, canvas.width, height * dpr)
 }
-
-onMounted(async () => {})
 
 watch(
 	() => props.url,
