@@ -7,14 +7,25 @@ class ReactivePDF {
 	public lib: Lib | null = null
 	public document = shallowRef<PDFDocumentProxy>()
 	public page = shallowRef<PDFPageProxy>()
+	public pageNumber = ref(1)
 
-	public constructor(url?: string) {
+	public constructor(url?: string, initialPage: number = 1) {
 		if (import.meta.client) {
 			this.initialize()
+			this.pageNumber.value = initialPage
+			watch(this.pageNumber, value => {
+				this.loadPage(value)
+			})
 		}
 		if (url) {
 			this.load(url)
 		}
+	}
+
+	private loadPage(p: number) {
+		this.document.value?.getPage(p).then(page => {
+			this.page.value = page
+		})
 	}
 
 	private async initialize() {
@@ -29,6 +40,7 @@ class ReactivePDF {
 			const loadingTask = this.lib?.getDocument(url)
 			loadingTask?.promise.then(pdf => {
 				this.document.value = pdf
+				this.loadPage(this.pageNumber.value)
 			})
 		} else {
 			watch(
@@ -38,18 +50,13 @@ class ReactivePDF {
 						const loadingTask = this.lib?.getDocument(url)
 						loadingTask?.promise.then(pdf => {
 							this.document.value = pdf
+							this.loadPage(this.pageNumber.value)
 						})
 					}
 				},
 				{ once: true },
 			)
 		}
-	}
-
-	public set pageNumber(value: number) {
-		this.document.value?.getPage(value).then(page => {
-			this.page.value = page
-		})
 	}
 
 	public renderPage(canvas: HTMLCanvasElement, scale: number = 1) {

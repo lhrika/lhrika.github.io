@@ -71,9 +71,6 @@ const onSettingsSubmit = () => {
 	render()
 }
 
-// Current page
-const pageNumber = ref(1)
-
 // Page non-white bouding (pdf point)
 const pageBounding = reactive({
 	top: 0,
@@ -109,8 +106,8 @@ const nextSection = () => {
 	if (sectionIndex.value < totalSections.value) {
 		sectionIndex.value += 1
 		render()
-	} else if (pageNumber.value < totalPages.value) {
-		pageNumber.value += 1
+	} else if (pdf.pageNumber.value < totalPages.value) {
+		pdf.pageNumber.value += 1
 		sectionIndex.value = 1
 	}
 }
@@ -118,7 +115,7 @@ const nextSection = () => {
 const hasNextSection = computed(() => {
 	return (
 		sectionIndex.value < totalSections.value ||
-		pageNumber.value < totalPages.value
+		pdf.pageNumber.value < totalPages.value
 	)
 })
 
@@ -127,14 +124,14 @@ const prevSection = () => {
 	if (sectionIndex.value > 1) {
 		sectionIndex.value -= 1
 		render()
-	} else if (pageNumber.value > 1) {
-		pageNumber.value -= 1
+	} else if (pdf.pageNumber.value > 1) {
+		pdf.pageNumber.value -= 1
 		sectionIndex.value = totalSections.value
 	}
 }
 
 const hasPrevSection = computed(() => {
-	return sectionIndex.value > 1 || pageNumber.value > 1
+	return sectionIndex.value > 1 || pdf.pageNumber.value > 1
 })
 
 // Function to adjust scale based on viewport width
@@ -147,12 +144,8 @@ const adjustScale = () => {
 
 watch(pdf.document, newValue => {
 	if (newValue) {
-		pdf.pageNumber = 1
+		pdf.pageNumber.value = 1
 	}
-})
-
-watch(pageNumber, newValue => {
-	pdf.pageNumber = newValue
 })
 
 watch(pdf.page, async () => {
@@ -339,7 +332,7 @@ onMounted(async () => {})
 watch(
 	() => props.url,
 	() => {
-		pageNumber.value = 1
+		pdf.pageNumber.value = 1
 		sectionIndex.value = 1
 		pdf.load(props.url)
 	},
@@ -435,7 +428,7 @@ watch(
 				</UFieldGroup>
 			</div>
 			<UPagination
-				v-model:page="pageNumber"
+				v-model:page="pdf.pageNumber.value"
 				:items-per-page="1"
 				:total="totalPages"
 				:disabled="isRendering"
