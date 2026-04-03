@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { PDFPageProxy } from 'pdfjs-dist'
 import { useElementSize } from '@vueuse/core'
 import * as z from 'zod/v4'
 
@@ -291,16 +290,20 @@ const render = async () => {
 		const margin = settings.margin
 		const y = sectionOffset.value + margin
 		const height = settings.sectionHeight + 2 * margin
-		await renderPageRegion(pdf.page.value, {
-			x: settings.cropX,
-			y: y,
-			width: settings.cropWidth,
-			height: height,
-			scale: settings.scale,
-		})
+		await pdf.renderPageRegion(
+			canvasRef.value,
+			settings.cropX,
+			y,
+			settings.cropWidth,
+			height,
+			settings.scale,
+		)?.promise
+		if (settings.margin) {
+			drawGradientOverlay(canvasRef.value, settings.margin * settings.scale)
+		}
 	} else if (renderMode.value === 'page') {
-		const task = renderPage(pdf.page.value, canvasRef.value, settings.scale)
-		await task.promise
+		const task = pdf.renderPage(canvasRef.value, settings.scale)
+		await task?.promise
 	}
 	isRendering.value = false
 }
@@ -309,16 +312,18 @@ const drawGradientOverlay = (canvas: HTMLCanvasElement, height: number) => {
 	const ctx = canvas.getContext('2d')
 	if (!ctx) return
 
-	const gradTop = ctx.createLinearGradient(0, 0, 0, height)
+	const dpr = window.devicePixelRatio || 1
+
+	const gradTop = ctx.createLinearGradient(0, 0, 0, height * dpr)
 	gradTop.addColorStop(1, 'rgb(255 255 255 / 0.4)')
 	gradTop.addColorStop(0.5, 'rgb(255 255 255 / 0.7)')
 	gradTop.addColorStop(0, 'rgb(255 255 255)')
 	ctx.fillStyle = gradTop
-	ctx.fillRect(0, 0, canvas.width, height)
+	ctx.fillRect(0, 0, canvas.width, height * dpr)
 
 	const gradBottom = ctx.createLinearGradient(
 		0,
-		canvas.height - height,
+		canvas.height - height * dpr,
 		0,
 		canvas.height,
 	)
@@ -326,73 +331,7 @@ const drawGradientOverlay = (canvas: HTMLCanvasElement, height: number) => {
 	gradBottom.addColorStop(0.5, 'rgb(255 255 255 / 0.7)')
 	gradBottom.addColorStop(1, 'rgb(255 255 255)')
 	ctx.fillStyle = gradBottom
-	ctx.fillRect(0, canvas.height - height, canvas.width, height)
-}
-
-const renderPage = (
-	page: PDFPageProxy,
-	canvas: HTMLCanvasElement,
-	scale: number = 1,
-) => {
-	const dpr = window.devicePixelRatio || 1
-	const viewport = page.getViewport({ scale: scale })
-	canvas.width = Math.ceil(viewport.width * dpr)
-	canvas.height = Math.ceil(viewport.height * dpr)
-	canvas.style.width = `${Math.ceil(viewport.width)}px`
-	canvas.style.height = `${Math.ceil(viewport.height)}px`
-	const task = page.render({
-		canvas,
-		viewport,
-		transform: [dpr, 0, 0, dpr, 0, 0],
-	})
-	return task
-}
-
-const renderPageRegion = async (
-	page: PDFPageProxy,
-	region: {
-		x: number
-		y: number
-		width: number
-		height: number
-		scale: number
-	},
-) => {
-	const canvas = canvasRef.value!
-	const outputScale = window.devicePixelRatio || 1
-	const viewport = page.getViewport({ scale: region.scale })
-	// PDF space region -> viewport space
-	const [x1, y1, x2, y2] = viewport.convertToViewportRectangle([
-		region.x,
-		region.y,
-		region.x + region.width,
-		region.y + region.height,
-	])
-	const cropX = Math.min(x1, x2)
-	const cropY = Math.min(y1, y2)
-	const cropWidth = Math.abs(x2 - x1)
-	const cropHeight = Math.abs(y2 - y1)
-
-	canvas.width = Math.ceil(cropWidth * outputScale)
-	canvas.height = Math.ceil(cropHeight * outputScale)
-	canvas.style.width = `${Math.ceil(cropWidth)}px`
-	canvas.style.height = `${Math.ceil(cropHeight)}px`
-
-	await page.render({
-		canvas,
-		viewport,
-		transform: [
-			outputScale,
-			0,
-			0,
-			outputScale,
-			-cropX * outputScale,
-			-cropY * outputScale,
-		],
-	}).promise
-	if (settings.margin) {
-		drawGradientOverlay(canvas, settings.margin * outputScale * settings.scale)
-	}
+	ctx.fillRect(0, canvas.height - height * dpr, canvas.width, height * dpr)
 }
 
 onMounted(async () => {})
