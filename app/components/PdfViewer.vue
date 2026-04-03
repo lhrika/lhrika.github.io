@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
+import type { PDFPageProxy } from 'pdfjs-dist'
 import { useElementSize } from '@vueuse/core'
 import * as z from 'zod/v4'
 
@@ -15,15 +15,31 @@ const settingsFormRef = useTemplateRef('settingsForm')
 // Viewport size
 const viewportSize = useElementSize(viewportRef)
 
+// Reactive PDF
 const pdf = usePDF(props.url)
-
-// PDF document
-const pdfDocument = pdf.document
 
 // Total pages
 const totalPages = computed(() => {
-	return pdfDocument.value?.numPages ?? 0
+	return pdf.document.value?.numPages ?? 0
 })
+
+const renderMode = ref<'page' | 'section'>('page')
+const getRenderModeIcon = () => {
+	switch (renderMode.value) {
+		case 'page':
+			return 'i-lucide-maximize'
+		case 'section':
+			return 'i-lucide-crop'
+	}
+}
+const switchRenderMode = () => {
+	if (renderMode.value === 'page') {
+		renderMode.value = 'section'
+	} else if (renderMode.value === 'section') {
+		renderMode.value = 'page'
+	}
+	render()
+}
 
 // Settings form
 const isSettingsOpen = ref(false)
@@ -133,12 +149,12 @@ const adjustScale = () => {
 
 // Function to load PDF page
 const loadPage = async () => {
-	pdfPage.value = await pdfDocument.value?.getPage(pageNumber.value)
+	pdfPage.value = await pdf.document.value?.getPage(pageNumber.value)
 	await detectWhitespaceCrop()
 }
 
-watch(pdfDocument, () => {
-	if (pdfDocument.value) {
+watch(pdf.document, () => {
+	if (pdf.document.value) {
 		loadPage().then(render)
 	}
 })
@@ -269,20 +285,25 @@ const detectWhitespaceCrop = async () => {
 }
 
 const render = async () => {
-	if (!pdfPage.value || isRendering.value) {
+	if (!pdfPage.value || isRendering.value || !canvasRef.value) {
 		return
 	}
 	isRendering.value = true
-	const margin = settings.margin
-	const y = sectionOffset.value + margin
-	const height = settings.sectionHeight + 2 * margin
-	await renderPageRegion(pdfPage.value, {
-		x: settings.cropX,
-		y: y,
-		width: settings.cropWidth,
-		height: height,
-		scale: settings.scale,
-	})
+	if (renderMode.value === 'section') {
+		const margin = settings.margin
+		const y = sectionOffset.value + margin
+		const height = settings.sectionHeight + 2 * margin
+		await renderPageRegion(pdfPage.value, {
+			x: settings.cropX,
+			y: y,
+			width: settings.cropWidth,
+			height: height,
+			scale: settings.scale,
+		})
+	} else if (renderMode.value === 'page') {
+		const task = renderPage(pdfPage.value, canvasRef.value, settings.scale)
+		await task.promise
+	}
 	isRendering.value = false
 }
 
@@ -308,6 +329,25 @@ const drawGradientOverlay = (canvas: HTMLCanvasElement, height: number) => {
 	gradBottom.addColorStop(1, 'rgb(255 255 255)')
 	ctx.fillStyle = gradBottom
 	ctx.fillRect(0, canvas.height - height, canvas.width, height)
+}
+
+const renderPage = (
+	page: PDFPageProxy,
+	canvas: HTMLCanvasElement,
+	scale: number = 1,
+) => {
+	const dpr = window.devicePixelRatio || 1
+	const viewport = page.getViewport({ scale: scale })
+	canvas.width = Math.ceil(viewport.width * dpr)
+	canvas.height = Math.ceil(viewport.height * dpr)
+	canvas.style.width = `${Math.ceil(viewport.width)}px`
+	canvas.style.height = `${Math.ceil(viewport.height)}px`
+	const task = page.render({
+		canvas,
+		viewport,
+		transform: [dpr, 0, 0, dpr, 0, 0],
+	})
+	return task
 }
 
 const renderPageRegion = async (
@@ -376,64 +416,71 @@ watch(
 				ref="viewport"
 				class="w-full relative overflow-clip bg-muted min-h-48 flex flex-col justify-center items-center"
 			>
-				<UPopover
-					v-model:open="isSettingsOpen"
-					:ui="{
-						content: 'p-4 max-w-sm',
-					}"
-				>
-					<UButton
-						icon="i-lucide-settings"
-						variant="soft"
-						color="neutral"
-						class="absolute top-4 right-4"
-					/>
-					<template #content>
-						<UForm
-							ref="settingsForm"
-							:state="settings"
-							:schema="schema"
-							class="space-y-4"
-							@submit="onSettingsSubmit"
-						>
-							<USwitch v-model="settings.autoCrop" label="Auto Crop" />
-							<UFormField
-								v-if="settings.autoCrop"
-								label="Auto crop margin"
-								name="cropMarginX"
+				<div class="absolute top-4 right-4 flex flex-col gap-2">
+					<UPopover
+						v-model:open="isSettingsOpen"
+						:ui="{
+							content: 'p-4 max-w-xs',
+						}"
+					>
+						<UButton icon="i-lucide-settings" variant="soft" color="neutral" />
+						<template #content>
+							<UForm
+								ref="settingsForm"
+								:state="settings"
+								:schema="schema"
+								class="space-y-4"
+								@submit="onSettingsSubmit"
 							>
-								<UInput v-model="settings.cropMarginX" />
-							</UFormField>
-							<div v-else class="flex gap-2">
-								<UFormField label="Crop X" name="cropX">
-									<UInputNumber v-model="settings.cropX" class="flex-1" />
+								<USwitch v-model="settings.autoCrop" label="Auto Crop" />
+								<UFormField
+									v-if="settings.autoCrop"
+									label="Auto crop margin"
+									name="cropMarginX"
+								>
+									<UInput v-model="settings.cropMarginX" />
 								</UFormField>
-								<UFormField label="Crop Width" name="cropWidth">
-									<UInputNumber v-model="settings.cropWidth" class="flex-1" />
+								<div v-else class="flex gap-2">
+									<UFormField label="Crop X" name="cropX">
+										<UInputNumber v-model="settings.cropX" class="flex-1" />
+									</UFormField>
+									<UFormField label="Crop Width" name="cropWidth">
+										<UInputNumber v-model="settings.cropWidth" class="flex-1" />
+									</UFormField>
+								</div>
+								<UFormField label="Section Height" name="numSections">
+									<UInputNumber v-model="settings.sectionHeight" />
 								</UFormField>
-							</div>
-							<UFormField label="Section Height" name="numSections">
-								<UInputNumber v-model="settings.sectionHeight" />
-							</UFormField>
-							<UFormField label="Top/Bottom Margin" name="margin">
-								<UInputNumber v-model="settings.margin" />
-							</UFormField>
-							<UFormField label="Scale" name="scale">
-								<UFieldGroup>
-									<UInputNumber v-model="settings.scale" :step="0.1" />
-									<UButton
-										label="Auto"
-										color="neutral"
-										variant="outline"
-										@click="adjustScale"
-									/>
-								</UFieldGroup>
-							</UFormField>
-						</UForm>
-					</template>
-				</UPopover>
+								<UFormField label="Top/Bottom Margin" name="margin">
+									<UInputNumber v-model="settings.margin" />
+								</UFormField>
+								<UFormField label="Scale" name="scale">
+									<UFieldGroup>
+										<UInputNumber v-model="settings.scale" :step="0.1" />
+										<UButton
+											label="Auto"
+											color="neutral"
+											variant="outline"
+											@click="adjustScale"
+										/>
+									</UFieldGroup>
+								</UFormField>
+							</UForm>
+						</template>
+					</UPopover>
+					<UButton
+						:icon="getRenderModeIcon()"
+						variant="subtle"
+						color="neutral"
+						@click="switchRenderMode"
+					/>
+				</div>
 				<canvas ref="canvas" />
-				<UFieldGroup orientation="vertical" class="absolute bottom-4 right-4">
+				<UFieldGroup
+					v-if="renderMode === 'section'"
+					orientation="vertical"
+					class="absolute bottom-4 right-4"
+				>
 					<UButton
 						icon="i-lucide-chevron-up"
 						color="neutral"
