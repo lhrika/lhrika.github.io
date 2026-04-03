@@ -402,7 +402,7 @@ watch(
 						@click="switchRenderMode"
 					/>
 				</div>
-				<canvas ref="canvas" />
+				<canvas ref="canvas" @click="nextSection" />
 				<UFieldGroup
 					v-if="renderMode === 'section'"
 					orientation="vertical"
