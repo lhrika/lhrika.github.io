@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { useElementSize, useScreenOrientation } from '@vueuse/core'
+import {
+	useElementSize,
+	useScreenOrientation,
+	useFullscreen,
+} from '@vueuse/core'
 import * as z from 'zod/v4'
 
 const props = defineProps<{
@@ -18,7 +22,23 @@ const jumpTargetPage = ref(1)
 const viewportSize = useElementSize(viewportRef)
 
 // Screen orientation
-const screenOrientation = useScreenOrientation()
+const {
+	orientation: screenOrientation,
+	isSupported: isScreenOrientationSupported,
+} = useScreenOrientation()
+const settingsPopupClasses = computed(() => {
+	if (
+		isScreenOrientationSupported.value &&
+		screenOrientation.value?.startsWith('landscape')
+	) {
+		return 'p-4 max-w-sm space-y-4 max-h-64 overflow-y-auto'
+	} else {
+		return 'p-4 max-w-xs space-y-4'
+	}
+})
+
+// Full screen API
+const fullscreen = useFullscreen()
 
 // Reactive PDF
 const pdf = usePDF(props.url)
@@ -358,6 +378,13 @@ watch(
 			>
 				<div class="absolute top-4 right-4 flex gap-2">
 					<UButton
+						v-if="fullscreen.isSupported.value"
+						color="neutral"
+						variant="subtle"
+						icon="i-lucide-fullscreen"
+						@click="fullscreen.toggle"
+					/>
+					<UButton
 						:icon="getRenderModeIcon()"
 						variant="subtle"
 						color="neutral"
@@ -366,7 +393,7 @@ watch(
 					<UPopover
 						v-model:open="isSettingsOpen"
 						:ui="{
-							content: `p-4 max-w-xs space-y-4 ${screenOrientation.orientation.value === 'landscape-primary' ? 'overflow-y-auto max-h-xs' : ''}`,
+							content: settingsPopupClasses,
 						}"
 					>
 						<UButton icon="i-lucide-settings" variant="soft" color="neutral" />
