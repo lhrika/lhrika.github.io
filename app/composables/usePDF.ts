@@ -109,7 +109,6 @@ class ReactivePDF {
 					`rgba(${r},${g},${b},${a})`,
 					'rgb',
 				)
-				console.log(distance)
 				if (distance > tolerance) {
 					columnHasContent = true
 					break
