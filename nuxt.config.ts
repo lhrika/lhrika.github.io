@@ -12,6 +12,7 @@ export default defineNuxtConfig({
 		'@nuxtjs/turnstile',
 		'@nuxtjs/seo',
 		'@pinia/nuxt',
+		'pinia-plugin-persistedstate',
 	],
 	devtools: { enabled: true },
 	css: ['~/assets/css/main.css'],
