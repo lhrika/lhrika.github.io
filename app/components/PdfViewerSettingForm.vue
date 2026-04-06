@@ -31,22 +31,20 @@ const state = reactive<Schema>({
 	scale: store.scale,
 	margin: store.margin,
 })
+
+store.$subscribe(mutation => {
+	if (mutation.type === 'direct') {
+		state.cropX = store.cropX
+		state.cropWidth = store.cropWidth
+	}
+})
+
 const onSubmit = () => {
-	store.cropX = state.cropX
-	store.cropY = state.cropY
-	store.cropWidth = state.cropWidth
-	store.cropHeight = state.cropHeight
-	store.cropMarginX = state.cropMarginX
-	store.cropMarginY = state.cropMarginY
-	store.autoCrop = state.autoCrop
-	store.sectionHeight = state.sectionHeight
-	store.scale = state.scale
-	store.margin = state.margin
+	store.$patch({ ...state })
 	emit('submit')
 }
 const adjustScale = (width: number) => {
-	state.scale = width / store.cropWidth
-	store.scale = state.scale
+	state.scale = width / state.cropWidth
 }
 const submit = () => {
 	formRef.value?.submit()
