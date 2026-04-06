@@ -1,5 +1,4 @@
 import type { PDFPageProxy, PDFDocumentProxy } from 'pdfjs-dist'
-import chroma from 'chroma-js'
 
 type Lib = typeof import('pdfjs-dist')
 
@@ -59,7 +58,7 @@ class ReactivePDF {
 
 	public detectContentBounding = async (
 		color: string = '#FFFFFF',
-		tolerance: number = 10,
+		tolerance: number = 5,
 		marginX: number = 0,
 		marginY: number = 0,
 	) => {
@@ -94,6 +93,7 @@ class ReactivePDF {
 		let right = 0
 		let top = 0
 		let bottom = h
+		const c1 = hexToRgb(color)
 
 		// Scan horizontally for left/right bounds
 		for (let x = 0; x < w; x++) {
@@ -104,12 +104,12 @@ class ReactivePDF {
 				const g = data[i + 1] ?? 0
 				const b = data[i + 2] ?? 0
 				const a = data[i + 3] ?? 1
-				const distance = chroma.distance(
-					color,
-					`rgba(${r},${g},${b},${a})`,
-					'rgb',
-				)
-				if (distance > tolerance) {
+				if (
+					a &&
+					Math.abs(c1.r - r) > tolerance &&
+					Math.abs(c1.g - g) > tolerance &&
+					Math.abs(c1.b - b) > tolerance
+				) {
 					columnHasContent = true
 					break
 				}
@@ -129,12 +129,12 @@ class ReactivePDF {
 				const g = data[i + 1] ?? 0
 				const b = data[i + 2] ?? 0
 				const a = data[i + 3] ?? 1
-				const distance = chroma.distance(
-					color,
-					`rgba(${r},${g},${b},${a})`,
-					'rgb',
-				)
-				if (distance > tolerance) {
+				if (
+					a &&
+					Math.abs(c1.r - r) > tolerance &&
+					Math.abs(c1.g - g) > tolerance &&
+					Math.abs(c1.b - b) > tolerance
+				) {
 					rowHasContent = true
 					break
 				}

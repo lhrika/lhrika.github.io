@@ -172,7 +172,7 @@ watch(pdf.document, newValue => {
 watch(pdf.page, async () => {
 	const bounding = await pdf.detectContentBounding(
 		'#FFFFFF',
-		10,
+		5,
 		settings.cropMarginX,
 		settings.cropMarginY,
 	)
