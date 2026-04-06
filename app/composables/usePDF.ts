@@ -1,4 +1,5 @@
 import type { PDFPageProxy, PDFDocumentProxy } from 'pdfjs-dist'
+import chroma from 'chroma-js'
 
 type Lib = typeof import('pdfjs-dist')
 
@@ -57,6 +58,8 @@ class ReactivePDF {
 	}
 
 	public detectContentBounding = async (
+		color: string = '#FFFFFF',
+		tolerance: number = 10,
 		marginX: number = 0,
 		marginY: number = 0,
 	) => {
@@ -91,7 +94,6 @@ class ReactivePDF {
 		let right = 0
 		let top = 0
 		let bottom = h
-		const threshold = 250
 
 		// Scan horizontally for left/right bounds
 		for (let x = 0; x < w; x++) {
@@ -102,9 +104,13 @@ class ReactivePDF {
 				const g = data[i + 1] ?? 0
 				const b = data[i + 2] ?? 0
 				const a = data[i + 3] ?? 1
-				const isWhite =
-					a === 0 || (r >= threshold && g >= threshold && b >= threshold)
-				if (!isWhite) {
+				const distance = chroma.distance(
+					color,
+					`rgba(${r},${g},${b},${a})`,
+					'rgb',
+				)
+				console.log(distance)
+				if (distance > tolerance) {
 					columnHasContent = true
 					break
 				}
@@ -124,9 +130,12 @@ class ReactivePDF {
 				const g = data[i + 1] ?? 0
 				const b = data[i + 2] ?? 0
 				const a = data[i + 3] ?? 1
-				const isWhite =
-					a === 0 || (r >= threshold && g >= threshold && b >= threshold)
-				if (!isWhite) {
+				const distance = chroma.distance(
+					color,
+					`rgba(${r},${g},${b},${a})`,
+					'rgb',
+				)
+				if (distance > tolerance) {
 					rowHasContent = true
 					break
 				}
