@@ -93,30 +93,22 @@ const onSettingsSubmit = () => {
 	render()
 }
 
-// Page non-white bouding (pdf point)
-const pageBounding = reactive({
-	top: 0,
-	left: 0,
-	width: 0,
-	height: 0,
-})
-
 // Current section index
 const sectionIndex = ref(1)
 
 // Section offset Y
 const sectionOffset = computed(() => {
-	const pageHeight = pageBounding.height
-	if (!pageHeight || !settings.sectionHeight) {
+	const contentTop = pdf.contentBounding.value.top
+	if (!settings.sectionHeight) {
 		return 0
 	}
-	const offset = pageHeight - sectionIndex.value * settings.sectionHeight
+	const offset = contentTop - sectionIndex.value * settings.sectionHeight
 	return offset < 0 ? 0 : offset
 })
 
 // Total sections
 const totalSections = computed(() => {
-	const pageHeight = pageBounding.height
+	const pageHeight = pdf.contentBounding.value.height
 	if (!pageHeight || !settings.sectionHeight) {
 		return 0
 	}
@@ -178,7 +170,11 @@ watch(pdf.document, newValue => {
 })
 
 watch(pdf.page, async () => {
-	await detectWhitespaceCrop()
+	const bounding = await pdf.detectContentBounding()
+	if (settings.autoCrop) {
+		settings.cropX = bounding.left
+		settings.cropWidth = bounding.width
+	}
 	if (sectionIndex.value > totalSections.value) {
 		sectionIndex.value = totalSections.value
 	}
@@ -194,118 +190,6 @@ watch(isSettingsOpen, value => {
 // Rendering state
 const isRendering = ref(false)
 
-const detectWhitespaceCrop = async () => {
-	const page = pdf.page.value
-	if (!page) {
-		return
-	}
-	const deepScale = settings.scale
-	const viewport = page.getViewport({ scale: deepScale })
-	const dpr = window.devicePixelRatio || 1
-
-	const tmp = document.createElement('canvas')
-	const w = Math.ceil(viewport.width * dpr)
-	const h = Math.ceil(viewport.height * dpr)
-	tmp.width = w
-	tmp.height = h
-	await page.render({
-		canvas: tmp,
-		viewport,
-		transform: [dpr, 0, 0, dpr, 0, 0],
-	}).promise
-	const ctx = tmp.getContext('2d')
-	const img = ctx?.getImageData(0, 0, tmp.width, tmp.height)
-	const data = img?.data
-	if (!data) return
-
-	let leftPx = w
-	let rightPx = 0
-	let topPx = h
-	let bottomPx = 0
-	const threshold = 250
-
-	// Scan horizontally for left/right bounds
-	for (let x = 0; x < w; x++) {
-		let columnHasContent = false
-		for (let y = 0; y < h; y++) {
-			const i = (y * w + x) * 4
-			const r = data[i] ?? 0
-			const g = data[i + 1] ?? 0
-			const b = data[i + 2] ?? 0
-			const a = data[i + 3] ?? 1
-			const isWhite =
-				a === 0 || (r >= threshold && g >= threshold && b >= threshold)
-			if (!isWhite) {
-				columnHasContent = true
-				break
-			}
-		}
-		if (columnHasContent) {
-			leftPx = Math.min(leftPx, x)
-			rightPx = Math.max(rightPx, x)
-		}
-	}
-
-	// Scan vertically for top/bottom bounds
-	for (let y = 0; y < h; y++) {
-		let rowHasContent = false
-		for (let x = 0; x < w; x++) {
-			const i = (y * w + x) * 4
-			const r = data[i] ?? 0
-			const g = data[i + 1] ?? 0
-			const b = data[i + 2] ?? 0
-			const a = data[i + 3] ?? 1
-			const isWhite =
-				a === 0 || (r >= threshold && g >= threshold && b >= threshold)
-			if (!isWhite) {
-				rowHasContent = true
-				break
-			}
-		}
-		if (rowHasContent) {
-			topPx = Math.min(topPx, y)
-			bottomPx = Math.max(bottomPx, y)
-		}
-	}
-
-	if (leftPx > rightPx || topPx > bottomPx) {
-		// page appears blank (or not detected), fallback to full page
-		const fullViewport = page.getViewport({ scale: 1 })
-		pageBounding.left = 0
-		pageBounding.top = 0
-		pageBounding.width = fullViewport.width
-		pageBounding.height = fullViewport.height
-		return
-	}
-
-	const fullViewport = page.getViewport({ scale: 1 })
-	const pageWidth = fullViewport.width
-	const pageHeight = fullViewport.height
-
-	const leftPdf = leftPx / dpr / deepScale
-	const rightPdf = rightPx / dpr / deepScale
-	const topPdf = topPx / dpr / deepScale
-	const bottomPdf = bottomPx / dpr / deepScale
-
-	const marginX = settings.cropMarginX
-	const marginY = settings.cropMarginY
-
-	const boundLeft = Math.max(0, leftPdf - marginX)
-	const boundRight = Math.min(pageWidth, rightPdf + marginX)
-	const boundTop = Math.max(0, topPdf - marginY)
-	const boundBottom = Math.min(pageHeight, bottomPdf + marginY)
-
-	pageBounding.left = boundLeft
-	pageBounding.top = boundTop
-	pageBounding.width = Math.max(1, boundRight - boundLeft)
-	pageBounding.height = Math.max(1, boundBottom - boundTop)
-
-	if (settings.autoCrop) {
-		settings.cropX = boundLeft
-		settings.cropWidth = pageBounding.width
-	}
-}
-
 const render = async () => {
 	if (!pdf.page.value || isRendering.value || !canvasRef.value) {
 		return
@@ -313,7 +197,7 @@ const render = async () => {
 	isRendering.value = true
 	if (renderMode.value === 'section') {
 		const margin = settings.margin
-		const y = sectionOffset.value + margin
+		const y = sectionOffset.value - margin
 		const height = settings.sectionHeight + 2 * margin
 		await pdf.renderPageRegion(
 			canvasRef.value,
