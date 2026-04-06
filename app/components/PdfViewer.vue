@@ -4,7 +4,6 @@ import {
 	useScreenOrientation,
 	useFullscreen,
 } from '@vueuse/core'
-import * as z from 'zod/v4'
 
 const props = defineProps<{
 	url: string
@@ -14,6 +13,9 @@ const props = defineProps<{
 const canvasRef = useTemplateRef('canvas')
 const viewportRef = useTemplateRef('viewport')
 const settingsFormRef = useTemplateRef('settingsForm')
+
+// PDF store
+const store = usePDFStore()
 
 // Jump page target
 const jumpTargetPage = ref(1)
@@ -64,31 +66,6 @@ const switchRenderMode = () => {
 
 // Settings form
 const isSettingsOpen = ref(false)
-const schema = z.object({
-	cropX: z.number().nonnegative(),
-	cropY: z.number().nonnegative(),
-	cropWidth: z.number().nonnegative(),
-	cropHeight: z.number().nonnegative(),
-	cropMarginX: z.number().nonnegative(),
-	cropMarginY: z.number().nonnegative(),
-	autoCrop: z.boolean(),
-	sectionHeight: z.number().positive(),
-	scale: z.number().positive(),
-	margin: z.number().nonnegative(),
-})
-type Schema = z.output<typeof schema>
-const settings = reactive<Schema>({
-	cropX: 0,
-	cropY: 0,
-	cropWidth: 500,
-	cropHeight: 1000,
-	cropMarginX: 0,
-	cropMarginY: 0,
-	autoCrop: false,
-	sectionHeight: 200,
-	scale: 1,
-	margin: 30,
-})
 const onSettingsSubmit = () => {
 	render()
 }
@@ -99,20 +76,20 @@ const sectionIndex = ref(1)
 // Section offset Y
 const sectionOffset = computed(() => {
 	const contentTop = pdf.contentBounding.value.top
-	if (!settings.sectionHeight) {
+	if (!store.sectionHeight) {
 		return 0
 	}
-	const offset = contentTop - sectionIndex.value * settings.sectionHeight
+	const offset = contentTop - sectionIndex.value * store.sectionHeight
 	return offset < 0 ? 0 : offset
 })
 
 // Total sections
 const totalSections = computed(() => {
 	const pageHeight = pdf.contentBounding.value.height
-	if (!pageHeight || !settings.sectionHeight) {
+	if (!pageHeight || !store.sectionHeight) {
 		return 0
 	}
-	return Math.ceil(pageHeight / settings.sectionHeight)
+	return Math.ceil(pageHeight / store.sectionHeight)
 })
 
 // Next section
@@ -157,10 +134,7 @@ const jumpPage = () => {
 
 // Function to adjust scale based on viewport width
 const adjustScale = () => {
-	const viewportWidth = viewportSize.width.value
-	if (settings.cropWidth) {
-		settings.scale = viewportWidth / settings.cropWidth
-	}
+	settingsFormRef.value?.adjustScale(viewportSize.width.value)
 }
 
 watch(pdf.document, newValue => {
@@ -173,12 +147,12 @@ watch(pdf.page, async () => {
 	const bounding = await pdf.detectContentBounding(
 		'#FFFFFF',
 		5,
-		settings.cropMarginX,
-		settings.cropMarginY,
+		store.cropMarginX,
+		store.cropMarginY,
 	)
-	if (settings.autoCrop) {
-		settings.cropX = bounding.left
-		settings.cropWidth = bounding.width
+	if (store.autoCrop) {
+		store.cropX = bounding.left
+		store.cropWidth = bounding.width
 	}
 	if (sectionIndex.value > totalSections.value) {
 		sectionIndex.value = totalSections.value
@@ -201,22 +175,22 @@ const render = async () => {
 	}
 	isRendering.value = true
 	if (renderMode.value === 'section') {
-		const margin = settings.margin
+		const margin = store.margin
 		const y = sectionOffset.value - margin
-		const height = settings.sectionHeight + 2 * margin
+		const height = store.sectionHeight + 2 * margin
 		await pdf.renderPageRegion(
 			canvasRef.value,
-			settings.cropX,
+			store.cropX,
 			y,
-			settings.cropWidth,
+			store.cropWidth,
 			height,
-			settings.scale,
+			store.scale,
 		)?.promise
-		if (settings.margin) {
-			drawGradientOverlay(canvasRef.value, settings.margin * settings.scale)
+		if (store.margin) {
+			drawGradientOverlay(canvasRef.value, store.margin * store.scale)
 		}
 	} else if (renderMode.value === 'page') {
-		const task = pdf.renderPage(canvasRef.value, settings.scale)
+		const task = pdf.renderPage(canvasRef.value, store.scale)
 		await task?.promise
 	}
 	isRendering.value = false
@@ -287,47 +261,11 @@ watch(
 					>
 						<UButton icon="i-lucide-settings" variant="soft" color="neutral" />
 						<template #content>
-							<UForm
+							<PdfViewerSettingForm
 								ref="settingsForm"
-								:state="settings"
-								:schema="schema"
-								class="space-y-4"
+								@adjust-scale="adjustScale"
 								@submit="onSettingsSubmit"
-							>
-								<USwitch v-model="settings.autoCrop" label="Auto Crop" />
-								<UFormField
-									v-if="settings.autoCrop"
-									label="Auto crop margin"
-									name="cropMarginX"
-								>
-									<UInput v-model="settings.cropMarginX" />
-								</UFormField>
-								<div v-else class="flex gap-2">
-									<UFormField label="Crop X" name="cropX">
-										<UInputNumber v-model="settings.cropX" class="flex-1" />
-									</UFormField>
-									<UFormField label="Crop Width" name="cropWidth">
-										<UInputNumber v-model="settings.cropWidth" class="flex-1" />
-									</UFormField>
-								</div>
-								<UFormField label="Section Height" name="numSections">
-									<UInputNumber v-model="settings.sectionHeight" />
-								</UFormField>
-								<UFormField label="Top/Bottom Margin" name="margin">
-									<UInputNumber v-model="settings.margin" />
-								</UFormField>
-								<UFormField label="Scale" name="scale">
-									<UFieldGroup>
-										<UInputNumber v-model="settings.scale" :step="0.1" />
-										<UButton
-											label="Auto"
-											color="neutral"
-											variant="outline"
-											@click="adjustScale"
-										/>
-									</UFieldGroup>
-								</UFormField>
-							</UForm>
+							/>
 							<UFormField
 								label="Go to page"
 								orientation="horizontal"
