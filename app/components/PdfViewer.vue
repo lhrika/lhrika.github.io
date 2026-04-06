@@ -38,7 +38,7 @@ const settingsPopupClasses = computed(() => {
 })
 
 // Full screen API
-const fullscreen = useFullscreen()
+const fullscreen = useFullscreen(viewportRef)
 
 // Reactive PDF
 const pdf = usePDF(props.url)
