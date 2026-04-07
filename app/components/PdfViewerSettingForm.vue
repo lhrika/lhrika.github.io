@@ -60,7 +60,7 @@ defineExpose({
 		ref="form"
 		:state="state"
 		:schema="schema"
-		class="space-y-4"
+		class="space-y-4 w-full"
 		@submit="onSubmit"
 	>
 		<USwitch v-model="state.autoCrop" label="Auto Crop" />

@@ -312,7 +312,10 @@ watch(
 					leave-to-class="opacity-0 -translate-x-10"
 					@enter="onTransitionEnter"
 				>
-					<div v-if="showSettings" class="bg-default p-4">
+					<div
+						v-if="showSettings && isFullscreen"
+						class="bg-default p-4 w-full"
+					>
 						<PdfViewerSettingForm
 							ref="settingsForm"
 							@adjust-scale="adjustScale"
