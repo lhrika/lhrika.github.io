@@ -62,6 +62,11 @@ const switchRenderMode = () => {
 	render()
 }
 
+// Color captor
+const colorCaptor = useCanvasColorCaptor(color => {
+	console.log(color)
+})
+
 // Settings form
 const isSettingsPopupOpen = ref(false)
 const showSettings = ref(false)
@@ -243,7 +248,7 @@ watch(
 		<div class="flex flex-col items-center gap-2">
 			<div
 				ref="viewport"
-				class="w-full relative overflow-clip bg-muted min-h-48 flex flex-col justify-center items-center"
+				class="w-full relative overflow-clip min-h-48 flex flex-col justify-center items-center"
 			>
 				<div class="absolute top-4 right-4 flex gap-2">
 					<UButton
@@ -331,7 +336,11 @@ watch(
 							@submit="onSettingsSubmit"
 						/>
 					</div>
-					<canvas v-else ref="canvas" @click="nextSection" />
+					<canvas
+						v-else
+						ref="canvas"
+						:class="{ 'cursor-pipette': colorCaptor.isCapturing.value }"
+					/>
 				</Transition>
 				<UFieldGroup
 					v-if="renderMode === 'section'"
