@@ -74,11 +74,6 @@ const onTransitionEnter = () => {
 	}
 }
 
-const onSettingsSubmit = () => {
-	showSettings.value = false
-	render()
-}
-
 // Current section index
 const sectionIndex = ref(1)
 
@@ -151,7 +146,7 @@ watch(pdf.document, newValue => {
 	}
 })
 
-watch(pdf.page, async () => {
+const cropPage = async () => {
 	const bounding = await pdf.detectContentBounding(
 		'#FFFFFF',
 		5,
@@ -165,8 +160,17 @@ watch(pdf.page, async () => {
 	if (sectionIndex.value > totalSections.value) {
 		sectionIndex.value = totalSections.value
 	}
+}
+
+watch(pdf.page, async () => {
+	await cropPage()
 	await render()
 })
+
+const onSettingsSubmit = () => {
+	showSettings.value = false
+	cropPage().then(render)
+}
 
 // Rendering state
 const isRendering = ref(false)
