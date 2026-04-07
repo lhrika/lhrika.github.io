@@ -270,34 +270,34 @@ watch(
 				class="w-full relative overflow-clip min-h-48 flex flex-col justify-center items-center"
 				:style="`background-color:${viewportBgColor}`"
 			>
-				<div class="absolute top-4 left-4 flex">
-					<UPopover
-						v-model:open="isColorPickerOpen"
-						:ui="{
-							content: 'p-2 flex flex-col gap-2',
-						}"
-					>
-						<UButton
-							icon="i-lucide-paint-bucket"
-							color="neutral"
-							variant="subtle"
-							:class="colorPickerIconColor"
-							:style="`background-color:${viewportBgColor};`"
-						/>
-						<template #content>
-							<div class="flex items-center justify-between gap-2">
-								<span class="font-bold">Set background color</span>
-								<UButton
-									icon="i-lucide-pipette"
-									color="neutral"
-									variant="soft"
-									@click="grabColor"
-								/>
-							</div>
-							<UColorPicker v-model="viewportBgColor" format="hex" />
-						</template>
-					</UPopover>
-				</div>
+				<UPopover
+					v-if="!isFullscreen"
+					v-model:open="isColorPickerOpen"
+					:ui="{
+						content: 'p-2 flex flex-col gap-2',
+					}"
+				>
+					<UButton
+						icon="i-lucide-paint-bucket"
+						color="neutral"
+						variant="subtle"
+						class="absolute top-4 left-4"
+						:class="colorPickerIconColor"
+						:style="`background-color:${viewportBgColor};`"
+					/>
+					<template #content>
+						<div class="flex items-center justify-between gap-2">
+							<span class="font-bold">Set background color</span>
+							<UButton
+								icon="i-lucide-pipette"
+								color="neutral"
+								variant="soft"
+								@click="grabColor"
+							/>
+						</div>
+						<UColorPicker v-model="viewportBgColor" format="hex" />
+					</template>
+				</UPopover>
 				<div class="absolute top-4 right-4 flex gap-2">
 					<UButton
 						v-if="isFullscreenSupported"
@@ -388,6 +388,13 @@ watch(
 						v-else
 						ref="canvas"
 						:class="{ 'cursor-pipette': colorCaptor.isCapturing.value }"
+						@click="
+							() => {
+								if (!colorCaptor.isCapturing.value) {
+									nextSection()
+								}
+							}
+						"
 					/>
 				</Transition>
 				<UFieldGroup
