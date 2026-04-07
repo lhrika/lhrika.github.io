@@ -4,6 +4,7 @@ import {
 	useScreenOrientation,
 	useFullscreen,
 } from '@vueuse/core'
+import chroma from 'chroma-js'
 
 const props = defineProps<{
 	url: string
@@ -24,7 +25,14 @@ const jumpTargetPage = ref(1)
 const viewportSize = useElementSize(viewportRef)
 
 // Viewport background color
-const viewportBgColor = ref('rgb(255, 255, 255)')
+const viewportBgColor = ref('#FFFFFF')
+const colorPickerIconColor = computed(() => {
+	const c = chroma(viewportBgColor.value)
+	if (c.luminance() > 0.5) {
+		return 'text-neutral-700'
+	}
+	return 'text-white'
+})
 
 const isColorPickerOpen = ref(false)
 
@@ -273,7 +281,8 @@ watch(
 							icon="i-lucide-paint-bucket"
 							color="neutral"
 							variant="subtle"
-							:style="`color:${viewportBgColor};`"
+							:class="colorPickerIconColor"
+							:style="`background-color:${viewportBgColor};`"
 						/>
 						<template #content>
 							<div class="flex items-center justify-between gap-2">
@@ -285,7 +294,7 @@ watch(
 									@click="grabColor"
 								/>
 							</div>
-							<UColorPicker v-model="viewportBgColor" format="rgb" />
+							<UColorPicker v-model="viewportBgColor" format="hex" />
 						</template>
 					</UPopover>
 				</div>

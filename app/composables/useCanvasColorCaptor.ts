@@ -17,13 +17,17 @@ export const useCanvasColorCaptor = (callback?: (color: string) => void) => {
 		// Get single pixel data
 		const imageData = ctx.getImageData(Math.floor(x), Math.floor(y), 1, 1)
 		const [r = 0, g = 0, b = 0, a = 1] = imageData.data
+		const hex = `#${[r, g, b]
+			.map(x => x.toString(16).padStart(2, '0'))
+			.join('')
+			.toUpperCase()}`
 
 		// RGBA object
 		color.value = { r, g, b, a }
 		isCapturing.value = false
 
 		if (callback) {
-			callback(`rgb(${r}, ${g}, ${b})`)
+			callback(hex)
 		}
 	}
 
@@ -32,5 +36,5 @@ export const useCanvasColorCaptor = (callback?: (color: string) => void) => {
 		canvas.addEventListener('click', listener, { once: true })
 	}
 
-	return { capture, isCapturing }
+	return { capture, isCapturing, color }
 }
