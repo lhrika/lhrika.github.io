@@ -2,6 +2,9 @@
 import * as z from 'zod/v4'
 
 const emit = defineEmits<{ adjustScale: []; submit: [] }>()
+const { hasSubmitButton } = defineProps<{
+	hasSubmitButton?: boolean
+}>()
 
 const formRef = useTemplateRef('form')
 
@@ -60,7 +63,7 @@ defineExpose({
 		ref="form"
 		:state="state"
 		:schema="schema"
-		class="space-y-4 w-full"
+		class="space-y-4"
 		@submit="onSubmit"
 	>
 		<USwitch v-model="state.autoCrop" label="Auto Crop" />
@@ -79,13 +82,15 @@ defineExpose({
 				<UInputNumber v-model="state.cropWidth" class="flex-1" />
 			</UFormField>
 		</div>
-		<UFormField label="Section Height" name="numSections">
-			<UInputNumber v-model="state.sectionHeight" />
-		</UFormField>
-		<UFormField label="Top/Bottom Margin" name="margin">
-			<UInputNumber v-model="state.margin" />
-		</UFormField>
-		<UFormField label="Scale" name="scale">
+		<div class="flex gap-2">
+			<UFormField label="Section Height" name="numSections">
+				<UInputNumber v-model="state.sectionHeight" />
+			</UFormField>
+			<UFormField label="Top/Bottom Margin" name="margin">
+				<UInputNumber v-model="state.margin" />
+			</UFormField>
+		</div>
+		<UFormField label="Scale" name="scale" orientation="horizontal">
 			<UFieldGroup>
 				<UInputNumber v-model="state.scale" :step="0.1" />
 				<UButton
@@ -96,5 +101,11 @@ defineExpose({
 				/>
 			</UFieldGroup>
 		</UFormField>
+		<UButton
+			v-if="hasSubmitButton"
+			type="submit"
+			label="Submit"
+			class="w-full"
+		/>
 	</UForm>
 </template>

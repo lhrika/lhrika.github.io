@@ -75,6 +75,7 @@ const onTransitionEnter = () => {
 }
 
 const onSettingsSubmit = () => {
+	showSettings.value = false
 	render()
 }
 
@@ -320,6 +321,8 @@ watch(
 					<div v-if="showSettings" class="bg-default p-4 w-full">
 						<PdfViewerSettingForm
 							ref="settingsForm"
+							has-submit-button
+							class="max-w-sm mx-auto"
 							@adjust-scale="adjustScale"
 							@submit="onSettingsSubmit"
 						/>
