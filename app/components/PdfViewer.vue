@@ -246,7 +246,12 @@ watch(
 						color="neutral"
 						variant="subtle"
 						icon="i-lucide-fullscreen"
-						@click="toggleFullscreen"
+						@click="
+							() => {
+								toggleFullscreen()
+								showSettings = false
+							}
+						"
 					/>
 					<UButton
 						:icon="getRenderModeIcon()"
@@ -312,10 +317,7 @@ watch(
 					leave-to-class="opacity-0 -translate-x-10"
 					@enter="onTransitionEnter"
 				>
-					<div
-						v-if="showSettings && isFullscreen"
-						class="bg-default p-4 w-full"
-					>
+					<div v-if="showSettings" class="bg-default p-4 w-full">
 						<PdfViewerSettingForm
 							ref="settingsForm"
 							@adjust-scale="adjustScale"
