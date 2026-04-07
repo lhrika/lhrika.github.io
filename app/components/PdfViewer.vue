@@ -41,6 +41,7 @@ const {
 
 // Reactive PDF
 const pdf = usePDF(props.url)
+const pageNumber = pdf.pageNumber
 
 // Render mode (page or section)
 const renderMode = ref<'page' | 'section'>('section')
@@ -104,16 +105,15 @@ const nextSection = () => {
 	if (sectionIndex.value < totalSections.value) {
 		sectionIndex.value += 1
 		render()
-	} else if (pdf.pageNumber.value < pdf.numPages) {
-		pdf.pageNumber.value += 1
+	} else if (pageNumber.value < pdf.numPages) {
+		pageNumber.value += 1
 		sectionIndex.value = 1
 	}
 }
 
 const hasNextSection = computed(() => {
 	return (
-		sectionIndex.value < totalSections.value ||
-		pdf.pageNumber.value < pdf.numPages
+		sectionIndex.value < totalSections.value || pageNumber.value < pdf.numPages
 	)
 })
 
@@ -122,19 +122,19 @@ const prevSection = () => {
 	if (sectionIndex.value > 1) {
 		sectionIndex.value -= 1
 		render()
-	} else if (pdf.pageNumber.value > 1) {
-		pdf.pageNumber.value -= 1
+	} else if (pageNumber.value > 1) {
+		pageNumber.value -= 1
 		sectionIndex.value = totalSections.value
 	}
 }
 
 const hasPrevSection = computed(() => {
-	return sectionIndex.value > 1 || pdf.pageNumber.value > 1
+	return sectionIndex.value > 1 || pageNumber.value > 1
 })
 
 const jumpPage = () => {
 	if (jumpTargetPage.value) {
-		pdf.pageNumber.value = jumpTargetPage.value
+		pageNumber.value = jumpTargetPage.value
 	}
 	isSettingsPopupOpen.value = false
 }
@@ -146,7 +146,7 @@ const adjustScale = () => {
 
 watch(pdf.document, newValue => {
 	if (newValue) {
-		pdf.pageNumber.value = 1
+		pageNumber.value = 1
 	}
 })
 
@@ -165,12 +165,6 @@ watch(pdf.page, async () => {
 		sectionIndex.value = totalSections.value
 	}
 	await render()
-})
-
-watch(isSettingsPopupOpen, value => {
-	if (!value) {
-		settingsFormRef.value?.submit()
-	}
 })
 
 // Rendering state
@@ -232,7 +226,7 @@ const drawGradientOverlay = (canvas: HTMLCanvasElement, height: number) => {
 watch(
 	() => props.url,
 	() => {
-		pdf.pageNumber.value = 1
+		pageNumber.value = 1
 		sectionIndex.value = 1
 		pdf.load(props.url)
 	},
@@ -260,12 +254,26 @@ watch(
 						color="neutral"
 						@click="switchRenderMode"
 					/>
+					<UButton
+						v-if="isFullscreen"
+						icon="i-lucide-settings"
+						variant="soft"
+						color="neutral"
+						@click="toggleShowSettings"
+					/>
 					<UPopover
-						v-if="!isFullscreen && !isLandscape"
+						v-else
 						v-model:open="isSettingsPopupOpen"
 						:ui="{
 							content: 'p-4 max-w-xs space-y-4',
 						}"
+						@update:open="
+							value => {
+								if (!value) {
+									settingsFormRef?.submit()
+								}
+							}
+						"
 					>
 						<UButton icon="i-lucide-settings" variant="soft" color="neutral" />
 						<template #content>
@@ -293,13 +301,6 @@ watch(
 							</UFormField>
 						</template>
 					</UPopover>
-					<UButton
-						v-else
-						icon="i-lucide-settings"
-						variant="soft"
-						color="neutral"
-						@click="toggleShowSettings"
-					/>
 				</div>
 				<Transition
 					mode="out-in"
@@ -340,10 +341,17 @@ watch(
 						@click="nextSection"
 					/>
 				</UFieldGroup>
+				<CompactPagination
+					v-if="isFullscreen"
+					v-model="pageNumber"
+					:total="pdf.numPages"
+					size="sm"
+					class="absolute left-4 bottom-4"
+				/>
 			</div>
 			<UPagination
 				v-if="pdf.numPages"
-				v-model:page="pdf.pageNumber.value"
+				v-model:page="pageNumber"
 				:items-per-page="1"
 				:total="pdf.numPages"
 				:disabled="isRendering"
