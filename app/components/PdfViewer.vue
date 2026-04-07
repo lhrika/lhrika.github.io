@@ -28,19 +28,16 @@ const {
 	orientation: screenOrientation,
 	isSupported: isScreenOrientationSupported,
 } = useScreenOrientation()
-const settingsPopupClasses = computed(() => {
-	if (
-		isScreenOrientationSupported.value &&
-		screenOrientation.value?.startsWith('landscape')
-	) {
-		return 'p-4 max-w-sm space-y-4 max-h-64 overflow-y-auto'
-	} else {
-		return 'p-4 max-w-xs space-y-4'
-	}
+const isLandscape = computed(() => {
+	return screenOrientation.value?.startsWith('landscape')
 })
 
 // Full screen API
-const fullscreen = useFullscreen(viewportRef)
+const {
+	isSupported: isFullscreenSupported,
+	toggle: toggleFullscreen,
+	isFullscreen,
+} = useFullscreen(viewportRef)
 
 // Reactive PDF
 const pdf = usePDF(props.url)
@@ -65,7 +62,17 @@ const switchRenderMode = () => {
 }
 
 // Settings form
-const isSettingsOpen = ref(false)
+const isSettingsPopupOpen = ref(false)
+const showSettings = ref(false)
+const toggleShowSettings = () => {
+	showSettings.value = !showSettings.value
+}
+const onTransitionEnter = () => {
+	if (!showSettings.value) {
+		render()
+	}
+}
+
 const onSettingsSubmit = () => {
 	render()
 }
@@ -129,7 +136,7 @@ const jumpPage = () => {
 	if (jumpTargetPage.value) {
 		pdf.pageNumber.value = jumpTargetPage.value
 	}
-	isSettingsOpen.value = false
+	isSettingsPopupOpen.value = false
 }
 
 // Function to adjust scale based on viewport width
@@ -160,7 +167,7 @@ watch(pdf.page, async () => {
 	await render()
 })
 
-watch(isSettingsOpen, value => {
+watch(isSettingsPopupOpen, value => {
 	if (!value) {
 		settingsFormRef.value?.submit()
 	}
@@ -241,11 +248,11 @@ watch(
 			>
 				<div class="absolute top-4 right-4 flex gap-2">
 					<UButton
-						v-if="fullscreen.isSupported.value"
+						v-if="isFullscreenSupported"
 						color="neutral"
 						variant="subtle"
 						icon="i-lucide-fullscreen"
-						@click="fullscreen.toggle"
+						@click="toggleFullscreen"
 					/>
 					<UButton
 						:icon="getRenderModeIcon()"
@@ -254,9 +261,10 @@ watch(
 						@click="switchRenderMode"
 					/>
 					<UPopover
-						v-model:open="isSettingsOpen"
+						v-if="!isFullscreen && !isLandscape"
+						v-model:open="isSettingsPopupOpen"
 						:ui="{
-							content: settingsPopupClasses,
+							content: 'p-4 max-w-xs space-y-4',
 						}"
 					>
 						<UButton icon="i-lucide-settings" variant="soft" color="neutral" />
@@ -285,8 +293,33 @@ watch(
 							</UFormField>
 						</template>
 					</UPopover>
+					<UButton
+						v-else
+						icon="i-lucide-settings"
+						variant="soft"
+						color="neutral"
+						@click="toggleShowSettings"
+					/>
 				</div>
-				<canvas ref="canvas" @click="nextSection" />
+				<Transition
+					mode="out-in"
+					enter-active-class="transition-all duration-250 ease-in-out"
+					enter-from-class="opacity-0 translate-x-10"
+					enter-to-class="opacity-100 translate-x-0"
+					leave-active-class="transition-all duration-250 ease-in-out"
+					leave-from-class="opacity-100 translate-x-0"
+					leave-to-class="opacity-0 -translate-x-10"
+					@enter="onTransitionEnter"
+				>
+					<div v-if="showSettings" class="bg-default p-4">
+						<PdfViewerSettingForm
+							ref="settingsForm"
+							@adjust-scale="adjustScale"
+							@submit="onSettingsSubmit"
+						/>
+					</div>
+					<canvas v-else ref="canvas" @click="nextSection" />
+				</Transition>
 				<UFieldGroup
 					v-if="renderMode === 'section'"
 					orientation="vertical"
