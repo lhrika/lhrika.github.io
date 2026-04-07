@@ -23,6 +23,11 @@ const jumpTargetPage = ref(1)
 // Viewport size
 const viewportSize = useElementSize(viewportRef)
 
+// Viewport background color
+const viewportBgColor = ref('rgb(255, 255, 255)')
+
+const isColorPickerOpen = ref(false)
+
 // Screen orientation
 const {
 	orientation: screenOrientation,
@@ -64,8 +69,14 @@ const switchRenderMode = () => {
 
 // Color captor
 const colorCaptor = useCanvasColorCaptor(color => {
-	console.log(color)
+	viewportBgColor.value = color
 })
+const grabColor = () => {
+	if (canvasRef.value) {
+		colorCaptor.capture(canvasRef.value)
+		isColorPickerOpen.value = false
+	}
+}
 
 // Settings form
 const isSettingsPopupOpen = ref(false)
@@ -249,7 +260,35 @@ watch(
 			<div
 				ref="viewport"
 				class="w-full relative overflow-clip min-h-48 flex flex-col justify-center items-center"
+				:style="`background-color:${viewportBgColor}`"
 			>
+				<div class="absolute top-4 left-4 flex">
+					<UPopover
+						v-model:open="isColorPickerOpen"
+						:ui="{
+							content: 'p-2 flex flex-col gap-2',
+						}"
+					>
+						<UButton
+							icon="i-lucide-paint-bucket"
+							color="neutral"
+							variant="subtle"
+							:style="`color:${viewportBgColor};`"
+						/>
+						<template #content>
+							<div class="flex items-center justify-between gap-2">
+								<span class="font-bold">Set background color</span>
+								<UButton
+									icon="i-lucide-pipette"
+									color="neutral"
+									variant="soft"
+									@click="grabColor"
+								/>
+							</div>
+							<UColorPicker v-model="viewportBgColor" format="rgb" />
+						</template>
+					</UPopover>
+				</div>
 				<div class="absolute top-4 right-4 flex gap-2">
 					<UButton
 						v-if="isFullscreenSupported"
