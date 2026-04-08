@@ -40,6 +40,17 @@ export const usePDFStore = defineStore(
 			},
 		})
 
+		watch(url, value => {
+			const i = history.value.findIndex(e => e.url === value)
+			if (i > 0) {
+				const [entry] = history.value.splice(i, 1)
+				if (entry) {
+					entry.timestamp = Date.now()
+					history.value.unshift(entry)
+				}
+			}
+		})
+
 		// Crop region in PDF points
 		const cropX = ref(0)
 		const cropWidth = ref(256)

@@ -6,10 +6,6 @@ import {
 } from '@vueuse/core'
 import chroma from 'chroma-js'
 
-const props = defineProps<{
-	url: string
-}>()
-
 // Template refs
 const canvasRef = useTemplateRef('canvas')
 const viewportRef = useTemplateRef('viewport')
@@ -53,7 +49,7 @@ const {
 } = useFullscreen(viewportRef)
 
 // Reactive PDF
-const pdf = usePDF(props.url)
+const pdf = usePDF(store.url)
 const pageNumber = computed({
 	get() {
 		return store.page
@@ -267,9 +263,9 @@ const drawGradientOverlay = (canvas: HTMLCanvasElement, height: number) => {
 }
 
 watch(
-	() => props.url,
+	() => store.url,
 	value => {
-		pageNumber.value = store.page
+		pdf.pageNumber.value = store.page
 		sectionIndex.value = 1
 		pdf.url.value = value
 	},

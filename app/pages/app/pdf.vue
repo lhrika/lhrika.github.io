@@ -49,7 +49,7 @@
 				</UFieldGroup>
 			</UContainer>
 			<UContainer>
-				<PdfViewer v-if="store.url" :url="store.url" />
+				<PdfViewer v-if="store.url" />
 			</UContainer>
 		</UPageBody>
 	</UPage>
