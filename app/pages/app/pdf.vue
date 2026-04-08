@@ -2,8 +2,8 @@
 	<UPage>
 		<UPageBody>
 			<UContainer class="flex justify-between items-center">
-				<UFieldGroup>
-					<UInput v-model="inputUrl" />
+				<UFieldGroup class="w-full">
+					<UInput v-model="inputUrl" placeholder="URL of PDF" class="w-full" />
 					<UPopover
 						:ui="{
 							content: 'p-2 space-y-2',
@@ -14,12 +14,12 @@
 							<UFieldGroup
 								v-for="(item, index) in store.history"
 								:key="item.url"
-								class="flex justify-between"
+								class="flex"
 							>
 								<UButton
 									color="neutral"
 									variant="outline"
-									class="w-full"
+									class="w-full block text-start text-nowrap overflow-hidden text-ellipsis"
 									@click="
 										() => {
 											store.url = item.url
@@ -43,7 +43,6 @@
 					</UPopover>
 					<UButton label="Load" @click="loadPDF" />
 				</UFieldGroup>
-				<USwitch v-model="hideHeader" label="Hide Header" />
 			</UContainer>
 			<UContainer>
 				<PdfViewer :url="store.url" />
@@ -57,15 +56,5 @@ const inputUrl = ref('')
 const loadPDF = () => {
 	store.url = inputUrl.value
 }
-const appStore = useAppStore()
 const store = usePDFStore()
-
-const hideHeader = computed({
-	get() {
-		return !appStore.showHeader
-	},
-	set(value: boolean) {
-		appStore.showHeader = !value
-	},
-})
 </script>
