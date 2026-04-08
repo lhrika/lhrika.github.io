@@ -5,6 +5,7 @@
 				<UFieldGroup class="w-full">
 					<UInput v-model="inputUrl" placeholder="URL of PDF" class="w-full" />
 					<UPopover
+						v-model:open="isHistoryOpen"
 						:ui="{
 							content: 'p-2 space-y-2',
 						}"
@@ -12,7 +13,9 @@
 						<UButton icon="i-lucide-history" color="neutral" variant="subtle" />
 						<template #content>
 							<UFieldGroup
-								v-for="(item, index) in store.history"
+								v-for="(item, index) in store.history.filter(
+									e => e.url !== store.url,
+								)"
 								:key="item.url"
 								class="flex"
 							>
@@ -23,6 +26,7 @@
 									@click="
 										() => {
 											store.url = item.url
+											isHistoryOpen = false
 										}
 									"
 								>
@@ -53,6 +57,7 @@
 
 <script setup lang="ts">
 const inputUrl = ref('')
+const isHistoryOpen = ref(false)
 const loadPDF = () => {
 	store.url = inputUrl.value
 }
