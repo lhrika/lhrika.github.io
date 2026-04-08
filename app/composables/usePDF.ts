@@ -178,7 +178,7 @@ class ReactivePDF {
 	private async initialize() {
 		if (this.initialized.value) return
 		this.lib = await import('pdfjs-dist')
-		this.lib.GlobalWorkerOptions.workerSrc = '/pdfjs/worker'
+		this.lib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs'
 		this.initialized.value = true
 	}
 

@@ -35,8 +35,8 @@ export default defineNuxtConfig({
 				baseURL: '/pdfjs/wasm',
 			},
 			{
-				dir: resolve('node_modules/pdfjs-dist/build/pdf.worker.min.mjs'),
-				baseURL: '/pdfjs/worker',
+				dir: resolve('node_modules/pdfjs-dist/build'),
+				baseURL: '/pdfjs',
 			},
 		],
 		prerender: {
