@@ -184,10 +184,6 @@ watch(pdf.document, () => {
 	}
 })
 
-watch(store, () => {
-	console.log(store)
-})
-
 const cropPage = async () => {
 	const bounding = await pdf.detectContentBounding(
 		'#FFFFFF',
