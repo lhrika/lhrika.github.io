@@ -182,29 +182,32 @@ class ReactivePDF {
 		this.initialized.value = true
 	}
 
+	private getDocument(url: string) {
+		return this.lib?.getDocument({
+			url,
+			wasmUrl: '/pdfjs/wasm/',
+		})
+	}
+
+	private initializeDocument(pdf: PDFDocumentProxy) {
+		this.document.value = pdf
+		this.loadPage(this.pageNumber.value)
+	}
+
+	private loadDocument(url: string) {
+		const loadingTask = this.getDocument(url)
+		loadingTask?.promise.then(pdf => this.initializeDocument(pdf))
+	}
+
 	public load(url: string) {
 		if (this.initialized.value) {
-			const loadingTask = this.lib?.getDocument({
-				url,
-				wasmUrl: '/pdfjs/wasm/',
-			})
-			loadingTask?.promise.then(pdf => {
-				this.document.value = pdf
-				this.loadPage(this.pageNumber.value)
-			})
+			this.loadDocument(url)
 		} else {
 			watch(
 				this.initialized,
-				() => {
-					if (this.initialized.value) {
-						const loadingTask = this.lib?.getDocument({
-							url,
-							wasmUrl: '/pdfjs/wasm/',
-						})
-						loadingTask?.promise.then(pdf => {
-							this.document.value = pdf
-							this.loadPage(this.pageNumber.value)
-						})
+				value => {
+					if (value) {
+						this.loadDocument(url)
 					}
 				},
 				{ once: true },
