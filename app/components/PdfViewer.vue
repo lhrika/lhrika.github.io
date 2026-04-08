@@ -55,7 +55,7 @@ const pageNumber = computed({
 		return store.page
 	},
 	set(value) {
-		pdf.pageNumber.value = value
+		pdf.setPage(value)
 		store.page = value
 	},
 })
@@ -178,6 +178,7 @@ watch(pdf.document, () => {
 			})
 		})
 	}
+	pdf.setPage(store.page)
 })
 
 const cropPage = async () => {
@@ -265,7 +266,6 @@ const drawGradientOverlay = (canvas: HTMLCanvasElement, height: number) => {
 watch(
 	() => store.url,
 	value => {
-		pdf.pageNumber.value = store.page
 		sectionIndex.value = 1
 		pdf.url.value = value
 	},

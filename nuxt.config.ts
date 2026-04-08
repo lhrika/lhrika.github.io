@@ -35,6 +35,10 @@ export default defineNuxtConfig({
 				baseURL: '/pdfjs/wasm',
 			},
 			{
+				dir: resolve('node_modules/pdfjs-dist/cmaps'),
+				baseURL: '/pdfjs/cmaps',
+			},
+			{
 				dir: resolve('node_modules/pdfjs-dist/build'),
 				baseURL: '/pdfjs',
 			},

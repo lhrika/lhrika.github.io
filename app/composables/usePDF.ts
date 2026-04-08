@@ -30,9 +30,6 @@ class ReactivePDF {
 		if (import.meta.client) {
 			this.initialize()
 			this.pageNumber.value = initialPage
-			watch(this.pageNumber, value => {
-				this.loadPage(value)
-			})
 		}
 		watch(this.url, value => {
 			this.load(value)
@@ -40,6 +37,11 @@ class ReactivePDF {
 		if (url) {
 			this.url.value = url
 		}
+	}
+
+	public setPage(value: number) {
+		this.loadPage(value)
+		this.pageNumber.value = value
 	}
 
 	private loadPage(p: number) {
@@ -190,12 +192,13 @@ class ReactivePDF {
 		return this.lib?.getDocument({
 			url,
 			wasmUrl: '/pdfjs/wasm/',
+			cMapPacked: true,
+			cMapUrl: '/pdfjs/cmaps/',
 		})
 	}
 
 	private initializeDocument(pdf: PDFDocumentProxy) {
 		this.document.value = pdf
-		this.loadPage(this.pageNumber.value)
 	}
 
 	public async getInfo() {
