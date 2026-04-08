@@ -254,10 +254,10 @@ const drawGradientOverlay = (canvas: HTMLCanvasElement, height: number) => {
 
 watch(
 	() => props.url,
-	() => {
+	value => {
 		pageNumber.value = 1
 		sectionIndex.value = 1
-		pdf.load(props.url)
+		pdf.url.value = value
 	},
 )
 </script>

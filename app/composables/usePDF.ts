@@ -5,6 +5,7 @@ type Lib = typeof import('pdfjs-dist')
 class ReactivePDF {
 	private initialized = ref(false)
 	public lib: Lib | null = null
+	public url = ref('')
 	public document = shallowRef<PDFDocumentProxy>()
 	public page = shallowRef<PDFPageProxy>()
 	public pageNumber = ref(1)
@@ -33,8 +34,11 @@ class ReactivePDF {
 				this.loadPage(value)
 			})
 		}
+		watch(this.url, value => {
+			this.load(value)
+		})
 		if (url) {
-			this.load(url)
+			this.url.value = url
 		}
 	}
 
@@ -199,7 +203,7 @@ class ReactivePDF {
 		loadingTask?.promise.then(pdf => this.initializeDocument(pdf))
 	}
 
-	public load(url: string) {
+	private load(url: string) {
 		if (this.initialized.value) {
 			this.loadDocument(url)
 		} else {
