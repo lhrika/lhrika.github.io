@@ -178,13 +178,16 @@ class ReactivePDF {
 	private async initialize() {
 		if (this.initialized.value) return
 		this.lib = await import('pdfjs-dist')
-		this.lib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
+		this.lib.GlobalWorkerOptions.workerSrc = '/pdfjs/worker'
 		this.initialized.value = true
 	}
 
 	public load(url: string) {
 		if (this.initialized.value) {
-			const loadingTask = this.lib?.getDocument(url)
+			const loadingTask = this.lib?.getDocument({
+				url,
+				wasmUrl: '/pdfjs/wasm/',
+			})
 			loadingTask?.promise.then(pdf => {
 				this.document.value = pdf
 				this.loadPage(this.pageNumber.value)
@@ -194,7 +197,10 @@ class ReactivePDF {
 				this.initialized,
 				() => {
 					if (this.initialized.value) {
-						const loadingTask = this.lib?.getDocument(url)
+						const loadingTask = this.lib?.getDocument({
+							url,
+							wasmUrl: '/pdfjs/wasm/',
+						})
 						loadingTask?.promise.then(pdf => {
 							this.document.value = pdf
 							this.loadPage(this.pageNumber.value)

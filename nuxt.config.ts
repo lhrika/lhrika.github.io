@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { defineNuxtConfig } from 'nuxt/config'
+import { resolve } from 'path'
 
 export default defineNuxtConfig({
 	modules: [
@@ -28,6 +29,16 @@ export default defineNuxtConfig({
 		},
 	},
 	nitro: {
+		publicAssets: [
+			{
+				dir: resolve('node_modules/pdfjs-dist/wasm'),
+				baseURL: '/pdfjs/wasm',
+			},
+			{
+				dir: resolve('node_modules/pdfjs-dist/build/pdf.worker.min.mjs'),
+				baseURL: '/pdfjs/worker',
+			},
+		],
 		prerender: {
 			failOnError: false,
 			routes: [
