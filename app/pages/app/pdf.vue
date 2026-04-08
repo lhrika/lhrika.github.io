@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-const pdfUrl = ref('/cognitive-linguistics-an-introduction.pdf')
+const pdfUrl = ref('/pdf/modern-vietnamese-grammar.pdf')
 const inputUrl = ref('')
 const loadPDF = () => {
 	pdfUrl.value = inputUrl.value
