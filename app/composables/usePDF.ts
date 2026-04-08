@@ -198,6 +198,11 @@ class ReactivePDF {
 		this.loadPage(this.pageNumber.value)
 	}
 
+	public async getInfo() {
+		const data = await this.document.value?.getMetadata()
+		return data?.info as Record<string, unknown>
+	}
+
 	private loadDocument(url: string) {
 		const loadingTask = this.getDocument(url)
 		loadingTask?.promise.then(pdf => this.initializeDocument(pdf))

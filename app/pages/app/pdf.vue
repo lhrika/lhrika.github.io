@@ -4,31 +4,68 @@
 			<UContainer class="flex justify-between items-center">
 				<UFieldGroup>
 					<UInput v-model="inputUrl" />
+					<UPopover
+						:ui="{
+							content: 'p-2 space-y-2',
+						}"
+					>
+						<UButton icon="i-lucide-history" color="neutral" variant="subtle" />
+						<template #content>
+							<UFieldGroup
+								v-for="(item, index) in store.history"
+								:key="item.url"
+								class="flex justify-between"
+							>
+								<UButton
+									color="neutral"
+									variant="outline"
+									class="w-full"
+									@click="
+										() => {
+											store.url = item.url
+										}
+									"
+								>
+									{{ item.title || item.url }}
+								</UButton>
+								<UButton
+									icon="i-lucide-delete"
+									color="error"
+									variant="outline"
+									@click="
+										() => {
+											store.history.splice(index, 1)
+										}
+									"
+								/>
+							</UFieldGroup>
+						</template>
+					</UPopover>
 					<UButton label="Load" @click="loadPDF" />
 				</UFieldGroup>
 				<USwitch v-model="hideHeader" label="Hide Header" />
 			</UContainer>
 			<UContainer>
-				<PdfViewer :url="pdfUrl" />
+				<PdfViewer :url="store.url" />
 			</UContainer>
 		</UPageBody>
 	</UPage>
 </template>
 
 <script setup lang="ts">
-const pdfUrl = ref('/pdf/modern-vietnamese-grammar.pdf')
 const inputUrl = ref('')
 const loadPDF = () => {
-	pdfUrl.value = inputUrl.value
+	store.url = inputUrl.value
 }
-const store = useAppStore()
+const appStore = useAppStore()
+const store = usePDFStore()
 
 const hideHeader = computed({
 	get() {
-		return !store.showHeader
+		return !appStore.showHeader
 	},
 	set(value: boolean) {
-		store.showHeader = !value
+		appStore.showHeader = !value
 	},
 })
 </script>

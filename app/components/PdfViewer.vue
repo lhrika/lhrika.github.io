@@ -54,7 +54,15 @@ const {
 
 // Reactive PDF
 const pdf = usePDF(props.url)
-const pageNumber = pdf.pageNumber
+const pageNumber = computed({
+	get() {
+		return store.page
+	},
+	set(value) {
+		pdf.pageNumber.value = value
+		store.page = value
+	},
+})
 
 // Render mode (page or section)
 const renderMode = ref<'page' | 'section'>('section')
@@ -164,10 +172,20 @@ const adjustScale = () => {
 	settingsFormRef.value?.adjustScale(viewportSize.width.value)
 }
 
-watch(pdf.document, newValue => {
-	if (newValue) {
-		pageNumber.value = 1
+watch(pdf.document, () => {
+	if (!store.document) {
+		pdf.getInfo().then(info => {
+			store.addToHistory({
+				url: store.url,
+				title: info.Title as string | undefined,
+				page: 1,
+			})
+		})
 	}
+})
+
+watch(store, () => {
+	console.log(store)
 })
 
 const cropPage = async () => {
@@ -255,7 +273,7 @@ const drawGradientOverlay = (canvas: HTMLCanvasElement, height: number) => {
 watch(
 	() => props.url,
 	value => {
-		pageNumber.value = 1
+		pageNumber.value = store.page
 		sectionIndex.value = 1
 		pdf.url.value = value
 	},
