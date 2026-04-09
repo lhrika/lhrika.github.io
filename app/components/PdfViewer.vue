@@ -37,9 +37,29 @@ const {
 	orientation: screenOrientation,
 	isSupported: isScreenOrientationSupported,
 } = useScreenOrientation()
+const deviceOrientation = usePhysicalScreenOrientation()
 const isLandscape = computed(() => {
 	return screenOrientation.value?.startsWith('landscape')
 })
+const shouldRotateScreen = computed(() => {
+	if (
+		!isScreenOrientationSupported.value ||
+		!deviceOrientation.isSupported.value ||
+		!isFullscreen.value
+	)
+		return false
+	return (
+		(isLandscape.value && deviceOrientation.isPortrait.value) ||
+		(!isLandscape.value && deviceOrientation.isLandscape.value)
+	)
+})
+const rotateScreen = () => {
+	if (deviceOrientation.isLandscape.value) {
+		screenOrientation.value = 'landscape-primary'
+	} else if (deviceOrientation.isPortrait.value) {
+		screenOrientation.value = 'portrait-primary'
+	}
+}
 
 // Full screen API
 const {
@@ -427,13 +447,22 @@ watch(
 						@click="nextSection"
 					/>
 				</UFieldGroup>
-				<CompactPagination
-					v-if="isFullscreen"
-					v-model="pageNumber"
-					:total="pdf.numPages"
-					size="sm"
-					class="absolute left-4 bottom-4"
-				/>
+				<div class="absolute left-4 bottom-4 flex flex-col gap-2">
+					<UButton
+						v-if="shouldRotateScreen"
+						icon="i-lucide-ratio"
+						color="neutral"
+						variant="subtle"
+						class="rounded-full animate-[rotate-cw_4s_ease_infinite]"
+						@click="rotateScreen"
+					/>
+					<CompactPagination
+						v-if="isFullscreen"
+						v-model="pageNumber"
+						:total="pdf.numPages"
+						size="sm"
+					/>
+				</div>
 			</div>
 			<UPagination
 				v-if="pdf.numPages"
@@ -445,3 +474,23 @@ watch(
 		</div>
 	</ClientOnly>
 </template>
+
+<style>
+@keyframes rotate-cw {
+	0% {
+		rotate: 0;
+	}
+	25% {
+		rotate: 90deg;
+	}
+	50% {
+		rotate: 180deg;
+	}
+	75% {
+		rotate: 270deg;
+	}
+	100% {
+		rotate: 360deg;
+	}
+}
+</style>
