@@ -453,7 +453,7 @@ watch(
 						icon="i-lucide-ratio"
 						color="neutral"
 						variant="subtle"
-						class="rounded-full animate-[rotate-cw_4s_ease_infinite]"
+						class="rounded-full size-5 animate-[rotate-cw_4s_ease_infinite]"
 						@click="rotateScreen"
 					/>
 					<CompactPagination

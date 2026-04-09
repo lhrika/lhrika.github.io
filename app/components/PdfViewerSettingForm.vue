@@ -72,7 +72,7 @@ defineExpose({
 			label="Auto crop margin"
 			name="cropMarginX"
 		>
-			<UInput v-model="state.cropMarginX" />
+			<UInputNumber v-model="state.cropMarginX" />
 		</UFormField>
 		<div v-else class="flex gap-2">
 			<UFormField label="Crop X" name="cropX">
