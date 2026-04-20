@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { data: routineTitles } = useAsyncData('routine-titles', () =>
+const { data: routineTitles } = await useAsyncData('routine-titles', () =>
 	queryCollection('routine').select('title', 'id').all(),
 )
 
