@@ -4,11 +4,18 @@ const { routineId: id } = defineProps<{
 }>()
 const store = useRoutineStore()
 
-const { data } = useAsyncData(
+const { data, refresh } = useAsyncData(
 	`routine-${id}`,
 	() => queryCollection('routine').where('id', '=', id).first(),
 	{
 		watch: [() => id],
+	},
+)
+watch(
+	() => id,
+	() => {
+		console.log(id)
+		refresh()
 	},
 )
 
@@ -64,7 +71,6 @@ const shouldReset = (startAt: string, duration: string, resetAt: number) => {
 }
 
 watch(data, value => {
-	console.log(id, value)
 	if (value) {
 		scrollTo(0)
 		if (
