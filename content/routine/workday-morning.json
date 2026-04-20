@@ -1,0 +1,16 @@
+{
+	"title": "工作日早上",
+	"repeat": "P1D",
+	"items": [
+		{
+			"title": "绑头发"
+		},
+		{
+			"title": "准备水"
+		},
+		{
+			"title": "洗脸",
+			"description": "先准备好眼镜"
+		}
+	]
+}

@@ -1,5 +1,5 @@
 import { defineCollection, defineContentConfig } from '@nuxt/content'
-import { z } from 'zod/v4'
+import * as z from 'zod/v4'
 
 export default defineContentConfig({
 	collections: {
@@ -85,6 +85,21 @@ export default defineContentConfig({
 					z.object({
 						label: z.string(),
 						to: z.string(),
+					}),
+				),
+			}),
+		}),
+		routine: defineCollection({
+			type: 'data',
+			source: 'routine/**',
+			schema: z.object({
+				title: z.string(),
+				startAt: z.string().optional(),
+				repeat: z.boolean().or(z.iso.duration()).optional(),
+				items: z.array(
+					z.object({
+						title: z.string(),
+						description: z.string(),
 					}),
 				),
 			}),

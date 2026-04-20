@@ -1,0 +1,15 @@
+{
+	"title": "Test 1",
+	"startAt": "00:00:00",
+	"repeat": "PT10S",
+	"items": [
+		{
+			"title": "Test 1 Item 1",
+			"description": "Aliquip eiusmod occaecat ullamco sunt pariatur Lorem in culpa est minim ad excepteur."
+		},
+		{
+			"title": "Test 1 Item 2",
+			"description": "Aliquip eiusmod occaecat ullamco sunt pariatur Lorem in culpa est minim ad excepteur."
+		}
+	]
+}

@@ -127,6 +127,11 @@ const items = computed<NavigationMenuItem[]>(() => [
 				label: 'PDF Reader',
 				to: '/app/pdf',
 			},
+			{
+				icon: 'i-lucide-list-todo',
+				label: 'Routine',
+				to: '/app/routine',
+			},
 		],
 	},
 ])
