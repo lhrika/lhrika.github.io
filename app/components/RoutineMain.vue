@@ -5,7 +5,7 @@ const { routineId: id } = defineProps<{
 const store = useRoutineStore()
 
 const { data, refresh } = useAsyncData(
-	`routine-${id}`,
+	() => `routine-${id}`,
 	() => queryCollection('routine').where('id', '=', id).first(),
 	{
 		watch: [() => id],
@@ -15,7 +15,6 @@ watch(
 	() => id,
 	() => {
 		console.log(id)
-		refresh()
 	},
 )
 
@@ -106,6 +105,7 @@ const onEnableItem = (index: number) => {
 	store.setStatus(id, index, 'todo')
 }
 const onReset = () => {
+	console.log('[onReset]', id)
 	store.reset(id)
 	scrollTo(0)
 }
