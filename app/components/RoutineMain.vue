@@ -22,13 +22,14 @@ const getPeriodStart = (
 	start: Temporal.Instant,
 	duration: Temporal.Duration,
 ) => {
-	let periodStart = start
+	const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+	let periodStart = start.toZonedDateTimeISO(timezone)
 	let periodEnd = periodStart.add(duration)
 	while (Temporal.Instant.compare(periodEnd, time) < 0) {
 		periodStart = periodStart.add(duration)
 		periodEnd = periodStart.add(duration)
 	}
-	return periodStart
+	return periodStart.toInstant()
 }
 
 const parseInstant = (s: string) => {
@@ -63,6 +64,7 @@ const shouldReset = (startAt: string, duration: string, resetAt: number) => {
 }
 
 watch(data, value => {
+	console.log(id, value)
 	if (value) {
 		scrollTo(0)
 		if (
