@@ -14,6 +14,7 @@ if (locale.value !== 'ja') {
 // Free-text search
 const searchQuery = ref('')
 const keywords = shallowRef([] as string[])
+const compositioning = ref(false)
 const ignorePattern = /^[\\":{}\s\n\t,a-zA-Z]+$/i
 const search = () => {
 	keywords.value = searchQuery.value
@@ -21,7 +22,7 @@ const search = () => {
 		.filter(s => ignorePattern.exec(s) === null)
 }
 const onKeydown = (e: KeyboardEvent) => {
-	if (e.code === 'Enter') {
+	if (!compositioning.value && e.code === 'Enter') {
 		search()
 	}
 }
@@ -91,6 +92,16 @@ watch(
 					placeholder="キーワードで検索"
 					@blur="search"
 					@keydown="onKeydown"
+					@compositionstart="
+						() => {
+							compositioning = true
+						}
+					"
+					@compositionend="
+						() => {
+							compositioning = false
+						}
+					"
 				>
 					<template v-if="searchQuery.length" #trailing>
 						<UButton
