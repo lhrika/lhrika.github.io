@@ -12,16 +12,36 @@ if (locale.value !== 'ja') {
 
 // Free-text search
 const searchQuery = ref('')
+const keywords = shallowRef([] as string[])
+const ignorePattern = /^[\\":{}\s\n\t,a-zA-Z]+$/i
+const search = () => {
+	keywords.value = searchQuery.value
+		.split(/\s+/)
+		.filter(s => ignorePattern.exec(s) === null)
+}
+const onKeydown = (e: KeyboardEvent) => {
+	if (e.code === 'Enter') {
+		search()
+	}
+}
 
-const { data: spots, refresh } = useAsyncData('spots-list', () => {
-	return queryCollection('spots')
-		.where('rawBody', 'LIKE', `%${searchQuery.value}%`)
-		.all()
-})
-
-watch(searchQuery, () => {
-	refresh()
-})
+const { data: spots } = useAsyncData(
+	'spots-list',
+	() => {
+		const query = queryCollection('spots')
+		if (keywords.value.length) {
+			query.andWhere(q => {
+				return keywords.value.reduce((q, keyword) => {
+					return q.where('rawBody', 'LIKE', `%${keyword}%`)
+				}, q)
+			})
+		}
+		return query.all()
+	},
+	{
+		watch: [keywords],
+	},
+)
 
 watch(
 	spots,
@@ -38,7 +58,13 @@ watch(
 		<UPageHeader title="観光・散策スポットまとめ" />
 		<UPageBody>
 			<UContainer>
-				<UInput v-model="searchQuery" />
+				<UInput
+					v-model.trim="searchQuery"
+					icon="i-lucide-search"
+					class="w-full max-w-96"
+					@blur="search"
+					@keydown="onKeydown"
+				/>
 			</UContainer>
 			<UContainer>
 				<UPageGrid>
