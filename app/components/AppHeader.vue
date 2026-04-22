@@ -33,7 +33,7 @@
 				height="32"
 				class="rotate-y-180"
 			/>
-			<div class="font-bold text-lg">
+			<div class="font-bold text-lg text-nowrap text-ellipsis overflow-hidden">
 				{{ pageTitle }}
 			</div>
 			<NuxtImg src="/img/logo.png" width="32" height="32" />
