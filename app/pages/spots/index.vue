@@ -58,8 +58,8 @@ const { data: spots } = useAsyncData(
 		// The default getCachedData returns static.data[key] after hydration, which causes
 		// watch-triggered re-executions to return the pre-rendered (unfiltered) data instead
 		// of making a fresh query. Override to only cache during the initial hydration.
-		// getCachedData: (key: string) =>
-		// 	nuxtApp.isHydrating ? nuxtApp.payload.data[key] : null,
+		getCachedData: (key, nuxtApp) =>
+			nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
 	},
 )
 
