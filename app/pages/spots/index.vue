@@ -70,7 +70,7 @@ watch(
 	<UPage>
 		<UPageHeader title="観光・散策スポットまとめ" />
 		<UPageBody>
-			<UContainer class="space-y-4">
+			<UContainer class="flex flex-col gap-4 lg:flex-row">
 				<UInput
 					v-model.trim="searchQuery"
 					icon="i-lucide-search"
@@ -79,8 +79,18 @@ watch(
 					@keydown="onKeydown"
 				/>
 				<div class="flex gap-2">
-					<UCheckbox v-model="freeEntrance" variant="card" label="入場無料" />
-					<UCheckbox v-model="freeParking" variant="card" label="無料駐車場" />
+					<UCheckbox
+						v-model="freeEntrance"
+						variant="card"
+						label="入場無料"
+						size="sm"
+					/>
+					<UCheckbox
+						v-model="freeParking"
+						variant="card"
+						label="無料駐車場"
+						size="sm"
+					/>
 				</div>
 			</UContainer>
 			<UContainer>

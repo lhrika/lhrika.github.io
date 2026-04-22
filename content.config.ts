@@ -123,6 +123,7 @@ export default defineContentConfig({
 				address: z.string().default(''),
 				description: z.string().default(''),
 				image: imageSchema.optional(),
+				// number in JPY, or string when the system is complicated
 				fee: z.number().nonnegative().or(z.string()).default(0),
 				// false if no parking, true if free parking, otherwise parking fee description
 				parking: z.boolean().or(z.string()).default(true),
@@ -148,6 +149,7 @@ export default defineContentConfig({
 						}),
 					)
 					.default([]),
+				// Nuxt Content special field, ignore this
 				rawbody: z.string(),
 			}),
 		}),
