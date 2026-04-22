@@ -1,0 +1,48 @@
+{
+	"name": "権現堂公園",
+	"furigana": "ごんげんどうこうえん",
+	"postcode": 3400103,
+	"address": "埼玉県幸手市大字内国府間887-3",
+	"description": "権現堂川の堤防沿いに約1kmにわたって続く「権現堂堤」で知られる公園。春の桜と菜の花のコントラストは圧巻で、四季を通じてアジサイ、ヒガンバナ、水仙と、一年中途切れることなく美しい花々を楽しむことができます。",
+	"fee": 0,
+	"parking": "無料（ただし、桜まつり等のイベント期間中は有料：1,000円）",
+	"businessHours": "終日開放（管理事務所等は8:30〜17:00）",
+	"highlights": [
+		{
+			"name": "ソメイヨシノと菜の花",
+			"furigana": "そめいよしのとなのはな",
+			"time": "3月下旬〜4月上旬",
+			"description": "約1,000本の桜並木が1km続き、その脇には広大な菜の花畑が広がります。ピンクと黄色の鮮やかなコントラストは関東屈指の絶景です。",
+			"image": "https://gongendo.jp/wp-content/uploads/2021/04/top_img-1.jpg"
+		},
+		{
+			"name": "あじさい",
+			"furigana": "あじさい",
+			"time": "6月上旬〜7月上旬",
+			"description": "堤の斜面を埋め尽くすように、約100種16,000株のアジサイが咲き誇ります。アナベルの真っ白な絨毯も見どころです。",
+			"image": "https://gongendo.jp/wp-content/uploads/2021/04/ajisai-1.jpg"
+		},
+		{
+			"name": "曼珠沙華（彼岸花）",
+			"furigana": "まんじゅしゃげ",
+			"time": "9月中旬〜10月上旬",
+			"description": "秋になると、堤の斜面が真っ赤な絨毯を敷き詰めたようになります。約500万本が咲き乱れる光景は圧倒的です。",
+			"image": "https://gongendo.jp/wp-content/uploads/2021/04/manjushage-1.jpg"
+		},
+		{
+			"name": "水仙",
+			"furigana": "すいせん",
+			"time": "1月〜2月",
+			"description": "冬の静かな季節に、約50万本の水仙が可憐な花を咲かせ、爽やかな香りに包まれます。",
+			"image": "https://gongendo.jp/wp-content/uploads/2021/04/suisen-1.jpg"
+		}
+	],
+	"gallery": [],
+	"links": [
+		{
+			"label": "権現堂公園 公式サイト",
+			"url": "https://gongendo.jp/",
+			"target": "_blank"
+		}
+	]
+}

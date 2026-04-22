@@ -1,0 +1,60 @@
+{
+	"name": "吉野梅郷・梅の公園",
+	"furigana": "よしのばいごう",
+	"postcode": 1980063,
+	"address": "東京都青梅市梅郷",
+	"description": "かつて「日本一の梅の里」と称された名所。プラムポックスウイルスの影響により多くの梅が伐採されましたが、現在は再植樹が進み、再び美しい梅の景観を取り戻しています。中心となる「青梅市梅の公園」を中心に、地域一帯で四季折々の花を楽しめます。",
+	"fee": 0,
+	"parking": true,
+	"businessHours": "散策自由（青梅市梅の公園は9:00〜17:00）",
+	"highlights": [
+		{
+			"name": "ロウバイ",
+			"furigana": "ろうばい",
+			"description": "梅の季節に先駆けて、甘い香りと共に黄色い花を咲かせます。",
+			"time": "1月下旬〜2月下旬"
+		},
+		{
+			"name": "福寿草",
+			"furigana": "ふくじゅそう",
+			"description": "梅の根元などで春の訪れを告げる黄色い花が顔を出します。",
+			"time": "2月上旬〜3月上旬"
+		},
+		{
+			"name": "梅（青梅市梅の公園）",
+			"furigana": "うめ",
+			"description": "山の斜面を利用した公園内に、1,200本を超える梅が咲き誇る、吉野梅郷のメインスポットです。",
+			"time": "2月中旬〜3月下旬",
+			"image": "https://www.city.ome.tokyo.jp/uploaded/image/14878.jpg"
+		},
+		{
+			"name": "カタクリ",
+			"furigana": "かたくり",
+			"description": "梅のシーズンの終わり頃、林床に可憐な紫色の花を咲かせます。",
+			"time": "3月下旬〜4月上旬"
+		},
+		{
+			"name": "ミツバツツジ",
+			"furigana": "みつばつつじ",
+			"description": "梅の公園の斜面を鮮やかな紫紅色に染めます。",
+			"time": "4月上旬〜4月中旬"
+		},
+		{
+			"name": "サクラ",
+			"furigana": "さくら",
+			"description": "多摩川沿いや公園周辺でソメイヨシノなどが楽しめます。",
+			"time": "3月下旬〜4月上旬"
+		}
+	],
+	"gallery": [
+		"https://www.omekanko.gr.jp/wp-content/uploads/2018/02/yoshinobaigo_01.jpg",
+		"https://www.omekanko.gr.jp/wp-content/uploads/2018/02/yoshinobaigo_02.jpg"
+	],
+	"links": [
+		{
+			"label": "青梅市観光協会",
+			"url": "https://www.omekanko.gr.jp/",
+			"target": "_blank"
+		}
+	]
+}

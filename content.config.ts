@@ -1,6 +1,15 @@
 import { defineCollection, defineContentConfig } from '@nuxt/content'
 import * as z from 'zod/v4'
 
+const imageSchema = z.url().or(
+	z.object({
+		src: z.url(),
+		alt: z.string().optional(),
+		width: z.number().optional(),
+		height: z.number().optional(),
+	}),
+)
+
 export default defineContentConfig({
 	collections: {
 		blog: defineCollection({
@@ -102,6 +111,44 @@ export default defineContentConfig({
 						description: z.string(),
 					}),
 				),
+			}),
+		}),
+		spots: defineCollection({
+			type: 'data',
+			source: 'spots/**',
+			schema: z.object({
+				name: z.string(),
+				furigana: z.string().optional(),
+				postcode: z.number(),
+				address: z.string().default(''),
+				description: z.string().default(''),
+				image: imageSchema.optional(),
+				fee: z.number().nonnegative().or(z.string()).default(0),
+				// false if no parking, true if free parking, otherwise parking fee description
+				parking: z.boolean().or(z.string()).default(true),
+				businessHours: z.string().default(''),
+				highlights: z
+					.array(
+						z.object({
+							name: z.string(),
+							furigana: z.string().optional(),
+							description: z.string().optional(),
+							time: z.string(),
+							image: imageSchema.optional(),
+						}),
+					)
+					.default([]),
+				gallery: z.array(imageSchema).default([]),
+				links: z
+					.array(
+						z.object({
+							label: z.string(),
+							url: z.url(),
+							target: z.enum(['_blank', '_self']).default('_self'),
+						}),
+					)
+					.default([]),
+				rawbody: z.string(),
 			}),
 		}),
 	},

@@ -1,0 +1,32 @@
+{
+	"name": "東京都薬用植物園",
+	"furigana": "とうきょうとやくようしょくぶつえん",
+	"postcode": 1870033,
+	"address": "東京都小平市中島町21-1",
+	"description": "薬用植物の収集・栽培・研究を行っている植物園です。国内では珍しい「ケシ」の栽培展示で知られており、四季折々の薬草や有用植物を観察することができます。",
+	"fee": 0,
+	"parking": true,
+	"businessHours": "9:00～16:30（4月〜9月）、9:00～16:00（10月〜3月）。月曜定休（祝日の場合は翌日）。",
+	"image": "https://www.tmiph.metro.tokyo.lg.jp/files/lb_iyaku/plant/keshi11.jpg",
+	"highlights": [
+		{
+			"name": "ケシ",
+			"furigana": "けし",
+			"description": "都内で唯一、法的に許可を得て栽培されているケシの花を、開花時期に合わせてフェンス越しに間近で観察できます。",
+			"time": "5月上旬から5月中旬"
+		},
+		{
+			"name": "温室",
+			"furigana": "おんしつ",
+			"description": "熱帯・亜熱帯の薬用植物や、カカオ・バニラなどの身近な有用植物が展示されています。",
+			"time": "通年"
+		}
+	],
+	"links": [
+		{
+			"label": "公式サイト",
+			"url": "https://www.tmiph.metro.tokyo.lg.jp/lb_iyaku/plant/",
+			"target": "_blank"
+		}
+	]
+}

@@ -1,0 +1,24 @@
+{
+	"name": "さやま花多来里の郷",
+	"furigana": "さやまかたくりのさと",
+	"postcode": 1901202,
+	"address": "東京都西多摩郡瑞穂町駒形富士山243-1",
+	"fee": 0,
+	"parking": true,
+	"description": "カタクリは3月下旬から4月上旬が見頃",
+	"businessHours": "9:00 ~ 17:00",
+	"highlights": [
+		{
+			"name": "カタクリ",
+			"furigana": "かたくり",
+			"time": "3月下旬から4月上旬"
+		}
+	],
+	"links": [
+		{
+			"label": "公式サイト",
+			"url": "https://www.town.mizuho.tokyo.jp/bunka/003/p001885.html",
+			"target": "_blank"
+		}
+	]
+}
