@@ -1,4 +1,16 @@
 <script setup lang="ts">
+// Force ja locale
+definePageMeta({
+	i18n: {
+		locales: ['ja'],
+	},
+})
+
+const { locale, setLocale } = useI18n()
+if (locale.value !== 'ja') {
+	setLocale('ja')
+}
+
 const route = useRoute()
 const slug = computed(() => {
 	const s = route.params.slug
@@ -6,7 +18,7 @@ const slug = computed(() => {
 	return list.filter(s => s.length > 0)
 })
 
-const { data: spot } = useAsyncData(
+const { data: spot } = await useAsyncData(
 	() => `spots-${slug.value.length > 0 ? slug.value.join('-') : 'list'}`,
 	() => {
 		return queryCollection('spots')
@@ -17,6 +29,11 @@ const { data: spot } = useAsyncData(
 		watch: [slug],
 	},
 )
+
+// SEO meta
+useHead({
+	title: () => spot.value?.name ?? 'ページが見つかりません',
+})
 
 watch(
 	slug,
@@ -41,7 +58,7 @@ watch(
 					>
 					<template v-else>{{ spot?.name }}</template>
 				</template>
-				<template v-else>スポットが見つかりません</template>
+				<template v-else>ページが見つかりません</template>
 			</template>
 		</UPageHeader>
 		<UPageBody>
@@ -57,9 +74,13 @@ watch(
 				/>
 			</UContainer>
 			<!-- Highlights -->
-			<UContainer v-if="spot" class="bg-muted py-4">
+			<UContainer v-if="spot" class="bg-muted py-6">
 				<div v-if="spot.highlights.length" class="space-y-4">
-					<h2 class="text-lg font-bold text-center py-4">見どころ</h2>
+					<h2
+						class="text-xl sm:text-2xl lg:text-3xl font-bold text-center py-4"
+					>
+						見どころ
+					</h2>
 					<div class="space-y-4">
 						<SpotHighlight
 							v-for="(highlight, index) in spot.highlights"
@@ -71,9 +92,9 @@ watch(
 				</div>
 			</UContainer>
 			<!-- Links -->
-			<UContainer v-if="spot?.links.length" class="space-y-2">
-				<h2 class="text-lg font-semibold">リンク</h2>
-				<ul class="space-y-2 list-disc list-inside">
+			<UContainer v-if="spot?.links.length" class="space-y-4">
+				<h2 class="text-lg lg:text-xl font-bold">リンク</h2>
+				<ul class="space-y-2 list-disc list-inside px-4">
 					<li v-for="(link, index) in spot.links" :key="index">
 						<ULink :to="link.url" :target="link.target">{{ link.label }}</ULink>
 					</li>

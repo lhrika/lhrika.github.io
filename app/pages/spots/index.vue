@@ -1,5 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
+	title: '観光・散策スポットまとめ',
 	i18n: {
 		locales: ['ja'],
 	},
@@ -25,6 +26,10 @@ const onKeydown = (e: KeyboardEvent) => {
 	}
 }
 
+// Other condition filters
+const freeParking = ref(false)
+const freeEntrance = ref(false)
+
 const { data: spots } = useAsyncData(
 	'spots-list',
 	() => {
@@ -36,10 +41,18 @@ const { data: spots } = useAsyncData(
 				}, q)
 			})
 		}
+		if (freeEntrance.value) {
+			query.where('fee', '=', 0)
+		}
+		if (freeParking.value) {
+			query.orWhere(q => {
+				return q.where('parking', '=', 'true').where('parking', '=', '無料')
+			})
+		}
 		return query.all()
 	},
 	{
-		watch: [keywords],
+		watch: [keywords, freeEntrance, freeParking],
 	},
 )
 
@@ -57,7 +70,7 @@ watch(
 	<UPage>
 		<UPageHeader title="観光・散策スポットまとめ" />
 		<UPageBody>
-			<UContainer>
+			<UContainer class="space-y-4">
 				<UInput
 					v-model.trim="searchQuery"
 					icon="i-lucide-search"
@@ -65,6 +78,10 @@ watch(
 					@blur="search"
 					@keydown="onKeydown"
 				/>
+				<div class="flex gap-2">
+					<UCheckbox v-model="freeEntrance" variant="card" label="入場無料" />
+					<UCheckbox v-model="freeParking" variant="card" label="無料駐車場" />
+				</div>
 			</UContainer>
 			<UContainer>
 				<UPageGrid>
