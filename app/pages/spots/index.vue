@@ -30,7 +30,6 @@ const onKeydown = (e: KeyboardEvent) => {
 const freeParking = ref(false)
 const freeEntrance = ref(false)
 
-const nuxtApp = useNuxtApp()
 const { data: spots } = useAsyncData(
 	'spots-list',
 	() => {
@@ -58,8 +57,15 @@ const { data: spots } = useAsyncData(
 		// The default getCachedData returns static.data[key] after hydration, which causes
 		// watch-triggered re-executions to return the pre-rendered (unfiltered) data instead
 		// of making a fresh query. Override to only cache during the initial hydration.
-		getCachedData: (key, nuxtApp) =>
-			nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
+		getCachedData: (key, nuxtApp, ctx) => {
+			if (nuxtApp.isHydrating) {
+				return nuxtApp.payload.data[key]
+			}
+			if (ctx.cause === 'watch') {
+				return undefined
+			}
+			return nuxtApp.static.data[key]
+		},
 	},
 )
 
@@ -85,7 +91,18 @@ watch(
 					placeholder="キーワードで検索"
 					@blur="search"
 					@keydown="onKeydown"
-				/>
+				>
+					<template v-if="searchQuery.length" #trailing>
+						<UButton
+							color="neutral"
+							variant="link"
+							size="sm"
+							icon="i-lucide-circle-x"
+							aria-label="Clear input"
+							@click="searchQuery = ''"
+						/>
+					</template>
+				</UInput>
 				<div class="flex gap-2">
 					<UCheckbox
 						v-model="freeEntrance"
