@@ -70,6 +70,7 @@ const pageTitle = computed(() => (route.meta.title as string) || '')
 
 // I18n
 const { t } = useI18n()
+const localePath = useLocalePath()
 
 // Navigation Menu
 const items = computed<NavigationMenuItem[]>(() => [
@@ -90,7 +91,7 @@ const items = computed<NavigationMenuItem[]>(() => [
 	},
 	{
 		label: '観光スポット',
-		to: '/spots',
+		to: localePath('/spots', 'ja'),
 		icon: 'i-lucide-trees',
 	},
 	{
