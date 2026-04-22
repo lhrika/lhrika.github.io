@@ -43,7 +43,7 @@ defineProps<{
 		@apply border border-accented p-2 text-nowrap font-bold;
 	}
 	td {
-		@apply border border-accented p-2;
+		@apply border border-accented p-2 w-full;
 	}
 }
 </style>

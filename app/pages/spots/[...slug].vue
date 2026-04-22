@@ -48,7 +48,20 @@ watch(
 
 <template>
 	<UPage>
-		<UPageHeader>
+		<UPageHeader
+			:links="[
+				{
+					icon: 'i-lucide-undo-2',
+					label: '一覧に戻る',
+					to: '/spots',
+					variant: 'link',
+				},
+			]"
+			:description="spot?.description"
+			:ui="{
+				wrapper: 'flex-col-reverse',
+			}"
+		>
 			<template #title>
 				<template v-if="spot">
 					<ruby v-if="spot?.furigana"
@@ -64,7 +77,6 @@ watch(
 		<UPageBody>
 			<!-- Basic Info -->
 			<UContainer v-if="spot" class="space-y-6">
-				<p>{{ spot.description }}</p>
 				<SpotInfo
 					:business-hours="spot.businessHours"
 					:postcode="spot.postcode"

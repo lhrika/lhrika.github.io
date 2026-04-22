@@ -75,6 +75,7 @@ watch(
 					v-model.trim="searchQuery"
 					icon="i-lucide-search"
 					class="w-full max-w-96"
+					placeholder="キーワードで検索"
 					@blur="search"
 					@keydown="onKeydown"
 				/>
