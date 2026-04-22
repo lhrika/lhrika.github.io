@@ -100,6 +100,7 @@ watch(
 						:key="spot.name"
 						:name="spot.name"
 						:description="spot.description"
+						:address="spot.address"
 						:to="`/${spot.stem}`"
 						:image="spot.image"
 					/>
