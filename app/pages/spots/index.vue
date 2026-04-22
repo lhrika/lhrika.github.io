@@ -30,6 +30,7 @@ const onKeydown = (e: KeyboardEvent) => {
 const freeParking = ref(false)
 const freeEntrance = ref(false)
 
+const nuxtApp = useNuxtApp()
 const { data: spots } = useAsyncData(
 	'spots-list',
 	() => {
@@ -37,7 +38,7 @@ const { data: spots } = useAsyncData(
 		if (keywords.value.length) {
 			query.andWhere(q => {
 				return keywords.value.reduce((q, keyword) => {
-					return q.where('rawBody', 'LIKE', `%${keyword}%`)
+					return q.where('rawbody', 'LIKE', `%${keyword}%`)
 				}, q)
 			})
 		}
@@ -53,6 +54,12 @@ const { data: spots } = useAsyncData(
 	},
 	{
 		watch: [keywords, freeEntrance, freeParking],
+		// In static generation (GitHub Pages), nuxtApp.static.data persists across refreshes.
+		// The default getCachedData returns static.data[key] after hydration, which causes
+		// watch-triggered re-executions to return the pre-rendered (unfiltered) data instead
+		// of making a fresh query. Override to only cache during the initial hydration.
+		// getCachedData: (key: string) =>
+		// 	nuxtApp.isHydrating ? nuxtApp.payload.data[key] : null,
 	},
 )
 
