@@ -60,6 +60,7 @@ watch(
 			:description="spot?.description"
 			:ui="{
 				wrapper: 'flex-col-reverse',
+				description: 'whitespace-pre-wrap',
 			}"
 		>
 			<template #title>
