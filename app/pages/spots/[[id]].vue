@@ -36,11 +36,10 @@ const freeEntrance = ref(false)
 
 // Pagination
 const route = useRoute()
-
 const initialPage = Array.isArray(route.params.id)
 	? route.params.id[0]
 	: route.params.id
-const page = ref(parseInt(initialPage ?? '1'))
+const page = ref(parseInt(initialPage ? initialPage : '1'))
 const itemsPerPage = 5
 const paginationLinkTo = (page: number) => {
 	return {
