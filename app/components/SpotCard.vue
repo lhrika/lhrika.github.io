@@ -13,6 +13,7 @@ defineProps<{
 	address: string
 	to: string
 	image?: Image
+	free?: boolean
 }>()
 </script>
 <template>
@@ -20,6 +21,7 @@ defineProps<{
 		:to="to"
 		:class="{
 			'lg:col-span-2': !!image,
+			'overflow-hidden': true,
 		}"
 		orientation="horizontal"
 		spotlight
@@ -37,6 +39,10 @@ defineProps<{
 			</div>
 			<div class="line-clamp-3 text-sm lg:text-base">{{ description }}</div>
 		</template>
+		<div
+			v-if="free"
+			class="absolute -top-8 -left-8 rotate-45 size-16 bg-success"
+		/>
 		<div class="overflow-hidden aspect-video flex justify-center items-center">
 			<NuxtImg
 				v-if="image"

@@ -139,6 +139,7 @@ watch(
 						:address="spot.address"
 						:to="`/${spot.stem}`"
 						:image="spot.image"
+						:free="spot.fee === 0 && spot.parking === true"
 					/>
 				</UPageGrid>
 			</UContainer>
