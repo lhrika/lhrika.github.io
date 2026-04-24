@@ -4,6 +4,7 @@ definePageMeta({
 	i18n: {
 		locales: ['ja'],
 	},
+	path: '/spots/:id(\\d+)?',
 })
 
 const { locale, setLocale } = useI18n()
