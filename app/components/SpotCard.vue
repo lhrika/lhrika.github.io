@@ -19,11 +19,11 @@ defineProps<{
 <template>
 	<UPageCard
 		:to="to"
+		class="overflow-hidden"
 		:class="{
 			'lg:col-span-2': !!image,
-			'overflow-hidden': true,
 		}"
-		orientation="horizontal"
+		:orientation="image ? 'horizontal' : 'vertical'"
 		spotlight
 		spotlight-color="primary"
 	>
@@ -43,9 +43,11 @@ defineProps<{
 			v-if="free"
 			class="absolute -top-8 -left-8 rotate-45 size-16 bg-success"
 		/>
-		<div class="overflow-hidden aspect-video flex justify-center items-center">
+		<div
+			v-if="image"
+			class="overflow-hidden aspect-video flex justify-center items-center"
+		>
 			<NuxtImg
-				v-if="image"
 				:src="typeof image === 'string' ? image : image.src"
 				class="w-full"
 			/>
