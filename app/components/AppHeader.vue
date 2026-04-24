@@ -76,17 +76,17 @@ const localePath = useLocalePath()
 const items = computed<NavigationMenuItem[]>(() => [
 	{
 		label: t('home'),
-		to: '/',
+		to: localePath('/'),
 		icon: 'i-lucide-house',
 	},
 	{
 		label: t('blog'),
-		to: '/blog',
+		to: localePath('/blog'),
 		icon: 'i-lucide-book-open',
 	},
 	{
 		label: 'Library',
-		to: '/library',
+		to: localePath('/library'),
 		icon: 'i-lucide-library',
 	},
 	{
@@ -96,7 +96,7 @@ const items = computed<NavigationMenuItem[]>(() => [
 	},
 	{
 		label: t('about'),
-		to: '/about',
+		to: localePath('/about'),
 		icon: 'i-lucide-user-circle',
 	},
 	{
@@ -105,38 +105,38 @@ const items = computed<NavigationMenuItem[]>(() => [
 		children: [
 			{
 				label: '家計簿',
-				to: '/kakeibo',
+				to: localePath('/kakeibo'),
 				icon: 'i-lucide-wallet',
 			},
 			{
 				label: t('dictionary'),
-				to: '/dictionary',
+				to: localePath('/dictionary'),
 				icon: 'i-lucide-book',
 			},
 			{
 				label: t('adv'),
-				to: '/adv',
+				to: localePath('/adv'),
 				icon: 'i-lucide-book-open-text',
 			},
 			{
 				label: 'Google Photos Direct URL',
 				icon: 'i-lucide-aperture',
-				to: '/app/google-photos-direct-url',
+				to: localePath('/app/google-photos-direct-url'),
 			},
 			{
 				icon: 'i-lucide-book-heart',
 				label: 'Diary',
-				to: '/app/diary',
+				to: localePath('/app/diary'),
 			},
 			{
 				icon: 'i-lucide-file-text',
 				label: 'PDF Reader',
-				to: '/app/pdf',
+				to: localePath('/app/pdf'),
 			},
 			{
 				icon: 'i-lucide-list-todo',
 				label: 'Routine',
-				to: '/app/routine',
+				to: localePath('/app/routine'),
 			},
 		],
 	},
