@@ -37,10 +37,12 @@ defineProps<{
 			</div>
 			<div class="line-clamp-3 text-sm lg:text-base">{{ description }}</div>
 		</template>
-		<NuxtImg
-			v-if="image"
-			:src="typeof image === 'string' ? image : image.src"
-			class="w-full"
-		/>
+		<div class="overflow-hidden aspect-video flex justify-center items-center">
+			<NuxtImg
+				v-if="image"
+				:src="typeof image === 'string' ? image : image.src"
+				class="w-full"
+			/>
+		</div>
 	</UPageCard>
 </template>
