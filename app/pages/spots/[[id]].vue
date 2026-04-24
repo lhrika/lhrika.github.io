@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { CollectionQueryBuilder } from '@nuxt/content'
+
 definePageMeta({
 	title: '観光・散策スポットまとめ',
 	i18n: {
@@ -47,29 +49,41 @@ const paginationLinkTo = (page: number) => {
 	}
 }
 
-const { data: total } = await useAsyncData('spots-count', () => {
-	return queryCollection('spots').count()
-})
+function filterQuery<T>(query: CollectionQueryBuilder<T>) {
+	if (keywords.value.length) {
+		query.andWhere(q => {
+			return keywords.value.reduce((q, keyword) => {
+				return q.where('rawbody', 'LIKE', `%${keyword}%`)
+			}, q)
+		})
+	}
+	if (freeEntrance.value) {
+		query.where('fee', '=', 0)
+	}
+	if (freeParking.value) {
+		query.orWhere(q => {
+			return q.where('parking', '=', 'true').where('parking', '=', '無料')
+		})
+	}
+}
+
+const { data: total } = await useAsyncData(
+	'spots-count',
+	() => {
+		const query = queryCollection('spots')
+		filterQuery(query)
+		return query.count()
+	},
+	{
+		watch: [keywords, freeEntrance, freeParking],
+	},
+)
 
 const { data: spots } = useAsyncData(
 	() => `spots-list-${page.value}`,
 	() => {
 		const query = queryCollection('spots')
-		if (keywords.value.length) {
-			query.andWhere(q => {
-				return keywords.value.reduce((q, keyword) => {
-					return q.where('rawbody', 'LIKE', `%${keyword}%`)
-				}, q)
-			})
-		}
-		if (freeEntrance.value) {
-			query.where('fee', '=', 0)
-		}
-		if (freeParking.value) {
-			query.orWhere(q => {
-				return q.where('parking', '=', 'true').where('parking', '=', '無料')
-			})
-		}
+		filterQuery(query)
 		return query
 			.skip((page.value - 1) * itemsPerPage)
 			.limit(itemsPerPage)
