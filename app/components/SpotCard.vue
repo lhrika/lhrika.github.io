@@ -41,7 +41,7 @@ defineProps<{
 		</template>
 		<div
 			v-if="free"
-			class="absolute -top-8 -left-8 rotate-45 size-16 bg-success"
+			class="absolute -top-8 -right-8 lg:-left-8 rotate-45 size-16 bg-success"
 		/>
 		<div
 			v-if="image"

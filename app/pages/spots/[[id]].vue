@@ -11,6 +11,8 @@ if (locale.value !== 'ja') {
 	setLocale('ja')
 }
 
+const localePath = useLocalePath()
+
 // Free-text search
 const searchQuery = ref('')
 const keywords = shallowRef([] as string[])
@@ -31,8 +33,26 @@ const onKeydown = (e: KeyboardEvent) => {
 const freeParking = ref(false)
 const freeEntrance = ref(false)
 
+// Pagination
+const route = useRoute()
+
+const initialPage = Array.isArray(route.params.id)
+	? route.params.id[0]
+	: route.params.id
+const page = ref(parseInt(initialPage ?? '1'))
+const itemsPerPage = 5
+const paginationLinkTo = (page: number) => {
+	return {
+		path: localePath(`/spots/${page}`),
+	}
+}
+
+const { data: total } = await useAsyncData('spots-count', () => {
+	return queryCollection('spots').count()
+})
+
 const { data: spots } = useAsyncData(
-	'spots-list',
+	() => `spots-list-${page.value}`,
 	() => {
 		const query = queryCollection('spots')
 		if (keywords.value.length) {
@@ -50,7 +70,10 @@ const { data: spots } = useAsyncData(
 				return q.where('parking', '=', 'true').where('parking', '=', '無料')
 			})
 		}
-		return query.all()
+		return query
+			.skip((page.value - 1) * itemsPerPage)
+			.limit(itemsPerPage)
+			.all()
 	},
 	{
 		watch: [keywords, freeEntrance, freeParking],
@@ -129,7 +152,7 @@ watch(
 					/>
 				</div>
 			</UContainer>
-			<UContainer>
+			<UContainer class="flex flex-col items-center gap-4">
 				<UPageGrid>
 					<SpotCard
 						v-for="spot in spots"
@@ -137,11 +160,18 @@ watch(
 						:name="spot.name"
 						:description="spot.description"
 						:address="spot.address"
-						:to="`/${spot.stem}`"
+						:to="localePath(`/${spot.stem}`)"
 						:image="spot.image"
 						:free="spot.fee === 0 && spot.parking === true"
 					/>
 				</UPageGrid>
+				<UPagination
+					v-model:page="page"
+					:total="total"
+					:items-per-page="itemsPerPage"
+					:to="paginationLinkTo"
+					class="mx-auto"
+				/>
 			</UContainer>
 		</UPageBody>
 	</UPage>
