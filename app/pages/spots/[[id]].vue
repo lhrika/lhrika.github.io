@@ -14,24 +14,30 @@ if (locale.value !== 'ja') {
 	setLocale('ja')
 }
 
+const route = useRoute()
+const { currentRoute } = useRouter()
+
 // Free-text search
-const searchQuery = ref('')
-const keywords = shallowRef([] as string[])
-const compositioning = ref(false)
 const ignorePattern = /^[\\":{}\s\n\t,a-zA-Z]+$/i
-const search = () => {
-	keywords.value = searchQuery.value
+const keywords = computed(() =>
+	(currentRoute.value.query.q as string ?? '')
 		.split(/\s+/)
-		.filter(s => ignorePattern.exec(s) === null)
+		.filter(s => ignorePattern.exec(s) === null),
+)
+const searchQuery = ref(currentRoute.value.query.q as string ?? '')
+const compositioning = ref(false)
+const search = () => {
+	const q = searchQuery.value || undefined
+	navigateTo({
+		params: { id: 1 },
+		query: { ...currentRoute.value.query, q },
+	})
 }
 const onKeydown = (e: KeyboardEvent) => {
 	if (!compositioning.value && e.code === 'Enter') {
 		search()
 	}
 }
-
-const route = useRoute()
-const { currentRoute } = useRouter()
 
 // Other condition filters
 const freeParking = computed({
@@ -50,13 +56,6 @@ const freeEntrance = computed({
 			params: { id: 1 },
 			query: { ...currentRoute.value.query, freeEntrance: value || undefined },
 		}),
-})
-
-watch(keywords, () => {
-	navigateTo({
-		params: { id: 1 },
-		query: currentRoute.value.query,
-	})
 })
 
 // Pagination
@@ -155,7 +154,7 @@ const { data: spots } = useAsyncData(
 							size="sm"
 							icon="i-lucide-circle-x"
 							aria-label="Clear input"
-							@click="searchQuery = ''"
+							@click="searchQuery = ''; search()"
 						/>
 					</template>
 				</UInput>
