@@ -38,6 +38,7 @@ const freeParking = computed({
 	get: () => Number(currentRoute.value.query.freeParking ?? 0),
 	set: value => {
 		navigateTo({
+			params: { id: 1 },
 			query: { ...currentRoute.value.query, freeParking: value || undefined },
 		})
 	},
@@ -46,8 +47,16 @@ const freeEntrance = computed({
 	get: () => Number(currentRoute.value.query.freeEntrance ?? 0),
 	set: value =>
 		navigateTo({
+			params: { id: 1 },
 			query: { ...currentRoute.value.query, freeEntrance: value || undefined },
 		}),
+})
+
+watch(keywords, () => {
+	navigateTo({
+		params: { id: 1 },
+		query: currentRoute.value.query,
+	})
 })
 
 // Pagination
