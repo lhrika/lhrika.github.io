@@ -20,11 +20,11 @@ const { currentRoute } = useRouter()
 // Free-text search
 const ignorePattern = /^[\\":{}\s\n\t,a-zA-Z]+$/i
 const keywords = computed(() =>
-	(currentRoute.value.query.q as string ?? '')
+	((currentRoute.value.query.q as string) ?? '')
 		.split(/\s+/)
 		.filter(s => ignorePattern.exec(s) === null),
 )
-const searchQuery = ref(currentRoute.value.query.q as string ?? '')
+const searchQuery = ref((currentRoute.value.query.q as string) ?? '')
 const compositioning = ref(false)
 const search = () => {
 	const q = searchQuery.value || undefined
@@ -45,7 +45,10 @@ const freeParking = computed({
 	set: value => {
 		navigateTo({
 			params: { id: 1 },
-			query: { ...currentRoute.value.query, freeParking: value ? '1' : undefined },
+			query: {
+				...currentRoute.value.query,
+				freeParking: value ? '1' : undefined,
+			},
 		})
 	},
 })
@@ -54,7 +57,10 @@ const freeEntrance = computed({
 	set: value =>
 		navigateTo({
 			params: { id: 1 },
-			query: { ...currentRoute.value.query, freeEntrance: value ? '1' : undefined },
+			query: {
+				...currentRoute.value.query,
+				freeEntrance: value ? '1' : undefined,
+			},
 		}),
 })
 
@@ -106,6 +112,12 @@ const { data: total } = await useAsyncData(
 	},
 	{
 		watch: [freeEntrance, freeParking, keywords],
+		getCachedData(key, nuxtApp, context) {
+			if (context.cause === 'initial') {
+				return nuxtApp.payload.data[key]
+			}
+			return undefined
+		},
 	},
 )
 
@@ -121,6 +133,12 @@ const { data: spots } = useAsyncData(
 	},
 	{
 		watch: [freeEntrance, freeParking, keywords],
+		getCachedData(key, nuxtApp, context) {
+			if (context.cause === 'initial') {
+				return nuxtApp.payload.data[key]
+			}
+			return undefined
+		},
 	},
 )
 </script>
@@ -154,7 +172,10 @@ const { data: spots } = useAsyncData(
 							size="sm"
 							icon="i-lucide-circle-x"
 							aria-label="Clear input"
-							@click="searchQuery = ''; search()"
+							@click="
+								searchQuery = ''
+								search()
+							"
 						/>
 					</template>
 				</UInput>
