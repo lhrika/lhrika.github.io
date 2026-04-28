@@ -14,8 +14,6 @@ if (locale.value !== 'ja') {
 	setLocale('ja')
 }
 
-const localePath = useLocalePath()
-
 // Free-text search
 const searchQuery = ref('')
 const keywords = shallowRef([] as string[])
@@ -32,21 +30,45 @@ const onKeydown = (e: KeyboardEvent) => {
 	}
 }
 
+const route = useRoute()
+const { currentRoute } = useRouter()
+
 // Other condition filters
-const freeParking = ref(false)
-const freeEntrance = ref(false)
+const freeParking = computed({
+	get: () => Number(currentRoute.value.query.freeParking ?? 0),
+	set: value => {
+		navigateTo({
+			query: { ...currentRoute.value.query, freeParking: value || undefined },
+		})
+	},
+})
+const freeEntrance = computed({
+	get: () => Number(currentRoute.value.query.freeEntrance ?? 0),
+	set: value =>
+		navigateTo({
+			query: { ...currentRoute.value.query, freeEntrance: value || undefined },
+		}),
+})
 
 // Pagination
-const route = useRoute()
-const initialPage = Array.isArray(route.params.id)
-	? route.params.id[0]
-	: route.params.id
-const page = ref(parseInt(initialPage ? initialPage : '1'))
+const page = computed(() => {
+	const id = Array.isArray(route.params.id)
+		? route.params.id[0]
+		: route.params.id
+	return parseInt(id ? id : '1')
+})
 const itemsPerPage = 3
+const localePath = useLocalePath()
 const paginationLinkTo = (page: number) => {
-	return {
-		path: localePath(`/spots/${page}`),
-	}
+	const link = useLink({
+		to: {
+			params: {
+				id: page,
+			},
+			query: route.query,
+		},
+	})
+	return link.href.value
 }
 
 function filterQuery<T>(query: CollectionQueryBuilder<T>) {
@@ -68,14 +90,14 @@ function filterQuery<T>(query: CollectionQueryBuilder<T>) {
 }
 
 const { data: total } = await useAsyncData(
-	'spots-count',
+	() => `spots-count`,
 	() => {
 		const query = queryCollection('spots')
 		filterQuery(query)
 		return query.count()
 	},
 	{
-		watch: [keywords, freeEntrance, freeParking],
+		watch: [freeEntrance, freeParking, keywords],
 	},
 )
 
@@ -90,30 +112,7 @@ const { data: spots } = useAsyncData(
 			.all()
 	},
 	{
-		watch: [keywords, freeEntrance, freeParking],
-		// In static generation (GitHub Pages), nuxtApp.static.data persists across refreshes.
-		// The default getCachedData returns static.data[key] after hydration, which causes
-		// watch-triggered re-executions to return the pre-rendered (unfiltered) data instead
-		// of making a fresh query. Override to only cache during the initial hydration.
-		getCachedData: (key, nuxtApp, ctx) => {
-			if (nuxtApp.isHydrating) {
-				return nuxtApp.payload.data[key]
-			}
-			if (ctx.cause === 'watch') {
-				return undefined
-			}
-			return nuxtApp.static.data[key]
-		},
-	},
-)
-
-watch(
-	spots,
-	value => {
-		console.log(value)
-	},
-	{
-		immediate: true,
+		watch: [freeEntrance, freeParking, keywords],
 	},
 )
 </script>
@@ -154,12 +153,16 @@ watch(
 				<div class="flex gap-2">
 					<UCheckbox
 						v-model="freeEntrance"
+						:true-value="1"
+						:false-value="0"
 						variant="card"
 						label="入場無料"
 						size="sm"
 					/>
 					<UCheckbox
 						v-model="freeParking"
+						:true-value="1"
+						:false-value="0"
 						variant="card"
 						label="無料駐車場"
 						size="sm"
@@ -181,7 +184,7 @@ watch(
 				</UPageGrid>
 				<UPagination
 					v-if="total && total / itemsPerPage > 1"
-					v-model:page="page"
+					:page="page"
 					:total="total"
 					:items-per-page="itemsPerPage"
 					:to="paginationLinkTo"

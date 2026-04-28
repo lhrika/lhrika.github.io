@@ -1,0 +1,52 @@
+{
+	"name": "玉敷公園",
+	"furigana": "たましきこうえん",
+	"postcode": 3470105,
+	"address": "埼玉県加須市騎西639-1",
+	"description": "加須市騎西地区に位置する、歴史ある玉敷神社に隣接した公園です。最大の主役は、埼玉県指定天然記念物である樹齢約450年の「大藤」で、1メートル以上も垂れ下がる紫の花房が約400平方メートルにわたって広がる様子は圧巻です。初夏には約1万本のあじさい、秋には大イチョウの黄葉など、年間を通じて四季の移ろいを感じられます。※藤の開花シーズン（4月下旬〜5月上旬）は周辺道路や駐車場が非常に混雑するため、時間に余裕を持った訪問をお勧めします。",
+	"image": {
+		"src": "https://www.city.kazo.lg.jp/material/files/group/63/20210427-01.jpg",
+		"alt": "玉敷公園の県指定天然記念物・大藤の風景",
+		"width": 1000,
+		"height": 667
+	},
+	"fee": 0,
+	"parking": true,
+	"businessHours": "24時間（散策自由）",
+	"highlights": [
+		{
+			"name": "大藤（玉敷の藤）",
+			"furigana": "おおふじ",
+			"description": "県指定天然記念物。1メートルを超える長い花房が垂れ下がり、甘い香りが園内を包み込みます。",
+			"time": "4月下旬〜5月上旬",
+			"image": "https://www.city.kazo.lg.jp/material/files/group/63/20210427-02.jpg"
+		},
+		{
+			"name": "あじさい",
+			"furigana": "あじさい",
+			"description": "公園から玉敷神社へと続く道沿いや園内に、色鮮やかなあじさいが咲き誇ります。",
+			"time": "6月中旬〜6月下旬"
+		},
+		{
+			"name": "大イチョウ",
+			"furigana": "おおいちょう",
+			"description": "秋には隣接する神社とともに、黄金色に染まる見事な景観を楽しめます。",
+			"time": "11月中旬〜11月下旬"
+		}
+	],
+	"gallery": [
+		"https://www.city.kazo.lg.jp/material/files/group/63/20210427-03.jpg"
+	],
+	"links": [
+		{
+			"label": "加須市公式サイト（玉敷公園）",
+			"url": "https://www.city.kazo.lg.jp/site/kanko/11181.html",
+			"target": "_blank"
+		},
+		{
+			"label": "Google マップ",
+			"url": "https://goo.gl/maps/Z6ZfU8Y8kU1j5M5R8",
+			"target": "_blank"
+		}
+	]
+}

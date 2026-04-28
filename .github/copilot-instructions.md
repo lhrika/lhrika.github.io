@@ -3,6 +3,7 @@
 ## Stack
 
 **Nuxt 4** (Vue 3) personal blog and portfolio platform with:
+
 - **@nuxt/content v3** — Markdown blog posts + typed data collections (CSV, YAML, JSON)
 - **@nuxtjs/i18n** — Multilingual UI (default: `zh-CN`; locales: `en`, `vi`, `zh`, `ja`)
 - **Nuxt UI v4** + Tailwind CSS — Component library, themed via `app.config.ts`
@@ -47,18 +48,19 @@ supabase/
 
 Defined in `content.config.ts` with Zod schemas:
 
-| Collection | Format | Key fields |
-|---|---|---|
-| `blog` | Markdown | `title`, `date`, `tags`, `draft`, `image`, `excerpt` |
-| `library` | Markdown | `status` (pending/ongoing/completed/interested) |
-| `messages` | CSV | Guestbook entries |
-| `updates` | CSV | Timeline entries |
-| `adv` | Markdown | Game progress |
-| `profiles` | Markdown | UUID-based user profiles |
+| Collection | Format   | Key fields                                           |
+| ---------- | -------- | ---------------------------------------------------- |
+| `blog`     | Markdown | `title`, `date`, `tags`, `draft`, `image`, `excerpt` |
+| `library`  | Markdown | `status` (pending/ongoing/completed/interested)      |
+| `messages` | CSV      | Guestbook entries                                    |
+| `updates`  | CSV      | Timeline entries                                     |
+| `adv`      | Markdown | Game progress                                        |
+| `profiles` | Markdown | UUID-based user profiles                             |
 
 Query with `queryCollection('blog').where(...).all()` inside `useAsyncData`.
 
 Blog post frontmatter example:
+
 ```yaml
 ---
 title: Post Title
@@ -77,6 +79,7 @@ Images use Google Photos provider: `![alt](path){provider="google" width="500" h
 **i18n:** Use `const { t, locale } = useI18n()` and `t('key')` in templates. Routes are auto-prefixed (`/blog`, `/en/blog`, `/zh/blog`). Translation keys live in `i18n/locales/*.json`.
 
 **Supabase:**
+
 - `useSupabaseUser()` — authenticated user
 - `useSupabaseClient<Database>()` — typed DB queries (uses `Database` type from `app/types/database.types.ts`)
 - Edge Functions live in `supabase/functions/` (Deno runtime)
