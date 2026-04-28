@@ -41,20 +41,20 @@ const onKeydown = (e: KeyboardEvent) => {
 
 // Other condition filters
 const freeParking = computed({
-	get: () => Number(currentRoute.value.query.freeParking ?? 0),
+	get: () => currentRoute.value.query.freeParking === '1',
 	set: value => {
 		navigateTo({
 			params: { id: 1 },
-			query: { ...currentRoute.value.query, freeParking: value || undefined },
+			query: { ...currentRoute.value.query, freeParking: value ? '1' : undefined },
 		})
 	},
 })
 const freeEntrance = computed({
-	get: () => Number(currentRoute.value.query.freeEntrance ?? 0),
+	get: () => currentRoute.value.query.freeEntrance === '1',
 	set: value =>
 		navigateTo({
 			params: { id: 1 },
-			query: { ...currentRoute.value.query, freeEntrance: value || undefined },
+			query: { ...currentRoute.value.query, freeEntrance: value ? '1' : undefined },
 		}),
 })
 
@@ -161,16 +161,12 @@ const { data: spots } = useAsyncData(
 				<div class="flex gap-2">
 					<UCheckbox
 						v-model="freeEntrance"
-						:true-value="1"
-						:false-value="0"
 						variant="card"
 						label="入場無料"
 						size="sm"
 					/>
 					<UCheckbox
 						v-model="freeParking"
-						:true-value="1"
-						:false-value="0"
 						variant="card"
 						label="無料駐車場"
 						size="sm"
