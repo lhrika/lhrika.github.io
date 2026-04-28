@@ -113,7 +113,7 @@ const { data: total } = await useAsyncData(
 	{
 		watch: [freeEntrance, freeParking, keywords],
 		getCachedData(key, nuxtApp, context) {
-			if (context.cause === 'initial') {
+			if (nuxtApp.isHydrating) {
 				return nuxtApp.payload.data[key]
 			}
 			return undefined
@@ -134,7 +134,7 @@ const { data: spots } = useAsyncData(
 	{
 		watch: [freeEntrance, freeParking, keywords],
 		getCachedData(key, nuxtApp, context) {
-			if (context.cause === 'initial') {
+			if (nuxtApp.isHydrating) {
 				return nuxtApp.payload.data[key]
 			}
 			return undefined
