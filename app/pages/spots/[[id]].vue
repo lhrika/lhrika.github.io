@@ -22,7 +22,8 @@ const ignorePattern = /^[\\":{}\s\n\t,a-zA-Z]+$/i
 const keywords = computed(() =>
 	((currentRoute.value.query.q as string) ?? '')
 		.split(/\s+/)
-		.filter(s => ignorePattern.exec(s) === null),
+		.filter(s => ignorePattern.exec(s) === null)
+		.toSorted(),
 )
 const searchQuery = ref((currentRoute.value.query.q as string) ?? '')
 const compositioning = ref(false)
@@ -37,6 +38,10 @@ const onKeydown = (e: KeyboardEvent) => {
 	if (!compositioning.value && e.code === 'Enter') {
 		search()
 	}
+}
+const clearSearchQuery = () => {
+	searchQuery.value = ''
+	search()
 }
 
 // Other condition filters
@@ -103,18 +108,21 @@ function filterQuery<T>(query: CollectionQueryBuilder<T>) {
 	}
 }
 
+const filterKey = computed(() => {
+	return `e${freeEntrance.value ? '1' : '0'}p${freeParking.value ? '1' : '0'}${keywords.value.length ? '-' : ''}${keywords.value.join('-')}`
+})
+
 const { data: total } = await useAsyncData(
+	() => `spots-list-${filterKey.value}`,
 	() => {
 		const query = queryCollection('spots')
 		filterQuery(query)
 		return query.count()
 	},
-	{
-		watch: [freeEntrance, freeParking, keywords],
-	},
 )
 
 const { data: spots } = useAsyncData(
+	() => `spots-count-${filterKey.value}`,
 	() => {
 		const query = queryCollection('spots')
 		filterQuery(query)
@@ -122,9 +130,6 @@ const { data: spots } = useAsyncData(
 			.skip((page.value - 1) * itemsPerPage)
 			.limit(itemsPerPage)
 			.all()
-	},
-	{
-		watch: [freeEntrance, freeParking, keywords],
 	},
 )
 </script>
@@ -158,10 +163,7 @@ const { data: spots } = useAsyncData(
 							size="sm"
 							icon="i-lucide-circle-x"
 							aria-label="Clear input"
-							@click="
-								searchQuery = ''
-								search()
-							"
+							@click="clearSearchQuery"
 						/>
 					</template>
 				</UInput>
