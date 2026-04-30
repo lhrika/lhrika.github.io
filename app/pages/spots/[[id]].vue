@@ -104,7 +104,6 @@ function filterQuery<T>(query: CollectionQueryBuilder<T>) {
 }
 
 const { data: total } = await useAsyncData(
-	() => `spots-count`,
 	() => {
 		const query = queryCollection('spots')
 		filterQuery(query)
@@ -112,17 +111,10 @@ const { data: total } = await useAsyncData(
 	},
 	{
 		watch: [freeEntrance, freeParking, keywords],
-		getCachedData(key, nuxtApp, context) {
-			// if (nuxtApp.isHydrating) {
-			// 	return nuxtApp.payload.data[key]
-			// }
-			return undefined
-		},
 	},
 )
 
 const { data: spots } = useAsyncData(
-	() => `spots-list-${page.value}`,
 	() => {
 		const query = queryCollection('spots')
 		filterQuery(query)
@@ -133,12 +125,6 @@ const { data: spots } = useAsyncData(
 	},
 	{
 		watch: [freeEntrance, freeParking, keywords],
-		getCachedData(key, nuxtApp, context) {
-			// if (nuxtApp.isHydrating) {
-			// 	return nuxtApp.payload.data[key]
-			// }
-			return undefined
-		},
 	},
 )
 </script>
