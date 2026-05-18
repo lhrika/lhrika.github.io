@@ -87,6 +87,18 @@
 
 		<div class="flex-1" />
 
+		<!-- Auto stitch (only when exactly 2 selected) -->
+		<UButton
+			v-if="selectedCount === 2"
+			icon="i-lucide-combine"
+			label="自动拼接"
+			color="primary"
+			variant="subtle"
+			:loading="autoAligning"
+			title="自动检测两图重叠区域并对齐"
+			@click="emit('autoAlign')"
+		/>
+
 		<!-- Alignment (only when ≥2 selected) -->
 		<template v-if="selectedCount >= 2">
 			<span class="text-sm text-muted">对齐:</span>
@@ -97,6 +109,16 @@
 			<UButton icon="i-lucide-align-center-vertical" color="neutral" variant="subtle" title="水平居中对齐" @click="emit('align', 'center')" />
 			<UButton icon="i-lucide-align-end-vertical" color="neutral" variant="subtle" title="右侧对齐" @click="emit('align', 'right')" />
 		</template>
+
+		<!-- Crop to content -->
+		<UButton
+			icon="i-lucide-crop"
+			color="neutral"
+			variant="subtle"
+			title="裁剪画布：去掉没有图片的空白区域"
+			:disabled="imageCount === 0"
+			@click="emit('cropToContent')"
+		/>
 
 		<!-- Clear all -->
 		<UButton
@@ -131,6 +153,7 @@ defineProps<{
 	canRedo: boolean
 	selectedCount: number
 	imageCount: number
+	autoAligning?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -143,8 +166,10 @@ const emit = defineEmits<{
 	toggleExport: []
 	addFiles: [files: FileList]
 	clearAll: []
+	cropToContent: []
 	saveProject: []
 	openProjectFile: [file: File]
+	autoAlign: []
 }>()
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
