@@ -119,7 +119,7 @@ export function useImageStitch() {
 	}
 
 	// ---- File input ----
-	async function addFiles(files: FileList) {
+	async function addFiles(files: File[] | FileList) {
 		for (const file of files) {
 			const id = crypto.randomUUID()
 			const blob = file.slice(0, file.size, file.type) as Blob

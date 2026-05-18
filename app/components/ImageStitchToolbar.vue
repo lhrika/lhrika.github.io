@@ -164,7 +164,7 @@ const emit = defineEmits<{
 	redo: []
 	align: [edge: AlignEdge]
 	toggleExport: []
-	addFiles: [files: FileList]
+	addFiles: [files: File[]]
 	clearAll: []
 	cropToContent: []
 	saveProject: []
@@ -176,9 +176,10 @@ const fileInputRef = ref<HTMLInputElement | null>(null)
 const projectInputRef = ref<HTMLInputElement | null>(null)
 
 function onFilesChange(e: Event) {
-	const files = (e.target as HTMLInputElement).files
-	if (files?.length) emit('addFiles', files)
-	;(e.target as HTMLInputElement).value = ''
+	const input = e.target as HTMLInputElement
+	const files = input.files ? Array.from(input.files) : []
+	input.value = ''
+	if (files.length) emit('addFiles', files)
 }
 
 function onOpenProject() {
