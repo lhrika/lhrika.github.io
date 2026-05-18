@@ -1,6 +1,9 @@
 <template>
-	<div class="border border-muted rounded-lg p-4 space-y-3 bg-elevated">
-		<div class="font-medium text-sm">导出选项</div>
+	<!-- 3. UCard instead of hand-rolled card -->
+	<UCard>
+		<template #header>
+			<span class="font-medium text-sm">导出选项</span>
+		</template>
 		<div class="flex flex-wrap gap-4 items-end">
 			<UFormField label="文件名">
 				<UInput v-model="filename" class="w-44" placeholder="stitched-image" />
@@ -8,18 +11,19 @@
 			<UFormField label="格式">
 				<USelect v-model="format" :items="formatOptions" class="w-28" />
 			</UFormField>
+			<!-- 4. UInputNumber for numeric fields -->
 			<UFormField label="宽度 (px)">
-				<UInput v-model.number="width" type="number" min="1" max="20000" class="w-28" />
+				<UInputNumber v-model="width" :min="1" :max="20000" class="w-32" />
 			</UFormField>
 			<UFormField label="高度 (px)">
-				<UInput v-model.number="height" type="number" min="1" max="20000" class="w-28" />
+				<UInputNumber v-model="height" :min="1" :max="20000" class="w-32" />
 			</UFormField>
 			<UFormField v-if="format !== 'image/png'" label="质量 (1-100)">
-				<UInput v-model.number="quality" type="number" min="1" max="100" class="w-28" />
+				<UInputNumber v-model="quality" :min="1" :max="100" class="w-28" />
 			</UFormField>
 			<UButton label="导出图片" icon="i-lucide-download" @click="onExport" />
 		</div>
-	</div>
+	</UCard>
 </template>
 
 <script setup lang="ts">

@@ -8,10 +8,22 @@
 			:dropzone="false"
 		>
 			<template #default="{ open: openProjectPicker }">
-				<UButton icon="i-lucide-folder-open" label="打开项目" color="neutral" variant="outline" @click="onOpenProject(openProjectPicker)" />
+				<UButton
+					icon="i-lucide-folder-open"
+					label="打开项目"
+					color="neutral"
+					variant="outline"
+					@click="onOpenProject(openProjectPicker)"
+				/>
 			</template>
 		</UFileUpload>
-		<UButton icon="i-lucide-save" label="保存项目" color="neutral" variant="outline" @click="emit('saveProject')" />
+		<UButton
+			icon="i-lucide-save"
+			label="保存项目"
+			color="neutral"
+			variant="outline"
+			@click="emit('saveProject')"
+		/>
 
 		<div class="w-px h-6 bg-muted mx-1" />
 
@@ -24,92 +36,108 @@
 			:dropzone="false"
 		>
 			<template #default="{ open: openImagePicker }">
-				<UButton icon="i-lucide-image-plus" label="添加图片" @click="() => openImagePicker()" />
+				<UButton
+					icon="i-lucide-image-plus"
+					label="添加图片"
+					@click="() => openImagePicker()"
+				/>
 			</template>
 		</UFileUpload>
 
 		<!-- Canvas size -->
+		<!-- 4. UInputNumber for canvas dimensions -->
 		<div class="flex items-center gap-1">
-			<UInput
+			<UInputNumber
 				:model-value="canvasWidth"
-				type="number"
-				min="100"
-				max="10000"
-				class="w-24"
+				:min="100"
+				:max="10000"
+				class="w-32"
 				placeholder="宽"
-				@update:model-value="emit('update:canvasWidth', Number($event))"
+				@update:model-value="emit('update:canvasWidth', $event ?? canvasWidth)"
 			/>
 			<span class="text-muted text-sm">×</span>
-			<UInput
+			<UInputNumber
 				:model-value="canvasHeight"
-				type="number"
-				min="100"
-				max="10000"
-				class="w-24"
+				:min="100"
+				:max="10000"
+				class="w-32"
 				placeholder="高"
-				@update:model-value="emit('update:canvasHeight', Number($event))"
+				@update:model-value="
+					emit('update:canvasHeight', $event ?? canvasHeight)
+				"
 			/>
 			<span class="text-muted text-sm">px</span>
-			<UPopover>
-				<UButton
-					color="neutral"
-					variant="outline"
-					class="w-7 h-7 p-0 shrink-0"
-					title="画布背景色"
-				>
-					<span
-						class="block w-4 h-4 rounded-sm border border-muted"
-						:style="{ background: canvasBg }"
-					/>
-				</UButton>
-				<template #content>
-					<div class="p-2">
-						<UColorPicker
-							:model-value="canvasBg"
-							format="hex"
-							@update:model-value="emit('update:canvasBg', $event as string)"
+			<!-- 8. UTooltip for background color button -->
+			<UTooltip text="画布背景色">
+				<UPopover>
+					<UButton
+						color="neutral"
+						variant="outline"
+						class="w-7 h-7 p-0 shrink-0"
+					>
+						<span
+							class="block w-4 h-4 rounded-sm border border-muted"
+							:style="{ background: canvasBg }"
 						/>
-					</div>
-				</template>
-			</UPopover>
+					</UButton>
+					<template #content>
+						<div class="p-2">
+							<UColorPicker
+								:model-value="canvasBg"
+								format="hex"
+								@update:model-value="emit('update:canvasBg', $event as string)"
+							/>
+						</div>
+					</template>
+				</UPopover>
+			</UTooltip>
 		</div>
 
 		<!-- Zoom -->
 		<div class="flex items-center gap-1">
-			<UButton
-				icon="i-lucide-zoom-out"
-				color="neutral"
-				variant="subtle"
-				:disabled="zoom <= 0.1"
-				@click="emit('update:zoom', Math.max(0.1, +(zoom - 0.1).toFixed(1)))"
-			/>
-			<span class="text-sm w-12 text-center">{{ Math.round(zoom * 100) }}%</span>
-			<UButton
-				icon="i-lucide-zoom-in"
-				color="neutral"
-				variant="subtle"
-				:disabled="zoom >= 4"
-				@click="emit('update:zoom', Math.min(4, +(zoom + 0.1).toFixed(1)))"
-			/>
+			<UTooltip text="缩小">
+				<UButton
+					icon="i-lucide-zoom-out"
+					color="neutral"
+					variant="subtle"
+					:disabled="zoom <= 0.1"
+					@click="emit('update:zoom', Math.max(0.1, +(zoom - 0.1).toFixed(1)))"
+				/>
+			</UTooltip>
+			<span class="text-sm w-12 text-center"
+				>{{ Math.round(zoom * 100) }}%</span
+			>
+			<UTooltip text="放大">
+				<UButton
+					icon="i-lucide-zoom-in"
+					color="neutral"
+					variant="subtle"
+					:disabled="zoom >= 4"
+					@click="emit('update:zoom', Math.min(4, +(zoom + 0.1).toFixed(1)))"
+				/>
+			</UTooltip>
 		</div>
 
 		<!-- Undo / Redo -->
-		<UButton
-			icon="i-lucide-undo-2"
-			color="neutral"
-			variant="subtle"
-			title="撤销 (Ctrl+Z)"
-			:disabled="!canUndo"
-			@click="emit('undo')"
-		/>
-		<UButton
-			icon="i-lucide-redo-2"
-			color="neutral"
-			variant="subtle"
-			title="重做 (Ctrl+Shift+Z)"
-			:disabled="!canRedo"
-			@click="emit('redo')"
-		/>
+		<!-- 8. UTooltip for icon-only buttons -->
+		<UTooltip text="撤销 (⌘Z)">
+			<UButton
+				icon="i-lucide-undo-2"
+				color="neutral"
+				variant="subtle"
+				:disabled="!canUndo"
+				@click="emit('undo')"
+			/>
+		</UTooltip>
+		<UTooltip text="重做 (⌘⇧Z)">
+			<UButton
+				icon="i-lucide-redo-2"
+				color="neutral"
+				variant="subtle"
+				:disabled="!canRedo"
+				@click="emit('redo')"
+			/>
+		</UTooltip>
 
 		<div class="flex-1" />
 
@@ -121,40 +149,86 @@
 			color="primary"
 			variant="subtle"
 			:loading="autoAligning"
-			title="自动检测两图重叠区域并对齐"
 			@click="emit('autoAlign')"
 		/>
 
 		<!-- Alignment (only when ≥2 selected) -->
+		<!-- 5. UButtonGroup for alignment buttons -->
 		<template v-if="selectedCount >= 2">
 			<span class="text-sm text-muted">对齐:</span>
-			<UButton icon="i-lucide-align-start-horizontal" color="neutral" variant="subtle" title="顶部对齐" @click="emit('align', 'top')" />
-			<UButton icon="i-lucide-align-center-horizontal" color="neutral" variant="subtle" title="垂直居中对齐" @click="emit('align', 'middle')" />
-			<UButton icon="i-lucide-align-end-horizontal" color="neutral" variant="subtle" title="底部对齐" @click="emit('align', 'bottom')" />
-			<UButton icon="i-lucide-align-start-vertical" color="neutral" variant="subtle" title="左侧对齐" @click="emit('align', 'left')" />
-			<UButton icon="i-lucide-align-center-vertical" color="neutral" variant="subtle" title="水平居中对齐" @click="emit('align', 'center')" />
-			<UButton icon="i-lucide-align-end-vertical" color="neutral" variant="subtle" title="右侧对齐" @click="emit('align', 'right')" />
+			<UButtonGroup>
+				<UTooltip text="顶部对齐">
+					<UButton
+						icon="i-lucide-align-start-horizontal"
+						color="neutral"
+						variant="subtle"
+						@click="emit('align', 'top')"
+					/>
+				</UTooltip>
+				<UTooltip text="垂直居中">
+					<UButton
+						icon="i-lucide-align-center-horizontal"
+						color="neutral"
+						variant="subtle"
+						@click="emit('align', 'middle')"
+					/>
+				</UTooltip>
+				<UTooltip text="底部对齐">
+					<UButton
+						icon="i-lucide-align-end-horizontal"
+						color="neutral"
+						variant="subtle"
+						@click="emit('align', 'bottom')"
+					/>
+				</UTooltip>
+				<UTooltip text="左侧对齐">
+					<UButton
+						icon="i-lucide-align-start-vertical"
+						color="neutral"
+						variant="subtle"
+						@click="emit('align', 'left')"
+					/>
+				</UTooltip>
+				<UTooltip text="水平居中">
+					<UButton
+						icon="i-lucide-align-center-vertical"
+						color="neutral"
+						variant="subtle"
+						@click="emit('align', 'center')"
+					/>
+				</UTooltip>
+				<UTooltip text="右侧对齐">
+					<UButton
+						icon="i-lucide-align-end-vertical"
+						color="neutral"
+						variant="subtle"
+						@click="emit('align', 'right')"
+					/>
+				</UTooltip>
+			</UButtonGroup>
 		</template>
 
 		<!-- Crop to content -->
-		<UButton
-			icon="i-lucide-crop"
-			color="neutral"
-			variant="subtle"
-			title="裁剪画布：去掉没有图片的空白区域"
-			:disabled="imageCount === 0"
-			@click="emit('cropToContent')"
-		/>
+		<UTooltip text="裁剪画布：去掉没有图片的空白区域">
+			<UButton
+				icon="i-lucide-crop"
+				color="neutral"
+				variant="subtle"
+				:disabled="imageCount === 0"
+				@click="emit('cropToContent')"
+			/>
+		</UTooltip>
 
 		<!-- Clear all -->
-		<UButton
-			icon="i-lucide-trash-2"
-			color="error"
-			variant="subtle"
-			title="清空画布"
-			:disabled="imageCount === 0"
-			@click="emit('clearAll')"
-		/>
+		<UTooltip text="清空画布">
+			<UButton
+				icon="i-lucide-trash-2"
+				color="error"
+				variant="subtle"
+				:disabled="imageCount === 0"
+				@click="emit('clearAll')"
+			/>
+		</UTooltip>
 
 		<!-- Export toggle -->
 		<UButton
@@ -167,13 +241,14 @@
 		/>
 
 		<!-- Fullscreen -->
-		<UButton
-			:icon="isFullscreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
-			color="neutral"
-			variant="subtle"
-			:title="isFullscreen ? '退出全屏' : '全屏'"
-			@click="emit('toggleFullscreen')"
-		/>
+		<UTooltip :text="isFullscreen ? '退出全屏' : '全屏'">
+			<UButton
+				:icon="isFullscreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
+				color="neutral"
+				variant="subtle"
+				@click="emit('toggleFullscreen')"
+			/>
+		</UTooltip>
 	</div>
 </template>
 
@@ -212,7 +287,7 @@ const emit = defineEmits<{
 }>()
 
 const imageFiles = ref<File[]>([])
-watch(imageFiles, (files) => {
+watch(imageFiles, files => {
 	if (files.length) {
 		emit('addFiles', [...files])
 		imageFiles.value = []
@@ -220,7 +295,7 @@ watch(imageFiles, (files) => {
 })
 
 const projectFile = ref<File | null>(null)
-watch(projectFile, (file) => {
+watch(projectFile, file => {
 	if (file) {
 		emit('openProjectFile', file)
 		projectFile.value = null

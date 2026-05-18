@@ -34,53 +34,56 @@
 			</div>
 		</div>
 
-		<!-- Action buttons -->
+		<!-- 5. UButtonGroup for layer actions, 8. UTooltip for icon buttons -->
 		<div class="px-2 py-1.5 border-t border-muted flex gap-1 justify-center">
-			<UButton
-				icon="i-lucide-chevron-up"
-				size="xs"
-				color="neutral"
-				variant="subtle"
-				title="上移一层"
-				:disabled="!singleSelected || singleSelected.zIndex >= sortedImages.length"
-				@click="singleSelected && emit('moveLayer', singleSelected.id, 1)"
-			/>
-			<UButton
-				icon="i-lucide-chevron-down"
-				size="xs"
-				color="neutral"
-				variant="subtle"
-				title="下移一层"
-				:disabled="!singleSelected || singleSelected.zIndex <= 1"
-				@click="singleSelected && emit('moveLayer', singleSelected.id, -1)"
-			/>
-			<UButton
-				icon="i-lucide-bring-to-front"
-				size="xs"
-				color="neutral"
-				variant="subtle"
-				title="置顶"
-				:disabled="!singleSelected || singleSelected.zIndex >= sortedImages.length"
-				@click="singleSelected && emit('moveLayerToEdge', singleSelected.id, 'top')"
-			/>
-			<UButton
-				icon="i-lucide-send-to-back"
-				size="xs"
-				color="neutral"
-				variant="subtle"
-				title="置底"
-				:disabled="!singleSelected || singleSelected.zIndex <= 1"
-				@click="singleSelected && emit('moveLayerToEdge', singleSelected.id, 'bottom')"
-			/>
-			<UButton
-				icon="i-lucide-trash-2"
-				size="xs"
-				color="error"
-				variant="subtle"
-				title="删除选中图片"
-				:disabled="selectedIds.length === 0"
-				@click="emit('removeSelected')"
-			/>
+			<UButtonGroup size="xs">
+				<UTooltip text="上移一层">
+					<UButton
+						icon="i-lucide-chevron-up"
+						color="neutral"
+						variant="subtle"
+						:disabled="!singleSelected || singleSelected.zIndex >= sortedImages.length"
+						@click="singleSelected && emit('moveLayer', singleSelected.id, 1)"
+					/>
+				</UTooltip>
+				<UTooltip text="下移一层">
+					<UButton
+						icon="i-lucide-chevron-down"
+						color="neutral"
+						variant="subtle"
+						:disabled="!singleSelected || singleSelected.zIndex <= 1"
+						@click="singleSelected && emit('moveLayer', singleSelected.id, -1)"
+					/>
+				</UTooltip>
+				<UTooltip text="置顶">
+					<UButton
+						icon="i-lucide-bring-to-front"
+						color="neutral"
+						variant="subtle"
+						:disabled="!singleSelected || singleSelected.zIndex >= sortedImages.length"
+						@click="singleSelected && emit('moveLayerToEdge', singleSelected.id, 'top')"
+					/>
+				</UTooltip>
+				<UTooltip text="置底">
+					<UButton
+						icon="i-lucide-send-to-back"
+						color="neutral"
+						variant="subtle"
+						:disabled="!singleSelected || singleSelected.zIndex <= 1"
+						@click="singleSelected && emit('moveLayerToEdge', singleSelected.id, 'bottom')"
+					/>
+				</UTooltip>
+			</UButtonGroup>
+			<UTooltip text="删除选中">
+				<UButton
+					icon="i-lucide-trash-2"
+					size="xs"
+					color="error"
+					variant="subtle"
+					:disabled="selectedIds.length === 0"
+					@click="emit('removeSelected')"
+				/>
+			</UTooltip>
 		</div>
 	</div>
 </template>
