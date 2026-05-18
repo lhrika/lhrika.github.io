@@ -34,9 +34,8 @@
 			</div>
 		</div>
 
-		<!-- 5. UButtonGroup for layer actions, 8. UTooltip for icon buttons -->
 		<div class="px-2 py-1.5 border-t border-muted flex gap-1 justify-center">
-			<UButtonGroup size="xs">
+			<UFieldGroup size="xs">
 				<UTooltip text="上移一层">
 					<UButton
 						icon="i-lucide-chevron-up"
@@ -73,7 +72,7 @@
 						@click="singleSelected && emit('moveLayerToEdge', singleSelected.id, 'bottom')"
 					/>
 				</UTooltip>
-			</UButtonGroup>
+			</UFieldGroup>
 			<UTooltip text="删除选中">
 				<UButton
 					icon="i-lucide-trash-2"

@@ -9,10 +9,6 @@
  */
 
 interface AlignResult {
-	/** position of image 1 along the alignment axis (anchored at 0) */
-	x1: number
-	/** position of image 2 along the alignment axis */
-	x2: number
 	/** overlap size in pixels that gave the best score */
 	overlap: number
 	/** normalised confidence 0-1 (higher = better match) */
@@ -25,13 +21,7 @@ async function loadPixels(src: string, width: number, height: number): Promise<U
 	canvas.height = height
 	const ctx = canvas.getContext('2d')
 	if (!ctx) throw new Error('Canvas 2D not available')
-	const img = new Image()
-	img.crossOrigin = 'anonymous'
-	await new Promise<void>((resolve, reject) => {
-		img.onload = () => resolve()
-		img.onerror = () => reject(new Error('Image load failed'))
-		img.src = src
-	})
+	const img = await loadImage(src)
 	ctx.drawImage(img, 0, 0, width, height)
 	return ctx.getImageData(0, 0, width, height).data
 }
@@ -105,6 +95,37 @@ function ssdV(
 }
 
 /**
+ * Coarse-to-fine 3-pass search for the overlap that minimises SSD.
+ * The caller provides the SSD function already bound to its pixel data.
+ */
+function runThreePasses(
+	ssd: (ov: number, step: number, band: number) => number,
+	minOv: number,
+	maxOv: number,
+): { overlap: number; score: number } {
+	let bestOv = minOv
+	let bestScore = Infinity
+
+	// Pass 1: coarse — step 8px, 30% sample band
+	for (let ov = minOv; ov <= maxOv; ov += 8) {
+		const s = ssd(ov, 4, 0.3)
+		if (s < bestScore) { bestScore = s; bestOv = ov }
+	}
+	// Pass 2: fine — ±32px, step 2px, 50% sample band
+	for (let ov = Math.max(minOv, bestOv - 32); ov <= Math.min(maxOv, bestOv + 32); ov += 2) {
+		const s = ssd(ov, 2, 0.5)
+		if (s < bestScore) { bestScore = s; bestOv = ov }
+	}
+	// Pass 3: pixel-perfect — ±4px, 70% sample band
+	for (let ov = Math.max(minOv, bestOv - 4); ov <= Math.min(maxOv, bestOv + 4); ov++) {
+		const s = ssd(ov, 1, 0.7)
+		if (s < bestScore) { bestScore = s; bestOv = ov }
+	}
+
+	return { overlap: bestOv, score: bestScore }
+}
+
+/**
  * Find best horizontal overlap between img1 (left) and img2 (right).
  */
 async function findOverlapH(
@@ -112,39 +133,14 @@ async function findOverlapH(
 	src2: string, w2: number,
 	minOverlapFraction = 0.05,
 	maxOverlapFraction = 0.95,
-): Promise<{ overlap: number; score: number } | null> {
+): Promise<{ overlap: number; score: number }> {
 	const [d1, d2] = await Promise.all([
 		loadPixels(src1, w1, h),
 		loadPixels(src2, w2, h),
 	])
-
 	const minOv = Math.max(4, Math.round(Math.min(w1, w2) * minOverlapFraction))
 	const maxOv = Math.round(Math.min(w1, w2) * maxOverlapFraction)
-
-	let bestOv = minOv
-	let bestScore = Infinity
-
-	// Pass 1: coarse — step 8px, 30% of rows
-	for (let ov = minOv; ov <= maxOv; ov += 8) {
-		const s = ssdH(d1, w1, h, d2, w2, ov, 4, 0.3)
-		if (s < bestScore) { bestScore = s; bestOv = ov }
-	}
-	// Pass 2: fine — ±32px, step 2px, 50% of rows
-	const p2s = Math.max(minOv, bestOv - 32)
-	const p2e = Math.min(maxOv, bestOv + 32)
-	for (let ov = p2s; ov <= p2e; ov += 2) {
-		const s = ssdH(d1, w1, h, d2, w2, ov, 2, 0.5)
-		if (s < bestScore) { bestScore = s; bestOv = ov }
-	}
-	// Pass 3: pixel-perfect — ±4px, 70% of rows
-	const p3s = Math.max(minOv, bestOv - 4)
-	const p3e = Math.min(maxOv, bestOv + 4)
-	for (let ov = p3s; ov <= p3e; ov++) {
-		const s = ssdH(d1, w1, h, d2, w2, ov, 1, 0.7)
-		if (s < bestScore) { bestScore = s; bestOv = ov }
-	}
-
-	return { overlap: bestOv, score: bestScore }
+	return runThreePasses((ov, step, band) => ssdH(d1, w1, h, d2, w2, ov, step, band), minOv, maxOv)
 }
 
 /**
@@ -155,39 +151,14 @@ async function findOverlapV(
 	src2: string, h2: number,
 	minOverlapFraction = 0.05,
 	maxOverlapFraction = 0.95,
-): Promise<{ overlap: number; score: number } | null> {
+): Promise<{ overlap: number; score: number }> {
 	const [d1, d2] = await Promise.all([
 		loadPixels(src1, w, h1),
 		loadPixels(src2, w, h2),
 	])
-
 	const minOv = Math.max(4, Math.round(Math.min(h1, h2) * minOverlapFraction))
 	const maxOv = Math.round(Math.min(h1, h2) * maxOverlapFraction)
-
-	let bestOv = minOv
-	let bestScore = Infinity
-
-	// Pass 1: coarse — step 8px, 30% of cols
-	for (let ov = minOv; ov <= maxOv; ov += 8) {
-		const s = ssdV(d1, w, h1, d2, h2, ov, 4, 0.3)
-		if (s < bestScore) { bestScore = s; bestOv = ov }
-	}
-	// Pass 2: fine — ±32px, step 2px, 50% of cols
-	const p2s = Math.max(minOv, bestOv - 32)
-	const p2e = Math.min(maxOv, bestOv + 32)
-	for (let ov = p2s; ov <= p2e; ov += 2) {
-		const s = ssdV(d1, w, h1, d2, h2, ov, 2, 0.5)
-		if (s < bestScore) { bestScore = s; bestOv = ov }
-	}
-	// Pass 3: pixel-perfect — ±4px, 70% of cols
-	const p3s = Math.max(minOv, bestOv - 4)
-	const p3e = Math.min(maxOv, bestOv + 4)
-	for (let ov = p3s; ov <= p3e; ov++) {
-		const s = ssdV(d1, w, h1, d2, h2, ov, 1, 0.7)
-		if (s < bestScore) { bestScore = s; bestOv = ov }
-	}
-
-	return { overlap: bestOv, score: bestScore }
+	return runThreePasses((ov, step, band) => ssdV(d1, w, h1, d2, h2, ov, step, band), minOv, maxOv)
 }
 
 export function useImageStitchAutoAlign() {
@@ -208,35 +179,26 @@ export function useImageStitchAutoAlign() {
 
 		if (hint === 'a-left') {
 			const r = await findOverlapH(srcA, wA, height, srcB, wB)
-			if (!r) return null
-			return { x1: 0, x2: wA - r.overlap, overlap: r.overlap, confidence: normalise(r.score), leftImage: 'a' }
+			return { overlap: r.overlap, confidence: normalise(r.score), leftImage: 'a' }
 		}
 		if (hint === 'b-left') {
 			const r = await findOverlapH(srcB, wB, height, srcA, wA)
-			if (!r) return null
-			return { x1: wB - r.overlap, x2: 0, overlap: r.overlap, confidence: normalise(r.score), leftImage: 'b' }
+			return { overlap: r.overlap, confidence: normalise(r.score), leftImage: 'b' }
 		}
 
 		const [ab, ba] = await Promise.all([
 			findOverlapH(srcA, wA, height, srcB, wB),
 			findOverlapH(srcB, wB, height, srcA, wA),
 		])
-		if (!ab && !ba) return null
-		const useAB = !ba || (ab && ab.score <= ba.score)
-		const best = useAB ? ab! : ba!
-		if (useAB) {
-			return { x1: 0, x2: wA - best.overlap, overlap: best.overlap, confidence: normalise(best.score), leftImage: 'a' }
-		} else {
-			return { x1: wB - best.overlap, x2: 0, overlap: best.overlap, confidence: normalise(best.score), leftImage: 'b' }
-		}
+		const useAB = ab.score <= ba.score
+		const best = useAB ? ab : ba
+		return { overlap: best.overlap, confidence: normalise(best.score), leftImage: useAB ? 'a' : 'b' }
 	}
 
 	/**
 	 * Vertical alignment: img A and B share the same width, overlap top/bottom.
 	 * hint forces a specific ordering; without it both are tried.
-	 *
-	 * Returns y1/y2 (reusing x1/x2 fields of AlignResult) anchored so the top
-	 * image is at y=0, plus which image ended up on top ('a' | 'b').
+	 * Returns the overlap size and which image ended up on top ('a' | 'b').
 	 */
 	async function autoAlignVertical(
 		srcA: string, hA: number,
@@ -248,27 +210,20 @@ export function useImageStitchAutoAlign() {
 
 		if (hint === 'a-top') {
 			const r = await findOverlapV(srcA, width, hA, srcB, hB)
-			if (!r) return null
-			return { x1: 0, x2: hA - r.overlap, overlap: r.overlap, confidence: normalise(r.score), topImage: 'a' }
+			return { overlap: r.overlap, confidence: normalise(r.score), topImage: 'a' }
 		}
 		if (hint === 'b-top') {
 			const r = await findOverlapV(srcB, width, hB, srcA, hA)
-			if (!r) return null
-			return { x1: hB - r.overlap, x2: 0, overlap: r.overlap, confidence: normalise(r.score), topImage: 'b' }
+			return { overlap: r.overlap, confidence: normalise(r.score), topImage: 'b' }
 		}
 
 		const [ab, ba] = await Promise.all([
 			findOverlapV(srcA, width, hA, srcB, hB),
 			findOverlapV(srcB, width, hB, srcA, hA),
 		])
-		if (!ab && !ba) return null
-		const useAB = !ba || (ab && ab.score <= ba.score)
-		const best = useAB ? ab! : ba!
-		if (useAB) {
-			return { x1: 0, x2: hA - best.overlap, overlap: best.overlap, confidence: normalise(best.score), topImage: 'a' }
-		} else {
-			return { x1: hB - best.overlap, x2: 0, overlap: best.overlap, confidence: normalise(best.score), topImage: 'b' }
-		}
+		const useAB = ab.score <= ba.score
+		const best = useAB ? ab : ba
+		return { overlap: best.overlap, confidence: normalise(best.score), topImage: useAB ? 'a' : 'b' }
 	}
 
 	return { autoAlignHorizontal, autoAlignVertical }

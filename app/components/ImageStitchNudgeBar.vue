@@ -3,7 +3,7 @@
 		<!-- Nudge buttons -->
 		<div class="flex items-center gap-1">
 			<span class="text-muted">微调:</span>
-			<UButtonGroup size="xs">
+			<UFieldGroup size="xs">
 				<UTooltip text="上移 (↑)">
 					<UButton icon="i-lucide-arrow-up" color="neutral" variant="subtle" @click="emit('nudge', 0, -1)" />
 				</UTooltip>
@@ -16,7 +16,7 @@
 				<UTooltip text="右移 (→)">
 					<UButton icon="i-lucide-arrow-right" color="neutral" variant="subtle" @click="emit('nudge', 1, 0)" />
 				</UTooltip>
-			</UButtonGroup>
+			</UFieldGroup>
 		</div>
 
 		<!-- Position & size inputs (single selection only) -->

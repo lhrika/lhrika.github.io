@@ -153,10 +153,10 @@
 		/>
 
 		<!-- Alignment (only when ≥2 selected) -->
-		<!-- 5. UButtonGroup for alignment buttons -->
+		<!-- 5. UFieldGroup for alignment buttons -->
 		<template v-if="selectedCount >= 2">
 			<span class="text-sm text-muted">对齐:</span>
-			<UButtonGroup>
+			<UFieldGroup>
 				<UTooltip text="顶部对齐">
 					<UButton
 						icon="i-lucide-align-start-horizontal"
@@ -205,7 +205,7 @@
 						@click="emit('align', 'right')"
 					/>
 				</UTooltip>
-			</UButtonGroup>
+			</UFieldGroup>
 		</template>
 
 		<!-- Reset pan -->

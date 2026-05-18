@@ -126,13 +126,12 @@ export function useImageStitch() {
 			await db.saveBlob(id, blob)
 
 			const src = URL.createObjectURL(blob)
-			const imgEl = new Image()
-			await new Promise<void>(resolve => { imgEl.onload = () => resolve(); imgEl.src = src })
+			const imgEl = await loadImage(src)
 
 			const maxZ = images.value.reduce((m, i) => Math.max(m, i.zIndex), 0)
 			images.value.push({ id, name: file.name, src, x: 0, y: 0, width: imgEl.naturalWidth, height: imgEl.naturalHeight, zIndex: maxZ + 1 })
-			pushHistory()
 		}
+		if (files.length) pushHistory()
 	}
 
 	function cleanupObjectURLs() {
@@ -257,12 +256,8 @@ export function useImageStitch() {
 		ctx.fillStyle = store.canvasBg
 		ctx.fillRect(0, 0, canvas.width, canvas.height)
 		for (const img of sortedImages.value) {
-			await new Promise<void>(resolve => {
-				const el = new Image()
-				el.onload = () => { ctx.drawImage(el, Math.round(img.x * scaleX), Math.round(img.y * scaleY), Math.round(img.width * scaleX), Math.round(img.height * scaleY)); resolve() }
-				el.onerror = () => resolve()
-				el.src = img.src
-			})
+			const el = await loadImage(img.src).catch(() => null)
+			if (el) ctx.drawImage(el, Math.round(img.x * scaleX), Math.round(img.y * scaleY), Math.round(img.width * scaleX), Math.round(img.height * scaleY))
 		}
 		const quality = opts.format === 'image/png' ? undefined : opts.quality / 100
 		const ext = opts.format === 'image/png' ? 'png' : opts.format === 'image/jpeg' ? 'jpg' : 'webp'
