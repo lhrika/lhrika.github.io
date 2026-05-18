@@ -46,13 +46,28 @@
 				@update:model-value="emit('update:canvasHeight', Number($event))"
 			/>
 			<span class="text-muted text-sm">px</span>
-			<input
-				:value="canvasBg"
-				type="color"
-				class="w-7 h-7 rounded cursor-pointer border border-muted shrink-0"
-				title="画布背景色"
-				@input="emit('update:canvasBg', ($event.target as HTMLInputElement).value)"
-			/>
+			<UPopover>
+				<UButton
+					color="neutral"
+					variant="outline"
+					class="w-7 h-7 p-0 shrink-0"
+					title="画布背景色"
+				>
+					<span
+						class="block w-4 h-4 rounded-sm border border-muted"
+						:style="{ background: canvasBg }"
+					/>
+				</UButton>
+				<template #content>
+					<div class="p-2">
+						<UColorPicker
+							:model-value="canvasBg"
+							format="hex"
+							@update:model-value="emit('update:canvasBg', $event)"
+						/>
+					</div>
+				</template>
+			</UPopover>
 		</div>
 
 		<!-- Zoom -->
