@@ -37,14 +37,18 @@ export function useImageStitchDB() {
 
 	async function loadBlob(id: string): Promise<Blob | null> {
 		const db = await openDB()
-		const result = (await tx(db, 'readonly', store => store.get(id))) as Blob | undefined
+		const result = (await tx(db, 'readonly', store => store.get(id))) as
+			| Blob
+			| undefined
 		db.close()
 		return result ?? null
 	}
 
 	async function getAllIds(): Promise<string[]> {
 		const db = await openDB()
-		const result = (await tx(db, 'readonly', store => store.getAllKeys())) as string[]
+		const result = (await tx(db, 'readonly', store =>
+			store.getAllKeys(),
+		)) as string[]
 		db.close()
 		return result
 	}
@@ -55,11 +59,14 @@ export function useImageStitchDB() {
 		const t = db.transaction(STORE_NAME, 'readwrite')
 		const store = t.objectStore(STORE_NAME)
 		await Promise.all(
-			ids.map(id => new Promise<void>((resolve, reject) => {
-				const req = store.delete(id)
-				req.onsuccess = () => resolve()
-				req.onerror = () => reject(req.error)
-			})),
+			ids.map(
+				id =>
+					new Promise<void>((resolve, reject) => {
+						const req = store.delete(id)
+						req.onsuccess = () => resolve()
+						req.onerror = () => reject(req.error)
+					}),
+			),
 		)
 		db.close()
 	}

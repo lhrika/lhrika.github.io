@@ -1,10 +1,16 @@
 import type { StitchImageMeta } from '~/stores/imageStitch'
 
 export interface StitchImage extends StitchImageMeta {
-	src: string  // runtime blob URL — not persisted
+	src: string // runtime blob URL — not persisted
 }
 
-export type AlignEdge = 'top' | 'bottom' | 'left' | 'right' | 'center' | 'middle'
+export type AlignEdge =
+	| 'top'
+	| 'bottom'
+	| 'left'
+	| 'right'
+	| 'center'
+	| 'middle'
 
 const MAX_HISTORY = 50
 
@@ -26,15 +32,21 @@ export function useImageStitch() {
 
 	const canvasWidth = computed({
 		get: () => store.canvasWidth,
-		set: v => { store.canvasWidth = v },
+		set: v => {
+			store.canvasWidth = v
+		},
 	})
 	const canvasHeight = computed({
 		get: () => store.canvasHeight,
-		set: v => { store.canvasHeight = v },
+		set: v => {
+			store.canvasHeight = v
+		},
 	})
 	const canvasBg = computed({
 		get: () => store.canvasBg,
-		set: v => { store.canvasBg = v },
+		set: v => {
+			store.canvasBg = v
+		},
 	})
 
 	// ---- Derived ----
@@ -129,7 +141,16 @@ export function useImageStitch() {
 			const imgEl = await loadImage(src)
 
 			const maxZ = images.value.reduce((m, i) => Math.max(m, i.zIndex), 0)
-			images.value.push({ id, name: file.name, src, x: 0, y: 0, width: imgEl.naturalWidth, height: imgEl.naturalHeight, zIndex: maxZ + 1 })
+			images.value.push({
+				id,
+				name: file.name,
+				src,
+				x: 0,
+				y: 0,
+				width: imgEl.naturalWidth,
+				height: imgEl.naturalHeight,
+				zIndex: maxZ + 1,
+			})
 		}
 		if (files.length) pushHistory()
 	}
@@ -151,13 +172,18 @@ export function useImageStitch() {
 		}
 	}
 
-	function deselectAll() { selectedIds.value = [] }
+	function deselectAll() {
+		selectedIds.value = []
+	}
 
 	// ---- Nudge ----
 	function nudge(dx: number, dy: number) {
 		for (const selId of selectedIds.value) {
 			const img = images.value.find(i => i.id === selId)
-			if (img) { img.x += dx; img.y += dy }
+			if (img) {
+				img.x += dx
+				img.y += dy
+			}
 		}
 		pushHistory()
 	}
@@ -165,12 +191,18 @@ export function useImageStitch() {
 	// ---- Direct position / size input ----
 	function setPos(axis: 'x' | 'y', value: number) {
 		const img = singleSelected.value
-		if (img) { img[axis] = value; pushHistory() }
+		if (img) {
+			img[axis] = value
+			pushHistory()
+		}
 	}
 
 	function setSize(dim: 'width' | 'height', value: number) {
 		const img = singleSelected.value
-		if (img) { img[dim] = Math.max(1, value); pushHistory() }
+		if (img) {
+			img[dim] = Math.max(1, value)
+			pushHistory()
+		}
 	}
 
 	// ---- Layer order ----
@@ -189,12 +221,16 @@ export function useImageStitch() {
 		if (edge === 'top') {
 			const maxZ = Math.max(...images.value.map(i => i.zIndex))
 			if (img.zIndex === maxZ) return
-			images.value.forEach(i => { if (i.zIndex > img.zIndex) i.zIndex-- })
+			images.value.forEach(i => {
+				if (i.zIndex > img.zIndex) i.zIndex--
+			})
 			img.zIndex = maxZ
 		} else {
 			const minZ = Math.min(...images.value.map(i => i.zIndex))
 			if (img.zIndex === minZ) return
-			images.value.forEach(i => { if (i.zIndex < img.zIndex) i.zIndex++ })
+			images.value.forEach(i => {
+				if (i.zIndex < img.zIndex) i.zIndex++
+			})
 			img.zIndex = minZ
 		}
 		pushHistory()
@@ -222,22 +258,50 @@ export function useImageStitch() {
 		const selected = images.value.filter(i => selectedIds.value.includes(i.id))
 		if (selected.length < 2) return
 		switch (edge) {
-			case 'top': { const minY = Math.min(...selected.map(i => i.y)); selected.forEach(i => { i.y = minY }); break }
-			case 'bottom': { const maxB = Math.max(...selected.map(i => i.y + i.height)); selected.forEach(i => { i.y = maxB - i.height }); break }
-			case 'left': { const minX = Math.min(...selected.map(i => i.x)); selected.forEach(i => { i.x = minX }); break }
-			case 'right': { const maxR = Math.max(...selected.map(i => i.x + i.width)); selected.forEach(i => { i.x = maxR - i.width }); break }
+			case 'top': {
+				const minY = Math.min(...selected.map(i => i.y))
+				selected.forEach(i => {
+					i.y = minY
+				})
+				break
+			}
+			case 'bottom': {
+				const maxB = Math.max(...selected.map(i => i.y + i.height))
+				selected.forEach(i => {
+					i.y = maxB - i.height
+				})
+				break
+			}
+			case 'left': {
+				const minX = Math.min(...selected.map(i => i.x))
+				selected.forEach(i => {
+					i.x = minX
+				})
+				break
+			}
+			case 'right': {
+				const maxR = Math.max(...selected.map(i => i.x + i.width))
+				selected.forEach(i => {
+					i.x = maxR - i.width
+				})
+				break
+			}
 			case 'center': {
 				const minX = Math.min(...selected.map(i => i.x))
 				const maxR = Math.max(...selected.map(i => i.x + i.width))
 				const cx = (minX + maxR) / 2
-				selected.forEach(i => { i.x = Math.round(cx - i.width / 2) })
+				selected.forEach(i => {
+					i.x = Math.round(cx - i.width / 2)
+				})
 				break
 			}
 			case 'middle': {
 				const minY = Math.min(...selected.map(i => i.y))
 				const maxB = Math.max(...selected.map(i => i.y + i.height))
 				const cy = (minY + maxB) / 2
-				selected.forEach(i => { i.y = Math.round(cy - i.height / 2) })
+				selected.forEach(i => {
+					i.y = Math.round(cy - i.height / 2)
+				})
 				break
 			}
 		}
@@ -245,7 +309,13 @@ export function useImageStitch() {
 	}
 
 	// ---- Export ----
-	async function exportImage(opts: { format: string; width: number; height: number; quality: number; filename?: string }) {
+	async function exportImage(opts: {
+		format: string
+		width: number
+		height: number
+		quality: number
+		filename?: string
+	}) {
 		const canvas = document.createElement('canvas')
 		canvas.width = opts.width
 		canvas.height = opts.height
@@ -257,10 +327,22 @@ export function useImageStitch() {
 		ctx.fillRect(0, 0, canvas.width, canvas.height)
 		for (const img of sortedImages.value) {
 			const el = await loadImage(img.src).catch(() => null)
-			if (el) ctx.drawImage(el, Math.round(img.x * scaleX), Math.round(img.y * scaleY), Math.round(img.width * scaleX), Math.round(img.height * scaleY))
+			if (el)
+				ctx.drawImage(
+					el,
+					Math.round(img.x * scaleX),
+					Math.round(img.y * scaleY),
+					Math.round(img.width * scaleX),
+					Math.round(img.height * scaleY),
+				)
 		}
 		const quality = opts.format === 'image/png' ? undefined : opts.quality / 100
-		const ext = opts.format === 'image/png' ? 'png' : opts.format === 'image/jpeg' ? 'jpg' : 'webp'
+		const ext =
+			opts.format === 'image/png'
+				? 'png'
+				: opts.format === 'image/jpeg'
+					? 'jpg'
+					: 'webp'
 		const a = document.createElement('a')
 		a.href = canvas.toDataURL(opts.format, quality)
 		a.download = `${opts.filename || 'stitched-image'}.${ext}`
@@ -312,7 +394,10 @@ export function useImageStitch() {
 	// ---- Auto align (two selected images) ----
 	// Detects whether to align horizontally or vertically based on image dimensions
 	// and current positions, then applies the best overlap found.
-	async function autoAlignSelected(): Promise<{ overlap: number; confidence: number } | null> {
+	async function autoAlignSelected(): Promise<{
+		overlap: number
+		confidence: number
+	} | null> {
 		if (selectedIds.value.length !== 2) return null
 		const [idA, idB] = selectedIds.value
 		const imgA = images.value.find(i => i.id === idA)
@@ -335,11 +420,12 @@ export function useImageStitch() {
 		// - only same width: vertical
 		// - only same height: horizontal
 		// - neither: use current position spread to decide
-		const useVertical = sameWidth && !sameHeight
-			? true
-			: sameHeight && !sameWidth
-				? false
-				: diffY >= diffX // both same or neither — follow the dominant spread
+		const useVertical =
+			sameWidth && !sameHeight
+				? true
+				: sameHeight && !sameWidth
+					? false
+					: diffY >= diffX // both same or neither — follow the dominant spread
 
 		if (useVertical) {
 			// Vertical alignment — images must share the same width
@@ -347,7 +433,14 @@ export function useImageStitch() {
 			let hint: 'a-top' | 'b-top' | undefined
 			if (diffY > 10) hint = centerAy < centerBy ? 'a-top' : 'b-top'
 
-			const result = await autoAlignVertical(imgA.src, imgA.height, imgB.src, imgB.height, w, hint)
+			const result = await autoAlignVertical(
+				imgA.src,
+				imgA.height,
+				imgB.src,
+				imgB.height,
+				w,
+				hint,
+			)
 			if (!result) return null
 
 			const topImg = result.topImage === 'a' ? imgA : imgB
@@ -366,7 +459,14 @@ export function useImageStitch() {
 			let hint: 'a-left' | 'b-left' | undefined
 			if (diffX > 10) hint = centerAx < centerBx ? 'a-left' : 'b-left'
 
-			const result = await autoAlignHorizontal(imgA.src, imgA.width, imgB.src, imgB.width, h, hint)
+			const result = await autoAlignHorizontal(
+				imgA.src,
+				imgA.width,
+				imgB.src,
+				imgB.width,
+				h,
+				hint,
+			)
 			if (!result) return null
 
 			const leftImg = result.leftImage === 'a' ? imgA : imgB

@@ -2,7 +2,10 @@
 	<div
 		ref="containerRef"
 		class="relative overflow-hidden border border-muted rounded-lg bg-[#e5e7eb] flex-1 min-h-100"
-		:style="{ maxHeight: fullscreen ? 'none' : '70vh', cursor: spaceDown ? (isPanning ? 'grabbing' : 'grab') : 'default' }"
+		:style="{
+			maxHeight: fullscreen ? 'none' : '70vh',
+			cursor: spaceDown ? (isPanning ? 'grabbing' : 'grab') : 'default',
+		}"
 		@mousedown="onContainerMouseDown"
 	>
 		<!-- Canvas surface -->
@@ -32,7 +35,9 @@
 					height: img.height * zoom + 'px',
 					zIndex: img.zIndex,
 					cursor: dragging?.id === img.id ? 'grabbing' : 'grab',
-					outline: selectedIds.includes(img.id) ? '2px solid #6366f1' : '2px solid transparent',
+					outline: selectedIds.includes(img.id)
+						? '2px solid #6366f1'
+						: '2px solid transparent',
 					boxSizing: 'border-box',
 					userSelect: 'none',
 				}"
@@ -41,7 +46,13 @@
 			>
 				<img
 					:src="img.src"
-					:style="{ width: '100%', height: '100%', display: 'block', pointerEvents: 'none', userSelect: 'none' }"
+					:style="{
+						width: '100%',
+						height: '100%',
+						display: 'block',
+						pointerEvents: 'none',
+						userSelect: 'none',
+					}"
 					draggable="false"
 				/>
 				<div
@@ -79,7 +90,12 @@ const panOffset = ref({ x: 0, y: 0 })
 const spaceDown = ref(false)
 const isPanning = ref(false)
 
-interface PanState { startMouseX: number; startMouseY: number; startPanX: number; startPanY: number }
+interface PanState {
+	startMouseX: number
+	startMouseY: number
+	startPanX: number
+	startPanY: number
+}
 const panState = ref<PanState | null>(null)
 
 function onContainerMouseDown(e: MouseEvent) {
@@ -96,7 +112,13 @@ function onContainerMouseDown(e: MouseEvent) {
 }
 
 // ---- Drag to move ----
-interface DragState { id: string; startMouseX: number; startMouseY: number; startX: number; startY: number }
+interface DragState {
+	id: string
+	startMouseX: number
+	startMouseY: number
+	startX: number
+	startY: number
+}
 const dragging = ref<DragState | null>(null)
 const multiDragOrigins = ref<Record<string, { x: number; y: number }>>({})
 
@@ -104,7 +126,13 @@ function startDrag(e: MouseEvent, id: string) {
 	if (e.button !== 0) return
 	const img = props.sortedImages.find(i => i.id === id)
 	if (!img) return
-	dragging.value = { id, startMouseX: e.clientX, startMouseY: e.clientY, startX: img.x, startY: img.y }
+	dragging.value = {
+		id,
+		startMouseX: e.clientX,
+		startMouseY: e.clientY,
+		startX: img.x,
+		startY: img.y,
+	}
 	// Capture multi-drag origins
 	if (props.selectedIds.includes(id) && props.selectedIds.length > 1) {
 		multiDragOrigins.value = {}
@@ -116,14 +144,26 @@ function startDrag(e: MouseEvent, id: string) {
 }
 
 // ---- Resize ----
-interface ResizeState { id: string; startMouseX: number; startMouseY: number; startWidth: number; startHeight: number }
+interface ResizeState {
+	id: string
+	startMouseX: number
+	startMouseY: number
+	startWidth: number
+	startHeight: number
+}
 const resizing = ref<ResizeState | null>(null)
 
 function startResize(e: MouseEvent, id: string) {
 	if (e.button !== 0) return
 	const img = props.sortedImages.find(i => i.id === id)
 	if (!img) return
-	resizing.value = { id, startMouseX: e.clientX, startMouseY: e.clientY, startWidth: img.width, startHeight: img.height }
+	resizing.value = {
+		id,
+		startMouseX: e.clientX,
+		startMouseY: e.clientY,
+		startWidth: img.width,
+		startHeight: img.height,
+	}
 }
 
 // ---- Global mouse events ----
@@ -140,15 +180,24 @@ function onMouseMove(e: MouseEvent) {
 		const dx = Math.round((e.clientX - dragging.value.startMouseX) / props.zoom)
 		const dy = Math.round((e.clientY - dragging.value.startMouseY) / props.zoom)
 
-		if (props.selectedIds.length > 1 && props.selectedIds.includes(dragging.value.id)) {
+		if (
+			props.selectedIds.length > 1 &&
+			props.selectedIds.includes(dragging.value.id)
+		) {
 			for (const selId of props.selectedIds) {
 				const img = props.sortedImages.find(i => i.id === selId)
 				const origin = multiDragOrigins.value[selId]
-				if (img && origin) { img.x = origin.x + dx; img.y = origin.y + dy }
+				if (img && origin) {
+					img.x = origin.x + dx
+					img.y = origin.y + dy
+				}
 			}
 		} else {
 			const img = props.sortedImages.find(i => i.id === dragging.value!.id)
-			if (img) { img.x = dragging.value.startX + dx; img.y = dragging.value.startY + dy }
+			if (img) {
+				img.x = dragging.value.startX + dx
+				img.y = dragging.value.startY + dy
+			}
 		}
 	}
 
@@ -188,21 +237,37 @@ function onWheel(e: WheelEvent) {
 		// Since zoom is a prop, we emit an update event.
 		zoomEmit(Math.min(4, Math.max(0.1, +(props.zoom + delta).toFixed(3))))
 	} else {
-		panOffset.value = { x: panOffset.value.x - e.deltaX, y: panOffset.value.y - e.deltaY }
+		panOffset.value = {
+			x: panOffset.value.x - e.deltaX,
+			y: panOffset.value.y - e.deltaY,
+		}
 	}
 }
 
-function zoomEmit(v: number) { emit('update:zoom', v) }
+function zoomEmit(v: number) {
+	emit('update:zoom', v)
+}
 
 // ---- Expose ----
-defineExpose({ resetPan: () => { panOffset.value = { x: 0, y: 0 } } })
+defineExpose({
+	resetPan: () => {
+		panOffset.value = { x: 0, y: 0 }
+	},
+})
 
 // ---- Keyboard ----
 function onKeyDown(e: KeyboardEvent) {
-	if (e.key === ' ' && !e.repeat) { e.preventDefault(); spaceDown.value = true }
+	if (e.key === ' ' && !e.repeat) {
+		e.preventDefault()
+		spaceDown.value = true
+	}
 }
 function onKeyUp(e: KeyboardEvent) {
-	if (e.key === ' ') { spaceDown.value = false; isPanning.value = false; panState.value = null }
+	if (e.key === ' ') {
+		spaceDown.value = false
+		isPanning.value = false
+		panState.value = null
+	}
 }
 
 onMounted(() => {

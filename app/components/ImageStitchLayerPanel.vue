@@ -18,7 +18,8 @@
 				:class="{
 					'bg-primary/10': selectedIds.includes(img.id),
 					'border-t-primary!': dragOver === img.id && dragPos === 'before',
-					'border-b-primary! border-b-2': dragOver === img.id && dragPos === 'after',
+					'border-b-primary! border-b-2':
+						dragOver === img.id && dragPos === 'after',
 					'opacity-40': dragging === img.id,
 				}"
 				@click.stop="emit('select', $event, img.id)"
@@ -28,7 +29,10 @@
 				@dragleave="onDragLeave(img.id)"
 				@drop.prevent.stop="onDrop($event, img.id)"
 			>
-				<Icon name="i-lucide-grip-vertical" class="size-3 text-muted shrink-0" />
+				<Icon
+					name="i-lucide-grip-vertical"
+					class="size-3 text-muted shrink-0"
+				/>
 				<img :src="img.src" class="w-7 h-7 object-cover rounded shrink-0" />
 				<span class="flex-1 truncate text-muted">{{ img.name }}</span>
 			</div>
@@ -41,7 +45,9 @@
 						icon="i-lucide-chevron-up"
 						color="neutral"
 						variant="subtle"
-						:disabled="!singleSelected || singleSelected.zIndex >= sortedImages.length"
+						:disabled="
+							!singleSelected || singleSelected.zIndex >= sortedImages.length
+						"
 						@click="singleSelected && emit('moveLayer', singleSelected.id, 1)"
 					/>
 				</UTooltip>
@@ -59,8 +65,13 @@
 						icon="i-lucide-bring-to-front"
 						color="neutral"
 						variant="subtle"
-						:disabled="!singleSelected || singleSelected.zIndex >= sortedImages.length"
-						@click="singleSelected && emit('moveLayerToEdge', singleSelected.id, 'top')"
+						:disabled="
+							!singleSelected || singleSelected.zIndex >= sortedImages.length
+						"
+						@click="
+							singleSelected &&
+							emit('moveLayerToEdge', singleSelected.id, 'top')
+						"
 					/>
 				</UTooltip>
 				<UTooltip text="置底">
@@ -69,7 +80,10 @@
 						color="neutral"
 						variant="subtle"
 						:disabled="!singleSelected || singleSelected.zIndex <= 1"
-						@click="singleSelected && emit('moveLayerToEdge', singleSelected.id, 'bottom')"
+						@click="
+							singleSelected &&
+							emit('moveLayerToEdge', singleSelected.id, 'bottom')
+						"
 					/>
 				</UTooltip>
 			</UFieldGroup>
@@ -153,6 +167,9 @@ function onDrop(_e: DragEvent, targetId: string | null) {
 		ordered.splice(insertIdx, 0, srcImg)
 	}
 
-	emit('reorder', ordered.map(i => i.id))
+	emit(
+		'reorder',
+		ordered.map(i => i.id),
+	)
 }
 </script>

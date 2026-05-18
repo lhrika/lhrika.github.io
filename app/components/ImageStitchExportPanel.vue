@@ -33,7 +33,15 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-	export: [opts: { format: string; width: number; height: number; quality: number; filename: string }]
+	export: [
+		opts: {
+			format: string
+			width: number
+			height: number
+			quality: number
+			filename: string
+		},
+	]
 }>()
 
 const formatOptions = [
@@ -48,10 +56,26 @@ const width = ref(props.canvasWidth)
 const height = ref(props.canvasHeight)
 const quality = ref(90)
 
-watch(() => props.canvasWidth, v => { width.value = v })
-watch(() => props.canvasHeight, v => { height.value = v })
+watch(
+	() => props.canvasWidth,
+	v => {
+		width.value = v
+	},
+)
+watch(
+	() => props.canvasHeight,
+	v => {
+		height.value = v
+	},
+)
 
 function onExport() {
-	emit('export', { format: format.value, width: width.value, height: height.value, quality: quality.value, filename: filename.value || 'stitched-image' })
+	emit('export', {
+		format: format.value,
+		width: width.value,
+		height: height.value,
+		quality: quality.value,
+		filename: filename.value || 'stitched-image',
+	})
 }
 </script>

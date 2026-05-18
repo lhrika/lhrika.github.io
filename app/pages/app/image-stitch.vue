@@ -8,9 +8,11 @@
 			<UContainer>
 				<div
 					ref="editorRef"
-					:class="isFullscreen
-						? 'flex flex-col p-3 gap-3 h-screen bg-default'
-						: 'flex flex-col gap-4'"
+					:class="
+						isFullscreen
+							? 'flex flex-col p-3 gap-3 h-screen bg-default'
+							: 'flex flex-col gap-4'
+					"
 				>
 					<!-- 7. USkeleton loading state -->
 					<template v-if="loading">
@@ -51,7 +53,10 @@
 							@export="onExport"
 						/>
 
-						<div class="flex gap-4 min-h-0" :class="isFullscreen ? 'flex-1' : ''">
+						<div
+							class="flex gap-4 min-h-0"
+							:class="isFullscreen ? 'flex-1' : ''"
+						>
 							<ImageStitchCanvas
 								ref="canvasRef"
 								:sorted-images="sortedImages"
@@ -76,7 +81,11 @@
 								@select="selectImage"
 								@move-layer="moveLayer"
 								@move-layer-to-edge="moveLayerToEdge"
-								@remove-selected="() => { for (const id of [...selectedIds]) removeImage(id) }"
+								@remove-selected="
+									() => {
+										for (const id of [...selectedIds]) removeImage(id)
+									}
+								"
 								@reorder="reorderLayers"
 							/>
 						</div>
@@ -94,13 +103,25 @@
 		</UPageBody>
 
 		<!-- 2. Confirm clear all modal -->
-		<UModal v-model:open="showClearModal" title="清空画布" :ui="{ footer: 'justify-end' }">
-			<template #body>
-				确定要清空所有图片吗？此操作不可撤销。
-			</template>
+		<UModal
+			v-model:open="showClearModal"
+			title="清空画布"
+			:ui="{ footer: 'justify-end' }"
+		>
+			<template #body> 确定要清空所有图片吗？此操作不可撤销。 </template>
 			<template #footer>
-				<UButton label="取消" color="neutral" variant="outline" @click="showClearModal = false" />
-				<UButton label="清空" color="error" icon="i-lucide-trash-2" @click="onClearAll" />
+				<UButton
+					label="取消"
+					color="neutral"
+					variant="outline"
+					@click="showClearModal = false"
+				/>
+				<UButton
+					label="清空"
+					color="error"
+					icon="i-lucide-trash-2"
+					@click="onClearAll"
+				/>
 			</template>
 		</UModal>
 	</UPage>
@@ -159,16 +180,30 @@ async function onOpenProjectFile(file: File) {
 async function onSaveProject() {
 	try {
 		await saveProject()
-		toast.add({ title: '项目已保存', color: 'success', icon: 'i-lucide-check-circle' })
+		toast.add({
+			title: '项目已保存',
+			color: 'success',
+			icon: 'i-lucide-check-circle',
+		})
 	} catch {
 		toast.add({ title: '保存失败', color: 'error', icon: 'i-lucide-circle-x' })
 	}
 }
 
-async function onExport(opts: { format: string; width: number; height: number; quality: number; filename: string }) {
+async function onExport(opts: {
+	format: string
+	width: number
+	height: number
+	quality: number
+	filename: string
+}) {
 	try {
 		await exportImage(opts)
-		toast.add({ title: '导出成功', color: 'success', icon: 'i-lucide-check-circle' })
+		toast.add({
+			title: '导出成功',
+			color: 'success',
+			icon: 'i-lucide-check-circle',
+		})
 	} catch {
 		toast.add({ title: '导出失败', color: 'error', icon: 'i-lucide-circle-x' })
 	}
@@ -176,7 +211,12 @@ async function onExport(opts: { format: string; width: number; height: number; q
 
 function onCropToContent() {
 	cropToContent()
-	toast.add({ title: '画布已裁剪', color: 'success', icon: 'i-lucide-crop', duration: 2000 })
+	toast.add({
+		title: '画布已裁剪',
+		color: 'success',
+		icon: 'i-lucide-crop',
+		duration: 2000,
+	})
 }
 
 const zoom = ref(1)
@@ -195,12 +235,20 @@ async function onAutoAlign() {
 			icon: 'i-lucide-combine',
 		})
 	} else {
-		toast.add({ title: '未能找到匹配区域', color: 'warning', icon: 'i-lucide-triangle-alert' })
+		toast.add({
+			title: '未能找到匹配区域',
+			color: 'warning',
+			icon: 'i-lucide-triangle-alert',
+		})
 	}
 }
 
-function onDragEnd() { pushHistory() }
-function onResizeEnd() { pushHistory() }
+function onDragEnd() {
+	pushHistory()
+}
+function onResizeEnd() {
+	pushHistory()
+}
 
 // 2. Clear all confirmation modal
 const showClearModal = ref(false)
@@ -212,7 +260,12 @@ function confirmClearAll() {
 async function onClearAll() {
 	showClearModal.value = false
 	await clearAll()
-	toast.add({ title: '画布已清空', color: 'neutral', icon: 'i-lucide-trash-2', duration: 2000 })
+	toast.add({
+		title: '画布已清空',
+		color: 'neutral',
+		icon: 'i-lucide-trash-2',
+		duration: 2000,
+	})
 }
 
 // Canvas ref (for resetPan)
@@ -242,10 +295,22 @@ function onKeyDown(e: KeyboardEvent) {
 	// Undo/redo handled by defineShortcuts
 	if (selectedIds.value.length === 0) return
 	const step = e.shiftKey ? 10 : 1
-	if (e.key === 'ArrowUp') { e.preventDefault(); nudge(0, -step) }
-	if (e.key === 'ArrowDown') { e.preventDefault(); nudge(0, step) }
-	if (e.key === 'ArrowLeft') { e.preventDefault(); nudge(-step, 0) }
-	if (e.key === 'ArrowRight') { e.preventDefault(); nudge(step, 0) }
+	if (e.key === 'ArrowUp') {
+		e.preventDefault()
+		nudge(0, -step)
+	}
+	if (e.key === 'ArrowDown') {
+		e.preventDefault()
+		nudge(0, step)
+	}
+	if (e.key === 'ArrowLeft') {
+		e.preventDefault()
+		nudge(-step, 0)
+	}
+	if (e.key === 'ArrowRight') {
+		e.preventDefault()
+		nudge(step, 0)
+	}
 	if (e.key === 'Delete' || e.key === 'Backspace') {
 		for (const id of [...selectedIds.value]) removeImage(id)
 	}

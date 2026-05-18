@@ -2,12 +2,21 @@ import { zipSync, unzipSync, strToU8, strFromU8 } from 'fflate'
 import type { StitchImageMeta } from '~/stores/imageStitch'
 
 // File System Access API — available in Chrome/Edge but not in all TS lib versions
-interface FSAPickerType { description?: string; accept: Record<string, string[]> }
+interface FSAPickerType {
+	description?: string
+	accept: Record<string, string[]>
+}
 interface WithSaveFilePicker {
-	showSaveFilePicker(opts?: { suggestedName?: string; types?: FSAPickerType[] }): Promise<FileSystemFileHandle>
+	showSaveFilePicker(opts?: {
+		suggestedName?: string
+		types?: FSAPickerType[]
+	}): Promise<FileSystemFileHandle>
 }
 interface WithOpenFilePicker {
-	showOpenFilePicker(opts?: { types?: FSAPickerType[]; multiple?: boolean }): Promise<FileSystemFileHandle[]>
+	showOpenFilePicker(opts?: {
+		types?: FSAPickerType[]
+		multiple?: boolean
+	}): Promise<FileSystemFileHandle[]>
 }
 
 const FILE_EXT = 'stitch'
@@ -87,9 +96,16 @@ export function useImageStitchFile() {
 		// Try File System Access API first (shows native save dialog)
 		if ('showSaveFilePicker' in window) {
 			try {
-				const handle = await (window as Window & WithSaveFilePicker).showSaveFilePicker({
+				const handle = await (
+					window as Window & WithSaveFilePicker
+				).showSaveFilePicker({
 					suggestedName: `project.${FILE_EXT}`,
-					types: [{ description: 'Stitch Project', accept: { [MIME_TYPE]: [`.${FILE_EXT}`] } }],
+					types: [
+						{
+							description: 'Stitch Project',
+							accept: { [MIME_TYPE]: [`.${FILE_EXT}`] },
+						},
+					],
 				})
 				const writable = await handle.createWritable()
 				await writable.write(blob)
@@ -123,7 +139,8 @@ export function useImageStitchFile() {
 		const entries = unzipSync(new Uint8Array(buf))
 
 		const manifestRaw = entries['manifest.json']
-		if (!manifestRaw) throw new Error('Invalid .stitch file: missing manifest.json')
+		if (!manifestRaw)
+			throw new Error('Invalid .stitch file: missing manifest.json')
 
 		const manifest = JSON.parse(strFromU8(manifestRaw)) as StitchManifest
 
@@ -153,8 +170,15 @@ export function useImageStitchFile() {
 		// Try File System Access API
 		if ('showOpenFilePicker' in window) {
 			try {
-				const handles = await (window as Window & WithOpenFilePicker).showOpenFilePicker({
-					types: [{ description: 'Stitch Project', accept: { [MIME_TYPE]: [`.${FILE_EXT}`] } }],
+				const handles = await (
+					window as Window & WithOpenFilePicker
+				).showOpenFilePicker({
+					types: [
+						{
+							description: 'Stitch Project',
+							accept: { [MIME_TYPE]: [`.${FILE_EXT}`] },
+						},
+					],
 				})
 				const handle = handles[0]
 				if (!handle) return null
