@@ -1,6 +1,6 @@
 <template>
 	<div class="flex flex-wrap gap-2 items-center">
-		<!-- Project: open / save -->
+		<!-- Project: open / save — collapsed into dropdown -->
 		<UFileUpload
 			v-model="projectFile"
 			accept=".stitch"
@@ -8,24 +8,19 @@
 			:dropzone="false"
 		>
 			<template #default="{ open: openProjectPicker }">
-				<UButton
-					icon="i-lucide-folder-open"
-					label="打开项目"
-					color="neutral"
-					variant="outline"
-					@click="onOpenProject(openProjectPicker)"
-				/>
+				<UDropdownMenu :items="projectMenuItems(openProjectPicker)">
+					<UButton
+						icon="i-lucide-folder"
+						label="项目"
+						color="neutral"
+						variant="outline"
+						trailing-icon="i-lucide-chevron-down"
+					/>
+				</UDropdownMenu>
 			</template>
 		</UFileUpload>
-		<UButton
-			icon="i-lucide-save"
-			label="保存项目"
-			color="neutral"
-			variant="outline"
-			@click="emit('saveProject')"
-		/>
 
-		<div class="w-px h-6 bg-muted mx-1" />
+		<div class="w-px h-6 bg-muted" />
 
 		<!-- Add images -->
 		<UFileUpload
@@ -44,41 +39,33 @@
 			</template>
 		</UFileUpload>
 
-		<!-- Canvas size -->
-		<!-- 4. UInputNumber for canvas dimensions -->
+		<!-- Canvas size + background -->
 		<div class="flex items-center gap-1">
 			<UInputNumber
 				:model-value="canvasWidth"
 				:min="100"
 				:max="10000"
-				class="w-32"
+				:increment="false"
+				:decrement="false"
+				class="w-24"
 				placeholder="宽"
 				@update:model-value="emit('update:canvasWidth', $event ?? canvasWidth)"
 			/>
-			<span class="text-muted text-sm">×</span>
+			<span class="text-muted text-xs">×</span>
 			<UInputNumber
 				:model-value="canvasHeight"
 				:min="100"
 				:max="10000"
-				class="w-32"
+				:increment="false"
+				:decrement="false"
+				class="w-24"
 				placeholder="高"
-				@update:model-value="
-					emit('update:canvasHeight', $event ?? canvasHeight)
-				"
+				@update:model-value="emit('update:canvasHeight', $event ?? canvasHeight)"
 			/>
-			<span class="text-muted text-sm">px</span>
-			<!-- 8. UTooltip for background color button -->
 			<UTooltip text="画布背景色">
 				<UPopover>
-					<UButton
-						color="neutral"
-						variant="outline"
-						class="w-7 h-7 p-0 shrink-0"
-					>
-						<span
-							class="block w-4 h-4 rounded-sm border border-muted"
-							:style="{ background: canvasBg }"
-						/>
+					<UButton color="neutral" variant="outline" class="w-7 h-7 p-0 shrink-0">
+						<span class="block w-4 h-4 rounded-sm border border-muted" :style="{ background: canvasBg }" />
 					</UButton>
 					<template #content>
 						<div class="p-2">
@@ -97,19 +84,19 @@
 		<div class="flex items-center gap-1">
 			<UTooltip text="缩小">
 				<UButton
-					icon="i-lucide-zoom-out"
+					icon="i-lucide-minus"
+					size="xs"
 					color="neutral"
 					variant="subtle"
 					:disabled="zoom <= 0.1"
 					@click="emit('update:zoom', Math.max(0.1, +(zoom - 0.1).toFixed(1)))"
 				/>
 			</UTooltip>
-			<span class="text-sm w-12 text-center"
-				>{{ Math.round(zoom * 100) }}%</span
-			>
+			<span class="text-sm w-10 text-center tabular-nums">{{ Math.round(zoom * 100) }}%</span>
 			<UTooltip text="放大">
 				<UButton
-					icon="i-lucide-zoom-in"
+					icon="i-lucide-plus"
+					size="xs"
 					color="neutral"
 					variant="subtle"
 					:disabled="zoom >= 4"
@@ -119,25 +106,14 @@
 		</div>
 
 		<!-- Undo / Redo -->
-		<!-- 8. UTooltip for icon-only buttons -->
-		<UTooltip text="撤销 (⌘Z)">
-			<UButton
-				icon="i-lucide-undo-2"
-				color="neutral"
-				variant="subtle"
-				:disabled="!canUndo"
-				@click="emit('undo')"
-			/>
-		</UTooltip>
-		<UTooltip text="重做 (⌘⇧Z)">
-			<UButton
-				icon="i-lucide-redo-2"
-				color="neutral"
-				variant="subtle"
-				:disabled="!canRedo"
-				@click="emit('redo')"
-			/>
-		</UTooltip>
+		<UFieldGroup>
+			<UTooltip text="撤销 (⌘Z)">
+				<UButton icon="i-lucide-undo-2" color="neutral" variant="subtle" :disabled="!canUndo" @click="emit('undo')" />
+			</UTooltip>
+			<UTooltip text="重做 (⌘⇧Z)">
+				<UButton icon="i-lucide-redo-2" color="neutral" variant="subtle" :disabled="!canRedo" @click="emit('redo')" />
+			</UTooltip>
+		</UFieldGroup>
 
 		<div class="flex-1" />
 
@@ -153,94 +129,44 @@
 		/>
 
 		<!-- Alignment (only when ≥2 selected) -->
-		<!-- 5. UFieldGroup for alignment buttons -->
 		<template v-if="selectedCount >= 2">
 			<span class="text-sm text-muted">对齐:</span>
 			<UFieldGroup>
 				<UTooltip text="顶部对齐">
-					<UButton
-						icon="i-lucide-align-start-horizontal"
-						color="neutral"
-						variant="subtle"
-						@click="emit('align', 'top')"
-					/>
+					<UButton icon="i-lucide-align-start-horizontal" color="neutral" variant="subtle" @click="emit('align', 'top')" />
 				</UTooltip>
 				<UTooltip text="垂直居中">
-					<UButton
-						icon="i-lucide-align-center-horizontal"
-						color="neutral"
-						variant="subtle"
-						@click="emit('align', 'middle')"
-					/>
+					<UButton icon="i-lucide-align-center-horizontal" color="neutral" variant="subtle" @click="emit('align', 'middle')" />
 				</UTooltip>
 				<UTooltip text="底部对齐">
-					<UButton
-						icon="i-lucide-align-end-horizontal"
-						color="neutral"
-						variant="subtle"
-						@click="emit('align', 'bottom')"
-					/>
+					<UButton icon="i-lucide-align-end-horizontal" color="neutral" variant="subtle" @click="emit('align', 'bottom')" />
 				</UTooltip>
 				<UTooltip text="左侧对齐">
-					<UButton
-						icon="i-lucide-align-start-vertical"
-						color="neutral"
-						variant="subtle"
-						@click="emit('align', 'left')"
-					/>
+					<UButton icon="i-lucide-align-start-vertical" color="neutral" variant="subtle" @click="emit('align', 'left')" />
 				</UTooltip>
 				<UTooltip text="水平居中">
-					<UButton
-						icon="i-lucide-align-center-vertical"
-						color="neutral"
-						variant="subtle"
-						@click="emit('align', 'center')"
-					/>
+					<UButton icon="i-lucide-align-center-vertical" color="neutral" variant="subtle" @click="emit('align', 'center')" />
 				</UTooltip>
 				<UTooltip text="右侧对齐">
-					<UButton
-						icon="i-lucide-align-end-vertical"
-						color="neutral"
-						variant="subtle"
-						@click="emit('align', 'right')"
-					/>
+					<UButton icon="i-lucide-align-end-vertical" color="neutral" variant="subtle" @click="emit('align', 'right')" />
 				</UTooltip>
 			</UFieldGroup>
 		</template>
 
-		<!-- Reset pan -->
-		<UTooltip text="画布恢复到中心位置">
-			<UButton
-				icon="i-lucide-locate"
-				color="neutral"
-				variant="subtle"
-				@click="emit('resetPan')"
-			/>
-		</UTooltip>
+		<!-- Canvas utilities: reset pan / crop / clear — grouped -->
+		<UFieldGroup>
+			<UTooltip text="画布恢复到中心位置">
+				<UButton icon="i-lucide-locate" color="neutral" variant="subtle" @click="emit('resetPan')" />
+			</UTooltip>
+			<UTooltip text="裁剪画布：去掉没有图片的空白区域">
+				<UButton icon="i-lucide-crop" color="neutral" variant="subtle" :disabled="imageCount === 0" @click="emit('cropToContent')" />
+			</UTooltip>
+			<UTooltip text="清空画布">
+				<UButton icon="i-lucide-trash-2" color="error" variant="subtle" :disabled="imageCount === 0" @click="emit('clearAll')" />
+			</UTooltip>
+		</UFieldGroup>
 
-		<!-- Crop to content -->
-		<UTooltip text="裁剪画布：去掉没有图片的空白区域">
-			<UButton
-				icon="i-lucide-crop"
-				color="neutral"
-				variant="subtle"
-				:disabled="imageCount === 0"
-				@click="emit('cropToContent')"
-			/>
-		</UTooltip>
-
-		<!-- Clear all -->
-		<UTooltip text="清空画布">
-			<UButton
-				icon="i-lucide-trash-2"
-				color="error"
-				variant="subtle"
-				:disabled="imageCount === 0"
-				@click="emit('clearAll')"
-			/>
-		</UTooltip>
-
-		<!-- Export toggle -->
+		<!-- Export -->
 		<UButton
 			icon="i-lucide-download"
 			label="导出"
@@ -313,11 +239,26 @@ watch(projectFile, file => {
 	}
 })
 
-function onOpenProject(openPicker: () => void) {
-	if ('showOpenFilePicker' in window) {
-		emit('openProjectFile', new File([], '__picker__'))
-		return
-	}
-	openPicker()
+function projectMenuItems(openPicker: () => void) {
+	return [
+		[
+			{
+				label: '打开项目',
+				icon: 'i-lucide-folder-open',
+				onSelect: () => {
+					if ('showOpenFilePicker' in window) {
+						emit('openProjectFile', new File([], '__picker__'))
+					} else {
+						openPicker()
+					}
+				},
+			},
+			{
+				label: '保存项目',
+				icon: 'i-lucide-save',
+				onSelect: () => emit('saveProject'),
+			},
+		],
+	]
 }
 </script>
