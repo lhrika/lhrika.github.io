@@ -208,6 +208,16 @@
 			</UButtonGroup>
 		</template>
 
+		<!-- Reset pan -->
+		<UTooltip text="画布恢复到中心位置">
+			<UButton
+				icon="i-lucide-locate"
+				color="neutral"
+				variant="subtle"
+				@click="emit('resetPan')"
+			/>
+		</UTooltip>
+
 		<!-- Crop to content -->
 		<UTooltip text="裁剪画布：去掉没有图片的空白区域">
 			<UButton
@@ -280,6 +290,7 @@ const emit = defineEmits<{
 	addFiles: [files: File[]]
 	clearAll: []
 	cropToContent: []
+	resetPan: []
 	saveProject: []
 	openProjectFile: [file: File]
 	autoAlign: []

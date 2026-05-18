@@ -40,6 +40,7 @@
 							@save-project="onSaveProject"
 							@open-project-file="onOpenProjectFile"
 							@auto-align="onAutoAlign"
+							@reset-pan="canvasRef?.resetPan()"
 							@toggle-fullscreen="toggle"
 						/>
 
@@ -52,6 +53,7 @@
 
 						<div class="flex gap-4 min-h-0" :class="isFullscreen ? 'flex-1' : ''">
 							<ImageStitchCanvas
+								ref="canvasRef"
 								:sorted-images="sortedImages"
 								:selected-ids="selectedIds"
 								:canvas-width="canvasWidth"
@@ -212,6 +214,9 @@ async function onClearAll() {
 	await clearAll()
 	toast.add({ title: '画布已清空', color: 'neutral', icon: 'i-lucide-trash-2', duration: 2000 })
 }
+
+// Canvas ref (for resetPan)
+const canvasRef = ref<{ resetPan: () => void } | null>(null)
 
 // Fullscreen
 const editorRef = ref<HTMLElement | null>(null)

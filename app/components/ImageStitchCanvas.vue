@@ -194,6 +194,9 @@ function onWheel(e: WheelEvent) {
 
 function zoomEmit(v: number) { emit('update:zoom', v) }
 
+// ---- Expose ----
+defineExpose({ resetPan: () => { panOffset.value = { x: 0, y: 0 } } })
+
 // ---- Keyboard ----
 function onKeyDown(e: KeyboardEvent) {
 	if (e.key === ' ' && !e.repeat) { e.preventDefault(); spaceDown.value = true }
