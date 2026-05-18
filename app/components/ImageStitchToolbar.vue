@@ -110,6 +110,16 @@
 			<UButton icon="i-lucide-align-end-vertical" color="neutral" variant="subtle" title="右侧对齐" @click="emit('align', 'right')" />
 		</template>
 
+		<!-- Crop to content -->
+		<UButton
+			icon="i-lucide-crop"
+			color="neutral"
+			variant="subtle"
+			title="裁剪画布：去掉没有图片的空白区域"
+			:disabled="imageCount === 0"
+			@click="emit('cropToContent')"
+		/>
+
 		<!-- Clear all -->
 		<UButton
 			icon="i-lucide-trash-2"
@@ -156,6 +166,7 @@ const emit = defineEmits<{
 	toggleExport: []
 	addFiles: [files: FileList]
 	clearAll: []
+	cropToContent: []
 	saveProject: []
 	openProjectFile: [file: File]
 	autoAlign: []

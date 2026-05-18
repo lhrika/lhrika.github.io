@@ -387,6 +387,23 @@ export function useImageStitch() {
 		}
 	}
 
+	// ---- Crop canvas to content ----
+	function cropToContent() {
+		if (images.value.length === 0) return
+		const minX = Math.min(...images.value.map(i => i.x))
+		const minY = Math.min(...images.value.map(i => i.y))
+		const maxX = Math.max(...images.value.map(i => i.x + i.width))
+		const maxY = Math.max(...images.value.map(i => i.y + i.height))
+		// Shift all images so the bounding box starts at (0, 0)
+		for (const img of images.value) {
+			img.x -= minX
+			img.y -= minY
+		}
+		store.canvasWidth = maxX - minX
+		store.canvasHeight = maxY - minY
+		pushHistory()
+	}
+
 	// ---- Clear all ----
 	async function clearAll() {
 		cleanupObjectURLs()
@@ -432,5 +449,6 @@ export function useImageStitch() {
 		loadProject,
 		pickAndLoadProject,
 		autoAlignSelected,
+		cropToContent,
 	}
 }

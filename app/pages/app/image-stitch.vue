@@ -25,7 +25,8 @@
 					@align="alignImages"
 					@toggle-export="showExportPanel = !showExportPanel"
 					@add-files="addFiles"
-					@clear-all="clearAll"
+					@crop-to-content="cropToContent"
+				@clear-all="clearAll"
 					@save-project="saveProject"
 					@open-project-file="onOpenProjectFile"
 					@auto-align="onAutoAlign"
@@ -119,6 +120,7 @@ const {
 	loadProject,
 	pickAndLoadProject,
 	autoAlignSelected,
+	cropToContent,
 } = useImageStitch()
 
 async function onOpenProjectFile(file: File) {
