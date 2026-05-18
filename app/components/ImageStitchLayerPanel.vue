@@ -1,0 +1,156 @@
+<template>
+	<div class="w-48 border border-muted rounded-lg bg-elevated flex flex-col">
+		<div class="px-3 py-2 text-sm font-medium border-b border-muted">
+			图层 ({{ sortedImages.length }})
+		</div>
+
+		<!-- List (highest z first) -->
+		<div
+			class="flex-1 overflow-y-auto"
+			@dragover.prevent
+			@drop.prevent="onDrop($event, null)"
+		>
+			<div
+				v-for="img in [...sortedImages].reverse()"
+				:key="img.id"
+				draggable="true"
+				class="flex items-center gap-1 px-2 py-1.5 text-xs cursor-grab hover:bg-muted/50 transition-colors border-t-2 border-transparent"
+				:class="{
+					'bg-primary/10': selectedIds.includes(img.id),
+					'border-t-primary!': dragOver === img.id && dragPos === 'before',
+					'border-b-primary! border-b-2': dragOver === img.id && dragPos === 'after',
+					'opacity-40': dragging === img.id,
+				}"
+				@click.stop="emit('select', $event, img.id)"
+				@dragstart="onDragStart($event, img.id)"
+				@dragend="onDragEnd"
+				@dragover.prevent="onDragOver($event, img.id)"
+				@dragleave="onDragLeave(img.id)"
+				@drop.prevent.stop="onDrop($event, img.id)"
+			>
+				<Icon name="i-lucide-grip-vertical" class="size-3 text-muted shrink-0" />
+				<img :src="img.src" class="w-7 h-7 object-cover rounded shrink-0" />
+				<span class="flex-1 truncate text-muted">{{ img.name }}</span>
+			</div>
+		</div>
+
+		<!-- Action buttons -->
+		<div class="px-2 py-1.5 border-t border-muted flex gap-1 justify-center">
+			<UButton
+				icon="i-lucide-chevron-up"
+				size="xs"
+				color="neutral"
+				variant="subtle"
+				title="上移一层"
+				:disabled="!singleSelected || singleSelected.zIndex >= sortedImages.length"
+				@click="singleSelected && emit('moveLayer', singleSelected.id, 1)"
+			/>
+			<UButton
+				icon="i-lucide-chevron-down"
+				size="xs"
+				color="neutral"
+				variant="subtle"
+				title="下移一层"
+				:disabled="!singleSelected || singleSelected.zIndex <= 1"
+				@click="singleSelected && emit('moveLayer', singleSelected.id, -1)"
+			/>
+			<UButton
+				icon="i-lucide-bring-to-front"
+				size="xs"
+				color="neutral"
+				variant="subtle"
+				title="置顶"
+				:disabled="!singleSelected || singleSelected.zIndex >= sortedImages.length"
+				@click="singleSelected && emit('moveLayerToEdge', singleSelected.id, 'top')"
+			/>
+			<UButton
+				icon="i-lucide-send-to-back"
+				size="xs"
+				color="neutral"
+				variant="subtle"
+				title="置底"
+				:disabled="!singleSelected || singleSelected.zIndex <= 1"
+				@click="singleSelected && emit('moveLayerToEdge', singleSelected.id, 'bottom')"
+			/>
+			<UButton
+				icon="i-lucide-trash-2"
+				size="xs"
+				color="error"
+				variant="subtle"
+				title="删除选中图片"
+				:disabled="selectedIds.length === 0"
+				@click="emit('removeSelected')"
+			/>
+		</div>
+	</div>
+</template>
+
+<script setup lang="ts">
+import type { StitchImage } from '~/composables/useImageStitch'
+
+const props = defineProps<{
+	sortedImages: StitchImage[]
+	selectedIds: string[]
+	singleSelected: StitchImage | undefined
+}>()
+
+const emit = defineEmits<{
+	select: [e: MouseEvent, id: string]
+	moveLayer: [id: string, delta: number]
+	moveLayerToEdge: [id: string, edge: 'top' | 'bottom']
+	removeSelected: []
+	reorder: [orderedIds: string[]]
+}>()
+
+// ---- Drag to reorder ----
+// List is rendered highest-z first; "before" = higher z, "after" = lower z
+const dragging = ref<string | null>(null)
+const dragOver = ref<string | null>(null)
+const dragPos = ref<'before' | 'after'>('before')
+
+function onDragStart(e: DragEvent, id: string) {
+	dragging.value = id
+	e.dataTransfer!.effectAllowed = 'move'
+}
+
+function onDragEnd() {
+	dragging.value = null
+	dragOver.value = null
+}
+
+function onDragOver(e: DragEvent, id: string) {
+	if (dragging.value === id) return
+	dragOver.value = id
+	const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+	dragPos.value = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after'
+}
+
+function onDragLeave(id: string) {
+	if (dragOver.value === id) dragOver.value = null
+}
+
+function onDrop(_e: DragEvent, targetId: string | null) {
+	const srcId = dragging.value
+	dragging.value = null
+	dragOver.value = null
+	if (!srcId || srcId === targetId) return
+
+	const ordered = [...props.sortedImages].reverse()
+	const srcIdx = ordered.findIndex(i => i.id === srcId)
+	if (srcIdx === -1) return
+
+	const srcImg = ordered.splice(srcIdx, 1)[0]
+	if (!srcImg) return
+
+	if (targetId === null) {
+		ordered.push(srcImg)
+	} else {
+		const tgtIdx = ordered.findIndex(i => i.id === targetId)
+		if (tgtIdx === -1) return
+		const insertIdx = dragPos.value === 'before' ? tgtIdx : tgtIdx + 1
+		ordered.splice(insertIdx, 0, srcImg)
+	}
+
+	emit('reorder', ordered.map(i => i.id))
+}
+</script>
