@@ -2,6 +2,9 @@
 	<div class="border border-muted rounded-lg p-4 space-y-3 bg-elevated">
 		<div class="font-medium text-sm">导出选项</div>
 		<div class="flex flex-wrap gap-4 items-end">
+			<UFormField label="文件名">
+				<UInput v-model="filename" class="w-44" placeholder="stitched-image" />
+			</UFormField>
 			<UFormField label="格式">
 				<USelect v-model="format" :items="formatOptions" class="w-28" />
 			</UFormField>
@@ -26,7 +29,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-	export: [opts: { format: string; width: number; height: number; quality: number }]
+	export: [opts: { format: string; width: number; height: number; quality: number; filename: string }]
 }>()
 
 const formatOptions = [
@@ -35,6 +38,7 @@ const formatOptions = [
 	{ label: 'WebP', value: 'image/webp' },
 ]
 
+const filename = ref('stitched-image')
 const format = ref('image/png')
 const width = ref(props.canvasWidth)
 const height = ref(props.canvasHeight)
@@ -44,6 +48,6 @@ watch(() => props.canvasWidth, v => { width.value = v })
 watch(() => props.canvasHeight, v => { height.value = v })
 
 function onExport() {
-	emit('export', { format: format.value, width: width.value, height: height.value, quality: quality.value })
+	emit('export', { format: format.value, width: width.value, height: height.value, quality: quality.value, filename: filename.value || 'stitched-image' })
 }
 </script>

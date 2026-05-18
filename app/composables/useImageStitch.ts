@@ -246,7 +246,7 @@ export function useImageStitch() {
 	}
 
 	// ---- Export ----
-	async function exportImage(opts: { format: string; width: number; height: number; quality: number }) {
+	async function exportImage(opts: { format: string; width: number; height: number; quality: number; filename?: string }) {
 		const canvas = document.createElement('canvas')
 		canvas.width = opts.width
 		canvas.height = opts.height
@@ -268,7 +268,7 @@ export function useImageStitch() {
 		const ext = opts.format === 'image/png' ? 'png' : opts.format === 'image/jpeg' ? 'jpg' : 'webp'
 		const a = document.createElement('a')
 		a.href = canvas.toDataURL(opts.format, quality)
-		a.download = `stitched-image.${ext}`
+		a.download = `${opts.filename || 'stitched-image'}.${ext}`
 		a.click()
 	}
 
