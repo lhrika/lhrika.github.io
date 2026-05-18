@@ -6,6 +6,11 @@
 		/>
 		<UPageBody>
 			<UContainer class="space-y-4">
+				<div v-if="loading" class="flex items-center gap-2 text-sm text-muted py-4">
+					<Icon name="i-lucide-loader-circle" class="size-4 animate-spin" />
+					正在恢复上次编辑内容…
+				</div>
+
 				<ImageStitchToolbar
 					v-model:canvas-width="canvasWidth"
 					v-model:canvas-height="canvasHeight"
@@ -19,6 +24,7 @@
 					@align="alignImages"
 					@toggle-export="showExportPanel = !showExportPanel"
 					@add-files="addFiles"
+					@clear-all="clearAll"
 				/>
 
 				<ImageStitchExportPanel
@@ -79,6 +85,7 @@
 const {
 	images,
 	selectedIds,
+	loading,
 	canvasWidth,
 	canvasHeight,
 	canvasBg,
@@ -102,6 +109,8 @@ const {
 	alignImages,
 	exportImage,
 	pushHistory,
+	clearAll,
+	restore,
 } = useImageStitch()
 
 const zoom = ref(1)
@@ -111,7 +120,8 @@ function onDragEnd() { pushHistory() }
 function onResizeEnd() { pushHistory() }
 
 // ---- Keyboard shortcuts ----
-onMounted(() => {
+onMounted(async () => {
+	await restore()
 	window.addEventListener('keydown', onKeyDown)
 })
 onUnmounted(() => {

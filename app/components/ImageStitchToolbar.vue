@@ -85,6 +85,16 @@
 			<UButton icon="i-lucide-align-end-vertical" color="neutral" variant="subtle" title="右侧对齐" @click="emit('align', 'right')" />
 		</template>
 
+		<!-- Clear all -->
+		<UButton
+			icon="i-lucide-trash-2"
+			color="error"
+			variant="subtle"
+			title="清空画布"
+			:disabled="imageCount === 0"
+			@click="emit('clearAll')"
+		/>
+
 		<!-- Export toggle -->
 		<UButton
 			icon="i-lucide-download"
@@ -119,6 +129,7 @@ const emit = defineEmits<{
 	align: [edge: AlignEdge]
 	toggleExport: []
 	addFiles: [files: FileList]
+	clearAll: []
 }>()
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
