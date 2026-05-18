@@ -46,6 +46,13 @@
 				@update:model-value="emit('update:canvasHeight', Number($event))"
 			/>
 			<span class="text-muted text-sm">px</span>
+			<input
+				:value="canvasBg"
+				type="color"
+				class="w-7 h-7 rounded cursor-pointer border border-muted shrink-0"
+				title="画布背景色"
+				@input="emit('update:canvasBg', ($event.target as HTMLInputElement).value)"
+			/>
 		</div>
 
 		<!-- Zoom -->
@@ -139,6 +146,15 @@
 			:disabled="imageCount === 0"
 			@click="emit('toggleExport')"
 		/>
+
+		<!-- Fullscreen -->
+		<UButton
+			:icon="isFullscreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
+			color="neutral"
+			variant="subtle"
+			:title="isFullscreen ? '退出全屏' : '全屏'"
+			@click="emit('toggleFullscreen')"
+		/>
 	</div>
 </template>
 
@@ -148,17 +164,20 @@ import type { AlignEdge } from '~/composables/useImageStitch'
 defineProps<{
 	canvasWidth: number
 	canvasHeight: number
+	canvasBg: string
 	zoom: number
 	canUndo: boolean
 	canRedo: boolean
 	selectedCount: number
 	imageCount: number
 	autoAligning?: boolean
+	isFullscreen?: boolean
 }>()
 
 const emit = defineEmits<{
 	'update:canvasWidth': [v: number]
 	'update:canvasHeight': [v: number]
+	'update:canvasBg': [v: string]
 	'update:zoom': [v: number]
 	undo: []
 	redo: []
@@ -170,6 +189,7 @@ const emit = defineEmits<{
 	saveProject: []
 	openProjectFile: [file: File]
 	autoAlign: []
+	toggleFullscreen: []
 }>()
 
 const fileInputRef = ref<HTMLInputElement | null>(null)

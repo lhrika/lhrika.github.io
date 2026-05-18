@@ -2,8 +2,7 @@
 	<div
 		ref="containerRef"
 		class="relative overflow-hidden border border-muted rounded-lg bg-[#e5e7eb] flex-1 min-h-100"
-		style="max-height: 70vh"
-		:style="{ cursor: spaceDown ? (isPanning ? 'grabbing' : 'grab') : 'default' }"
+		:style="{ maxHeight: fullscreen ? 'none' : '70vh', cursor: spaceDown ? (isPanning ? 'grabbing' : 'grab') : 'default' }"
 		@mousedown="onContainerMouseDown"
 	>
 		<!-- Canvas surface -->
@@ -64,6 +63,7 @@ const props = defineProps<{
 	canvasHeight: number
 	canvasBg: string
 	zoom: number
+	fullscreen?: boolean
 }>()
 
 const emit = defineEmits<{
