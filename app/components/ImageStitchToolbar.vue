@@ -1,28 +1,32 @@
 <template>
 	<div class="flex flex-wrap gap-2 items-center">
 		<!-- Project: open / save -->
-		<UButton icon="i-lucide-folder-open" label="打开项目" color="neutral" variant="outline" @click="onOpenProject" />
-		<input
-			ref="projectInputRef"
-			type="file"
+		<UFileUpload
+			v-model="projectFile"
 			accept=".stitch"
-			class="hidden"
-			@change="onProjectFileChange"
-		/>
+			:preview="false"
+			:dropzone="false"
+		>
+			<template #default="{ open: openProjectPicker }">
+				<UButton icon="i-lucide-folder-open" label="打开项目" color="neutral" variant="outline" @click="onOpenProject(openProjectPicker)" />
+			</template>
+		</UFileUpload>
 		<UButton icon="i-lucide-save" label="保存项目" color="neutral" variant="outline" @click="emit('saveProject')" />
 
 		<div class="w-px h-6 bg-muted mx-1" />
 
 		<!-- Add images -->
-		<UButton icon="i-lucide-image-plus" label="添加图片" @click="fileInputRef?.click()" />
-		<input
-			ref="fileInputRef"
-			type="file"
+		<UFileUpload
+			v-model="imageFiles"
 			accept="image/*"
 			multiple
-			class="hidden"
-			@change="onFilesChange"
-		/>
+			:preview="false"
+			:dropzone="false"
+		>
+			<template #default="{ open: openImagePicker }">
+				<UButton icon="i-lucide-image-plus" label="添加图片" @click="() => openImagePicker()" />
+			</template>
+		</UFileUpload>
 
 		<!-- Canvas size -->
 		<div class="flex items-center gap-1">
@@ -63,7 +67,7 @@
 						<UColorPicker
 							:model-value="canvasBg"
 							format="hex"
-							@update:model-value="emit('update:canvasBg', $event)"
+							@update:model-value="emit('update:canvasBg', $event as string)"
 						/>
 					</div>
 				</template>
@@ -207,29 +211,27 @@ const emit = defineEmits<{
 	toggleFullscreen: []
 }>()
 
-const fileInputRef = ref<HTMLInputElement | null>(null)
-const projectInputRef = ref<HTMLInputElement | null>(null)
+const imageFiles = ref<File[]>([])
+watch(imageFiles, (files) => {
+	if (files.length) {
+		emit('addFiles', [...files])
+		imageFiles.value = []
+	}
+})
 
-function onFilesChange(e: Event) {
-	const input = e.target as HTMLInputElement
-	const files = input.files ? Array.from(input.files) : []
-	input.value = ''
-	if (files.length) emit('addFiles', files)
-}
+const projectFile = ref<File | null>(null)
+watch(projectFile, (file) => {
+	if (file) {
+		emit('openProjectFile', file)
+		projectFile.value = null
+	}
+})
 
-function onOpenProject() {
-	// File System Access API available: let parent handle the picker
+function onOpenProject(openPicker: () => void) {
 	if ('showOpenFilePicker' in window) {
 		emit('openProjectFile', new File([], '__picker__'))
 		return
 	}
-	// Fallback: <input type=file>
-	projectInputRef.value?.click()
-}
-
-function onProjectFileChange(e: Event) {
-	const file = (e.target as HTMLInputElement).files?.[0]
-	if (file) emit('openProjectFile', file)
-	;(e.target as HTMLInputElement).value = ''
+	openPicker()
 }
 </script>
