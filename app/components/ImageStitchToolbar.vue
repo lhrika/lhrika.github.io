@@ -1,5 +1,7 @@
 <template>
-	<div class="flex flex-wrap gap-2 items-center">
+	<div class="flex flex-col gap-2">
+		<!-- Row 1: always visible -->
+		<div class="flex gap-2 items-center">
 		<!-- Project: open / save — collapsed into dropdown -->
 		<UFileUpload
 			v-model="projectFile"
@@ -131,72 +133,6 @@
 
 		<div class="flex-1" />
 
-		<!-- Auto stitch (only when exactly 2 selected) -->
-		<UButton
-			v-if="selectedCount === 2"
-			icon="i-lucide-combine"
-			label="自动拼接"
-			color="primary"
-			variant="subtle"
-			:loading="autoAligning"
-			@click="emit('autoAlign')"
-		/>
-
-		<!-- Alignment (only when ≥2 selected) -->
-		<template v-if="selectedCount >= 2">
-			<span class="text-sm text-muted">对齐:</span>
-			<UFieldGroup>
-				<UTooltip text="顶部对齐">
-					<UButton
-						icon="i-lucide-align-start-horizontal"
-						color="neutral"
-						variant="subtle"
-						@click="emit('align', 'top')"
-					/>
-				</UTooltip>
-				<UTooltip text="垂直居中">
-					<UButton
-						icon="i-lucide-align-center-horizontal"
-						color="neutral"
-						variant="subtle"
-						@click="emit('align', 'middle')"
-					/>
-				</UTooltip>
-				<UTooltip text="底部对齐">
-					<UButton
-						icon="i-lucide-align-end-horizontal"
-						color="neutral"
-						variant="subtle"
-						@click="emit('align', 'bottom')"
-					/>
-				</UTooltip>
-				<UTooltip text="左侧对齐">
-					<UButton
-						icon="i-lucide-align-start-vertical"
-						color="neutral"
-						variant="subtle"
-						@click="emit('align', 'left')"
-					/>
-				</UTooltip>
-				<UTooltip text="水平居中">
-					<UButton
-						icon="i-lucide-align-center-vertical"
-						color="neutral"
-						variant="subtle"
-						@click="emit('align', 'center')"
-					/>
-				</UTooltip>
-				<UTooltip text="右侧对齐">
-					<UButton
-						icon="i-lucide-align-end-vertical"
-						color="neutral"
-						variant="subtle"
-						@click="emit('align', 'right')"
-					/>
-				</UTooltip>
-			</UFieldGroup>
-		</template>
-
 		<!-- Canvas utilities: reset pan / crop / clear — grouped -->
 		<UFieldGroup>
 			<UTooltip text="画布恢复到中心位置">
@@ -246,6 +182,42 @@
 				@click="emit('toggleFullscreen')"
 			/>
 		</UTooltip>
+		</div>
+
+		<!-- Row 2: auto-stitch + alignment (only when ≥2 selected) -->
+		<div v-if="selectedCount >= 2" class="flex gap-2 items-center">
+			<UButton
+				v-if="selectedCount === 2"
+				icon="i-lucide-combine"
+				label="自动拼接"
+				color="primary"
+				variant="subtle"
+				:loading="autoAligning"
+				@click="emit('autoAlign')"
+			/>
+			<div v-if="selectedCount === 2" class="w-px h-6 bg-muted" />
+			<span class="text-sm text-muted">对齐:</span>
+			<UFieldGroup>
+				<UTooltip text="顶部对齐">
+					<UButton icon="i-lucide-align-start-horizontal" color="neutral" variant="subtle" @click="emit('align', 'top')" />
+				</UTooltip>
+				<UTooltip text="垂直居中">
+					<UButton icon="i-lucide-align-center-horizontal" color="neutral" variant="subtle" @click="emit('align', 'middle')" />
+				</UTooltip>
+				<UTooltip text="底部对齐">
+					<UButton icon="i-lucide-align-end-horizontal" color="neutral" variant="subtle" @click="emit('align', 'bottom')" />
+				</UTooltip>
+				<UTooltip text="左侧对齐">
+					<UButton icon="i-lucide-align-start-vertical" color="neutral" variant="subtle" @click="emit('align', 'left')" />
+				</UTooltip>
+				<UTooltip text="水平居中">
+					<UButton icon="i-lucide-align-center-vertical" color="neutral" variant="subtle" @click="emit('align', 'center')" />
+				</UTooltip>
+				<UTooltip text="右侧对齐">
+					<UButton icon="i-lucide-align-end-vertical" color="neutral" variant="subtle" @click="emit('align', 'right')" />
+				</UTooltip>
+			</UFieldGroup>
+		</div>
 	</div>
 </template>
 
