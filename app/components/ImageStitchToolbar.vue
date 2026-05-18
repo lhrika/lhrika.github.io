@@ -41,31 +41,47 @@
 
 		<!-- Canvas size + background -->
 		<div class="flex items-center gap-1">
-			<UInputNumber
-				:model-value="canvasWidth"
-				:min="100"
-				:max="10000"
-				:increment="false"
-				:decrement="false"
-				class="w-24"
-				placeholder="宽"
-				@update:model-value="emit('update:canvasWidth', $event ?? canvasWidth)"
-			/>
-			<span class="text-muted text-xs">×</span>
-			<UInputNumber
-				:model-value="canvasHeight"
-				:min="100"
-				:max="10000"
-				:increment="false"
-				:decrement="false"
-				class="w-24"
-				placeholder="高"
-				@update:model-value="emit('update:canvasHeight', $event ?? canvasHeight)"
-			/>
+			<UFieldGroup>
+				<UInputNumber
+					:model-value="canvasWidth"
+					:min="100"
+					:max="10000"
+					:increment="false"
+					:decrement="false"
+					class="w-16"
+					placeholder="宽"
+					@update:model-value="
+						emit('update:canvasWidth', $event ?? canvasWidth)
+					"
+				/>
+				<UBadge color="neutral" variant="subtle">
+					<UIcon name="i-lucide-x" class="size-4" />
+				</UBadge>
+				<UInputNumber
+					:model-value="canvasHeight"
+					:min="100"
+					:max="10000"
+					:increment="false"
+					:decrement="false"
+					class="w-16"
+					placeholder="高"
+					@update:model-value="
+						emit('update:canvasHeight', $event ?? canvasHeight)
+					"
+				/>
+				<UBadge color="neutral" variant="subtle" label="px" />
+			</UFieldGroup>
 			<UTooltip text="画布背景色">
 				<UPopover>
-					<UButton color="neutral" variant="outline" class="w-7 h-7 p-0 shrink-0">
-						<span class="block w-4 h-4 rounded-sm border border-muted" :style="{ background: canvasBg }" />
+					<UButton
+						color="neutral"
+						variant="outline"
+						class="w-7 h-7 p-0 shrink-0"
+					>
+						<span
+							class="block w-4 h-4 rounded-sm border border-muted"
+							:style="{ background: canvasBg }"
+						/>
 					</UButton>
 					<template #content>
 						<div class="p-2">
@@ -81,37 +97,35 @@
 		</div>
 
 		<!-- Zoom -->
-		<div class="flex items-center gap-1">
-			<UTooltip text="缩小">
-				<UButton
-					icon="i-lucide-minus"
-					size="xs"
-					color="neutral"
-					variant="subtle"
-					:disabled="zoom <= 0.1"
-					@click="emit('update:zoom', Math.max(0.1, +(zoom - 0.1).toFixed(1)))"
-				/>
-			</UTooltip>
-			<span class="text-sm w-10 text-center tabular-nums">{{ Math.round(zoom * 100) }}%</span>
-			<UTooltip text="放大">
-				<UButton
-					icon="i-lucide-plus"
-					size="xs"
-					color="neutral"
-					variant="subtle"
-					:disabled="zoom >= 4"
-					@click="emit('update:zoom', Math.min(4, +(zoom + 0.1).toFixed(1)))"
-				/>
-			</UTooltip>
-		</div>
+		<UInputNumber
+			:model-value="zoom"
+			:min="0.1"
+			:max="4"
+			:step="0.1"
+			:format-options="{ style: 'percent' }"
+			class="w-28"
+			@update:model-value="v => emit('update:zoom', +(v ?? 1).toFixed(2))"
+		/>
 
 		<!-- Undo / Redo -->
 		<UFieldGroup>
 			<UTooltip text="撤销 (⌘Z)">
-				<UButton icon="i-lucide-undo-2" color="neutral" variant="subtle" :disabled="!canUndo" @click="emit('undo')" />
+				<UButton
+					icon="i-lucide-undo-2"
+					color="neutral"
+					variant="subtle"
+					:disabled="!canUndo"
+					@click="emit('undo')"
+				/>
 			</UTooltip>
 			<UTooltip text="重做 (⌘⇧Z)">
-				<UButton icon="i-lucide-redo-2" color="neutral" variant="subtle" :disabled="!canRedo" @click="emit('redo')" />
+				<UButton
+					icon="i-lucide-redo-2"
+					color="neutral"
+					variant="subtle"
+					:disabled="!canRedo"
+					@click="emit('redo')"
+				/>
 			</UTooltip>
 		</UFieldGroup>
 
@@ -133,22 +147,52 @@
 			<span class="text-sm text-muted">对齐:</span>
 			<UFieldGroup>
 				<UTooltip text="顶部对齐">
-					<UButton icon="i-lucide-align-start-horizontal" color="neutral" variant="subtle" @click="emit('align', 'top')" />
+					<UButton
+						icon="i-lucide-align-start-horizontal"
+						color="neutral"
+						variant="subtle"
+						@click="emit('align', 'top')"
+					/>
 				</UTooltip>
 				<UTooltip text="垂直居中">
-					<UButton icon="i-lucide-align-center-horizontal" color="neutral" variant="subtle" @click="emit('align', 'middle')" />
+					<UButton
+						icon="i-lucide-align-center-horizontal"
+						color="neutral"
+						variant="subtle"
+						@click="emit('align', 'middle')"
+					/>
 				</UTooltip>
 				<UTooltip text="底部对齐">
-					<UButton icon="i-lucide-align-end-horizontal" color="neutral" variant="subtle" @click="emit('align', 'bottom')" />
+					<UButton
+						icon="i-lucide-align-end-horizontal"
+						color="neutral"
+						variant="subtle"
+						@click="emit('align', 'bottom')"
+					/>
 				</UTooltip>
 				<UTooltip text="左侧对齐">
-					<UButton icon="i-lucide-align-start-vertical" color="neutral" variant="subtle" @click="emit('align', 'left')" />
+					<UButton
+						icon="i-lucide-align-start-vertical"
+						color="neutral"
+						variant="subtle"
+						@click="emit('align', 'left')"
+					/>
 				</UTooltip>
 				<UTooltip text="水平居中">
-					<UButton icon="i-lucide-align-center-vertical" color="neutral" variant="subtle" @click="emit('align', 'center')" />
+					<UButton
+						icon="i-lucide-align-center-vertical"
+						color="neutral"
+						variant="subtle"
+						@click="emit('align', 'center')"
+					/>
 				</UTooltip>
 				<UTooltip text="右侧对齐">
-					<UButton icon="i-lucide-align-end-vertical" color="neutral" variant="subtle" @click="emit('align', 'right')" />
+					<UButton
+						icon="i-lucide-align-end-vertical"
+						color="neutral"
+						variant="subtle"
+						@click="emit('align', 'right')"
+					/>
 				</UTooltip>
 			</UFieldGroup>
 		</template>
@@ -156,13 +200,30 @@
 		<!-- Canvas utilities: reset pan / crop / clear — grouped -->
 		<UFieldGroup>
 			<UTooltip text="画布恢复到中心位置">
-				<UButton icon="i-lucide-locate" color="neutral" variant="subtle" @click="emit('resetPan')" />
+				<UButton
+					icon="i-lucide-locate"
+					color="neutral"
+					variant="subtle"
+					@click="emit('resetPan')"
+				/>
 			</UTooltip>
 			<UTooltip text="裁剪画布：去掉没有图片的空白区域">
-				<UButton icon="i-lucide-crop" color="neutral" variant="subtle" :disabled="imageCount === 0" @click="emit('cropToContent')" />
+				<UButton
+					icon="i-lucide-crop"
+					color="neutral"
+					variant="subtle"
+					:disabled="imageCount === 0"
+					@click="emit('cropToContent')"
+				/>
 			</UTooltip>
 			<UTooltip text="清空画布">
-				<UButton icon="i-lucide-trash-2" color="error" variant="subtle" :disabled="imageCount === 0" @click="emit('clearAll')" />
+				<UButton
+					icon="i-lucide-trash-2"
+					color="error"
+					variant="subtle"
+					:disabled="imageCount === 0"
+					@click="emit('clearAll')"
+				/>
 			</UTooltip>
 		</UFieldGroup>
 
