@@ -25,6 +25,8 @@
 					@toggle-export="showExportPanel = !showExportPanel"
 					@add-files="addFiles"
 					@clear-all="clearAll"
+					@save-project="saveProject"
+					@open-project-file="onOpenProjectFile"
 				/>
 
 				<ImageStitchExportPanel
@@ -111,7 +113,19 @@ const {
 	pushHistory,
 	clearAll,
 	restore,
+	saveProject,
+	loadProject,
+	pickAndLoadProject,
 } = useImageStitch()
+
+async function onOpenProjectFile(file: File) {
+	// Sentinel: toolbar wants the native file picker
+	if (file.name === '__picker__') {
+		await pickAndLoadProject()
+	} else {
+		await loadProject(file)
+	}
+}
 
 const zoom = ref(1)
 const showExportPanel = ref(false)

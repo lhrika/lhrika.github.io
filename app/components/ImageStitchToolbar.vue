@@ -1,5 +1,18 @@
 <template>
 	<div class="flex flex-wrap gap-2 items-center">
+		<!-- Project: open / save -->
+		<UButton icon="i-lucide-folder-open" label="打开项目" color="neutral" variant="outline" @click="onOpenProject" />
+		<input
+			ref="projectInputRef"
+			type="file"
+			accept=".stitch"
+			class="hidden"
+			@change="onProjectFileChange"
+		/>
+		<UButton icon="i-lucide-save" label="保存项目" color="neutral" variant="outline" @click="emit('saveProject')" />
+
+		<div class="w-px h-6 bg-muted mx-1" />
+
 		<!-- Add images -->
 		<UButton icon="i-lucide-image-plus" label="添加图片" @click="fileInputRef?.click()" />
 		<input
@@ -130,13 +143,32 @@ const emit = defineEmits<{
 	toggleExport: []
 	addFiles: [files: FileList]
 	clearAll: []
+	saveProject: []
+	openProjectFile: [file: File]
 }>()
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
+const projectInputRef = ref<HTMLInputElement | null>(null)
 
 function onFilesChange(e: Event) {
 	const files = (e.target as HTMLInputElement).files
 	if (files?.length) emit('addFiles', files)
+	;(e.target as HTMLInputElement).value = ''
+}
+
+function onOpenProject() {
+	// File System Access API available: let parent handle the picker
+	if ('showOpenFilePicker' in window) {
+		emit('openProjectFile', new File([], '__picker__'))
+		return
+	}
+	// Fallback: <input type=file>
+	projectInputRef.value?.click()
+}
+
+function onProjectFileChange(e: Event) {
+	const file = (e.target as HTMLInputElement).files?.[0]
+	if (file) emit('openProjectFile', file)
 	;(e.target as HTMLInputElement).value = ''
 }
 </script>

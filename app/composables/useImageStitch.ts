@@ -16,6 +16,7 @@ function metaOf(img: StitchImage): StitchImageMeta {
 export function useImageStitch() {
 	const store = useImageStitchStore()
 	const db = useImageStitchDB()
+	const fileIO = useImageStitchFile()
 
 	// Runtime state — src is a blob URL created at load time
 	const images = ref<StitchImage[]>([])
@@ -270,6 +271,48 @@ export function useImageStitch() {
 		a.click()
 	}
 
+	// ---- Project file save / open ----
+	async function saveProject(): Promise<void> {
+		await fileIO.saveFile(
+			images.value.map(metaOf),
+			store.canvasWidth,
+			store.canvasHeight,
+			store.canvasBg,
+		)
+	}
+
+	type LoadedProject = Awaited<ReturnType<typeof fileIO.openFile>>
+
+	async function applyProject(project: LoadedProject): Promise<void> {
+		cleanupObjectURLs()
+		await db.clearAll()
+		store.imageMetas = []
+
+		const loaded: StitchImage[] = []
+		for (const img of project.images) {
+			await db.saveBlob(img.id, img.blob)
+			loaded.push({ ...img, src: URL.createObjectURL(img.blob) })
+		}
+		images.value = loaded
+		store.canvasWidth = project.canvasWidth
+		store.canvasHeight = project.canvasHeight
+		store.canvasBg = project.canvasBg
+		selectedIds.value = []
+		history.value = []
+		historyIndex.value = -1
+		pushHistory()
+	}
+
+	async function loadProject(file: File): Promise<void> {
+		const project = await fileIO.openFile(file)
+		await applyProject(project)
+	}
+
+	async function pickAndLoadProject(): Promise<void> {
+		const project = await fileIO.pickAndOpen()
+		if (project) await applyProject(project)
+	}
+
 	// ---- Clear all ----
 	async function clearAll() {
 		cleanupObjectURLs()
@@ -311,5 +354,8 @@ export function useImageStitch() {
 		exportImage,
 		pushHistory,
 		clearAll,
+		saveProject,
+		loadProject,
+		pickAndLoadProject,
 	}
 }
