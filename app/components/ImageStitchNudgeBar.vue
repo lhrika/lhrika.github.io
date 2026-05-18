@@ -1,21 +1,64 @@
 <template>
 	<div class="flex flex-wrap items-center gap-3 text-sm">
-		<span class="text-muted">微调 (1px):</span>
-		<div class="flex gap-1">
-			<UButton icon="i-lucide-arrow-up" size="xs" color="neutral" variant="subtle" @click="emit('nudge', 0, -1)" />
-			<UButton icon="i-lucide-arrow-down" size="xs" color="neutral" variant="subtle" @click="emit('nudge', 0, 1)" />
-			<UButton icon="i-lucide-arrow-left" size="xs" color="neutral" variant="subtle" @click="emit('nudge', -1, 0)" />
-			<UButton icon="i-lucide-arrow-right" size="xs" color="neutral" variant="subtle" @click="emit('nudge', 1, 0)" />
+		<!-- Nudge buttons -->
+		<div class="flex items-center gap-1">
+			<span class="text-muted">微调:</span>
+			<UButtonGroup size="xs">
+				<UTooltip text="上移 (↑)">
+					<UButton icon="i-lucide-arrow-up" color="neutral" variant="subtle" @click="emit('nudge', 0, -1)" />
+				</UTooltip>
+				<UTooltip text="下移 (↓)">
+					<UButton icon="i-lucide-arrow-down" color="neutral" variant="subtle" @click="emit('nudge', 0, 1)" />
+				</UTooltip>
+				<UTooltip text="左移 (←)">
+					<UButton icon="i-lucide-arrow-left" color="neutral" variant="subtle" @click="emit('nudge', -1, 0)" />
+				</UTooltip>
+				<UTooltip text="右移 (→)">
+					<UButton icon="i-lucide-arrow-right" color="neutral" variant="subtle" @click="emit('nudge', 1, 0)" />
+				</UTooltip>
+			</UButtonGroup>
 		</div>
+
+		<!-- Position & size inputs (single selection only) -->
 		<template v-if="singleSelected">
-			<span class="text-muted">X:</span>
-			<UInput :model-value="singleSelected.x" type="number" class="w-20" @update:model-value="emit('setPos', 'x', Number($event))" />
-			<span class="text-muted">Y:</span>
-			<UInput :model-value="singleSelected.y" type="number" class="w-20" @update:model-value="emit('setPos', 'y', Number($event))" />
-			<span class="text-muted">W:</span>
-			<UInput :model-value="singleSelected.width" type="number" min="1" class="w-20" @update:model-value="emit('setSize', 'width', Number($event))" />
-			<span class="text-muted">H:</span>
-			<UInput :model-value="singleSelected.height" type="number" min="1" class="w-20" @update:model-value="emit('setSize', 'height', Number($event))" />
+			<div class="w-px h-4 bg-muted" />
+			<div class="flex items-center gap-2">
+				<UFormField label="X" size="xs" class="flex items-center gap-1">
+					<UInputNumber
+						:model-value="singleSelected.x"
+						size="xs"
+						class="w-20"
+						@update:model-value="v => emit('setPos', 'x', v ?? singleSelected!.x)"
+					/>
+				</UFormField>
+				<UFormField label="Y" size="xs" class="flex items-center gap-1">
+					<UInputNumber
+						:model-value="singleSelected.y"
+						size="xs"
+						class="w-20"
+						@update:model-value="v => emit('setPos', 'y', v ?? singleSelected!.y)"
+					/>
+				</UFormField>
+				<div class="w-px h-4 bg-muted" />
+				<UFormField label="W" size="xs" class="flex items-center gap-1">
+					<UInputNumber
+						:model-value="singleSelected.width"
+						:min="1"
+						size="xs"
+						class="w-20"
+						@update:model-value="v => emit('setSize', 'width', v ?? singleSelected!.width)"
+					/>
+				</UFormField>
+				<UFormField label="H" size="xs" class="flex items-center gap-1">
+					<UInputNumber
+						:model-value="singleSelected.height"
+						:min="1"
+						size="xs"
+						class="w-20"
+						@update:model-value="v => emit('setSize', 'height', v ?? singleSelected!.height)"
+					/>
+				</UFormField>
+			</div>
 		</template>
 	</div>
 </template>
