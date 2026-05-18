@@ -138,6 +138,11 @@ const items = computed<NavigationMenuItem[]>(() => [
 				label: 'Routine',
 				to: localePath('/app/routine'),
 			},
+			{
+				icon: 'i-lucide-combine',
+				label: '图片拼接',
+				to: localePath('/app/image-stitch'),
+			},
 		],
 	},
 ])
