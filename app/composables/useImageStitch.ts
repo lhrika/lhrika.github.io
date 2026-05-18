@@ -17,6 +17,7 @@ export function useImageStitch() {
 	const store = useImageStitchStore()
 	const db = useImageStitchDB()
 	const fileIO = useImageStitchFile()
+	const { autoAlignHorizontal, autoAlignVertical } = useImageStitchAutoAlign()
 
 	// Runtime state — src is a blob URL created at load time
 	const images = ref<StitchImage[]>([])
@@ -313,6 +314,79 @@ export function useImageStitch() {
 		if (project) await applyProject(project)
 	}
 
+	// ---- Auto align (two selected images) ----
+	// Detects whether to align horizontally or vertically based on image dimensions
+	// and current positions, then applies the best overlap found.
+	async function autoAlignSelected(): Promise<{ overlap: number; confidence: number } | null> {
+		if (selectedIds.value.length !== 2) return null
+		const [idA, idB] = selectedIds.value
+		const imgA = images.value.find(i => i.id === idA)
+		const imgB = images.value.find(i => i.id === idB)
+		if (!imgA || !imgB) return null
+
+		const sameWidth = imgA.width === imgB.width
+		const sameHeight = imgA.height === imgB.height
+
+		// Derive center positions for hint detection
+		const centerAx = imgA.x + imgA.width / 2
+		const centerBx = imgB.x + imgB.width / 2
+		const centerAy = imgA.y + imgA.height / 2
+		const centerBy = imgB.y + imgB.height / 2
+		const diffX = Math.abs(centerAx - centerBx)
+		const diffY = Math.abs(centerAy - centerBy)
+
+		// Decide mode:
+		// - both same: use whichever axis the user spread the images along
+		// - only same width: vertical
+		// - only same height: horizontal
+		// - neither: use current position spread to decide
+		const useVertical = sameWidth && !sameHeight
+			? true
+			: sameHeight && !sameWidth
+				? false
+				: diffY >= diffX // both same or neither — follow the dominant spread
+
+		if (useVertical) {
+			// Vertical alignment — images must share the same width
+			const w = Math.min(imgA.width, imgB.width)
+			let hint: 'a-top' | 'b-top' | undefined
+			if (diffY > 10) hint = centerAy < centerBy ? 'a-top' : 'b-top'
+
+			const result = await autoAlignVertical(imgA.src, imgA.height, imgB.src, imgB.height, w, hint)
+			if (!result) return null
+
+			const topImg = result.topImage === 'a' ? imgA : imgB
+			const botImg = result.topImage === 'a' ? imgB : imgA
+
+			// Keep top image's y; position bottom image so their overlap region meets
+			botImg.y = topImg.y + topImg.height - result.overlap
+			// Horizontally align lefts
+			botImg.x = topImg.x
+
+			pushHistory()
+			return { overlap: result.overlap, confidence: result.confidence }
+		} else {
+			// Horizontal alignment — images must share the same height
+			const h = Math.min(imgA.height, imgB.height)
+			let hint: 'a-left' | 'b-left' | undefined
+			if (diffX > 10) hint = centerAx < centerBx ? 'a-left' : 'b-left'
+
+			const result = await autoAlignHorizontal(imgA.src, imgA.width, imgB.src, imgB.width, h, hint)
+			if (!result) return null
+
+			const leftImg = result.leftImage === 'a' ? imgA : imgB
+			const rightImg = result.leftImage === 'a' ? imgB : imgA
+
+			// Keep left image's x; position right image so their overlap region meets
+			rightImg.x = leftImg.x + leftImg.width - result.overlap
+			// Vertically align tops
+			rightImg.y = leftImg.y
+
+			pushHistory()
+			return { overlap: result.overlap, confidence: result.confidence }
+		}
+	}
+
 	// ---- Clear all ----
 	async function clearAll() {
 		cleanupObjectURLs()
@@ -357,5 +431,6 @@ export function useImageStitch() {
 		saveProject,
 		loadProject,
 		pickAndLoadProject,
+		autoAlignSelected,
 	}
 }

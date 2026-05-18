@@ -19,6 +19,7 @@
 					:can-redo="canRedo"
 					:selected-count="selectedIds.length"
 					:image-count="images.length"
+					:auto-aligning="autoAligning"
 					@undo="undo"
 					@redo="redo"
 					@align="alignImages"
@@ -27,6 +28,7 @@
 					@clear-all="clearAll"
 					@save-project="saveProject"
 					@open-project-file="onOpenProjectFile"
+					@auto-align="onAutoAlign"
 				/>
 
 				<ImageStitchExportPanel
@@ -116,6 +118,7 @@ const {
 	saveProject,
 	loadProject,
 	pickAndLoadProject,
+	autoAlignSelected,
 } = useImageStitch()
 
 async function onOpenProjectFile(file: File) {
@@ -129,6 +132,13 @@ async function onOpenProjectFile(file: File) {
 
 const zoom = ref(1)
 const showExportPanel = ref(false)
+const autoAligning = ref(false)
+
+async function onAutoAlign() {
+	autoAligning.value = true
+	await autoAlignSelected()
+	autoAligning.value = false
+}
 
 function onDragEnd() { pushHistory() }
 function onResizeEnd() { pushHistory() }

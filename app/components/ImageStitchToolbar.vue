@@ -87,6 +87,18 @@
 
 		<div class="flex-1" />
 
+		<!-- Auto stitch (only when exactly 2 selected) -->
+		<UButton
+			v-if="selectedCount === 2"
+			icon="i-lucide-combine"
+			label="自动拼接"
+			color="primary"
+			variant="subtle"
+			:loading="autoAligning"
+			title="自动检测两图重叠区域并对齐"
+			@click="emit('autoAlign')"
+		/>
+
 		<!-- Alignment (only when ≥2 selected) -->
 		<template v-if="selectedCount >= 2">
 			<span class="text-sm text-muted">对齐:</span>
@@ -131,6 +143,7 @@ defineProps<{
 	canRedo: boolean
 	selectedCount: number
 	imageCount: number
+	autoAligning?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -145,6 +158,7 @@ const emit = defineEmits<{
 	clearAll: []
 	saveProject: []
 	openProjectFile: [file: File]
+	autoAlign: []
 }>()
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
