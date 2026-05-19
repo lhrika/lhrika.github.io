@@ -52,12 +52,20 @@
 							@toggle-fullscreen="toggle"
 						/>
 
-						<ImageStitchExportPanel
-							v-if="showExportPanel"
-							:canvas-width="canvasWidth"
-							:canvas-height="canvasHeight"
-							@export="onExport"
-						/>
+						<UCollapsible
+							v-model:open="showExportPanel"
+							:ui="{
+								content: 'p-4',
+							}"
+						>
+							<template #content>
+								<ImageStitchExportPanel
+									:canvas-width="canvasWidth"
+									:canvas-height="canvasHeight"
+									@export="onExport"
+								/>
+							</template>
+						</UCollapsible>
 
 						<div
 							class="flex gap-4 min-h-0"
@@ -122,17 +130,33 @@
 						v-for="img in images"
 						:key="img.id"
 						class="flex items-center gap-3 p-2 rounded-lg border cursor-pointer transition-colors"
-						:class="thumbId === img.id ? 'border-primary bg-primary/10' : 'border-muted hover:bg-muted/50'"
+						:class="
+							thumbId === img.id
+								? 'border-primary bg-primary/10'
+								: 'border-muted hover:bg-muted/50'
+						"
 						@click="thumbId = img.id"
 					>
-						<img :src="img.src" class="w-16 h-12 object-cover rounded shrink-0" />
+						<img
+							:src="img.src"
+							class="w-16 h-12 object-cover rounded shrink-0"
+						/>
 						<span class="text-sm truncate flex-1">{{ img.name }}</span>
-						<UIcon v-if="thumbId === img.id" name="i-lucide-check-circle" class="text-primary shrink-0" />
+						<UIcon
+							v-if="thumbId === img.id"
+							name="i-lucide-check-circle"
+							class="text-primary shrink-0"
+						/>
 					</div>
 				</div>
 			</template>
 			<template #footer>
-				<UButton label="取消" color="neutral" variant="outline" @click="showThumbAlignModal = false" />
+				<UButton
+					label="取消"
+					color="neutral"
+					variant="outline"
+					@click="showThumbAlignModal = false"
+				/>
 				<UButton
 					label="开始定位"
 					icon="i-lucide-scan-search"
@@ -309,7 +333,11 @@ async function onThumbAlign() {
 			icon: 'i-lucide-scan-search',
 		})
 	} else {
-		toast.add({ title: '定位失败', color: 'warning', icon: 'i-lucide-triangle-alert' })
+		toast.add({
+			title: '定位失败',
+			color: 'warning',
+			icon: 'i-lucide-triangle-alert',
+		})
 	}
 }
 

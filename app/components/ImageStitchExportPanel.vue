@@ -1,36 +1,56 @@
 <template>
-	<!-- 3. UCard instead of hand-rolled card -->
 	<UCard>
 		<template #header>
-			<span class="font-medium text-sm">导出选项</span>
+			<span class="font-bold text-sm">导出选项</span>
 		</template>
-		<div class="flex flex-wrap gap-4 items-end">
-			<UFormField label="文件名">
-				<UInput v-model="filename" class="w-44" placeholder="stitched-image" />
-			</UFormField>
-			<UFormField label="格式">
-				<USelect v-model="format" :items="formatOptions" class="w-28" />
-			</UFormField>
-			<!-- 4. UInputNumber for numeric fields -->
-			<UFormField label="宽度 (px)">
-				<UInputNumber :model-value="width" :min="1" :max="20000" class="w-32" @update:model-value="onWidth" />
-			</UFormField>
-			<UTooltip :text="locked ? '解锁比例' : '锁定比例'">
-				<UButton
-					:icon="locked ? 'i-lucide-lock' : 'i-lucide-lock-open'"
-					color="neutral"
-					variant="ghost"
-					size="xs"
-					class="self-end mb-1"
-					@click="locked = !locked"
-				/>
-			</UTooltip>
-			<UFormField label="高度 (px)">
-				<UInputNumber :model-value="height" :min="1" :max="20000" class="w-32" @update:model-value="onHeight" />
-			</UFormField>
-			<UFormField v-if="format !== 'image/png'" label="质量 (1-100)">
-				<UInputNumber v-model="quality" :min="1" :max="100" class="w-28" />
-			</UFormField>
+		<div
+			class="flex flex-col gap-4 lg:gap-8 lg:flex-row items-start lg:items-end"
+		>
+			<div class="flex gap-4">
+				<UFormField label="文件名">
+					<UInput
+						v-model="filename"
+						class="w-44"
+						placeholder="stitched-image"
+					/>
+				</UFormField>
+				<UFormField label="格式">
+					<USelect v-model="format" :items="formatOptions" class="w-28" />
+				</UFormField>
+				<UFormField v-if="format !== 'image/png'" label="质量 (1-100)">
+					<UInputNumber v-model="quality" :min="1" :max="100" class="w-28" />
+				</UFormField>
+			</div>
+			<div class="flex gap-4">
+				<UFormField label="宽度 (px)">
+					<UInputNumber
+						:model-value="width"
+						:min="1"
+						:max="20000"
+						class="w-32"
+						@update:model-value="onWidth"
+					/>
+				</UFormField>
+				<UTooltip :text="locked ? '解锁比例' : '锁定比例'">
+					<UButton
+						:icon="locked ? 'i-lucide-lock' : 'i-lucide-lock-open'"
+						color="neutral"
+						variant="ghost"
+						size="sm"
+						class="self-end mb-1"
+						@click="locked = !locked"
+					/>
+				</UTooltip>
+				<UFormField label="高度 (px)">
+					<UInputNumber
+						:model-value="height"
+						:min="1"
+						:max="20000"
+						class="w-32"
+						@update:model-value="onHeight"
+					/>
+				</UFormField>
+			</div>
 			<UButton label="导出图片" icon="i-lucide-download" @click="onExport" />
 		</div>
 	</UCard>
@@ -69,17 +89,21 @@ const locked = ref(false)
 
 watch(
 	() => props.canvasWidth,
-	v => { width.value = v },
+	v => {
+		width.value = v
+	},
 )
 watch(
 	() => props.canvasHeight,
-	v => { height.value = v },
+	v => {
+		height.value = v
+	},
 )
 
 function onWidth(v: number | null) {
 	if (v == null) return
 	if (locked.value && width.value > 0) {
-		height.value = Math.max(1, Math.round(v * height.value / width.value))
+		height.value = Math.max(1, Math.round((v * height.value) / width.value))
 	}
 	width.value = v
 }
@@ -87,7 +111,7 @@ function onWidth(v: number | null) {
 function onHeight(v: number | null) {
 	if (v == null) return
 	if (locked.value && height.value > 0) {
-		width.value = Math.max(1, Math.round(v * width.value / height.value))
+		width.value = Math.max(1, Math.round((v * width.value) / height.value))
 	}
 	height.value = v
 }

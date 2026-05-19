@@ -1,6 +1,6 @@
 <template>
 	<div class="w-48 border border-muted rounded-lg bg-elevated flex flex-col">
-		<div class="px-3 py-2 text-sm font-medium border-b border-muted">
+		<div class="px-3 py-2 text-sm font-bold border-b border-muted">
 			图层 ({{ sortedImages.length }})
 		</div>
 
@@ -14,7 +14,7 @@
 				v-for="img in [...sortedImages].reverse()"
 				:key="img.id"
 				draggable="true"
-				class="flex items-center gap-1 px-2 py-1.5 text-xs cursor-grab hover:bg-muted/50 transition-colors border-t-2 border-transparent"
+				class="flex items-center gap-1 px-2 py-1.5 text-xs cursor-grab hover:bg-primary/20 transition-colors border-t-2 border-transparent"
 				:class="{
 					'bg-primary/10': selectedIds.includes(img.id),
 					'border-t-primary!': dragOver === img.id && dragPos === 'before',

@@ -22,8 +22,6 @@
 				</template>
 			</UFileUpload>
 
-			<div class="w-px h-6 bg-muted" />
-
 			<!-- Add images -->
 			<UFileUpload
 				v-model="imageFiles"
@@ -44,6 +42,27 @@
 			<!-- Canvas size + background -->
 			<div class="flex items-center gap-1">
 				<UFieldGroup>
+					<UTooltip text="画布背景色">
+						<UPopover>
+							<UButton color="neutral" variant="outline" size="sm">
+								<span
+									class="block w-4 h-4 rounded-sm border border-muted"
+									:style="{ background: canvasBg }"
+								/>
+							</UButton>
+							<template #content>
+								<div class="p-2">
+									<UColorPicker
+										:model-value="canvasBg"
+										format="hex"
+										@update:model-value="
+											emit('update:canvasBg', $event as string)
+										"
+									/>
+								</div>
+							</template>
+						</UPopover>
+					</UTooltip>
 					<UInputNumber
 						:model-value="canvasWidth"
 						:min="100"
@@ -74,37 +93,25 @@
 						placeholder="高"
 						@update:model-value="onCanvasHeight($event ?? canvasHeight)"
 					/>
-					<UBadge color="neutral" variant="subtle" label="px" />
-				</UFieldGroup>
-				<UTooltip text="画布背景色">
-					<UPopover>
+					<UBadge color="neutral" variant="subtle" size="lg" label="px" />
+					<UTooltip text="裁剪画布：去掉没有图片的空白区域">
 						<UButton
+							icon="i-lucide-crop"
 							color="neutral"
-							variant="outline"
-							class="w-7 h-7 p-0 shrink-0"
-						>
-							<span
-								class="block w-4 h-4 rounded-sm border border-muted"
-								:style="{ background: canvasBg }"
-							/>
-						</UButton>
-						<template #content>
-							<div class="p-2">
-								<UColorPicker
-									:model-value="canvasBg"
-									format="hex"
-									@update:model-value="
-										emit('update:canvasBg', $event as string)
-									"
-								/>
-							</div>
-						</template>
-					</UPopover>
-				</UTooltip>
+							variant="subtle"
+							:disabled="imageCount === 0"
+							@click="emit('cropToContent')"
+						/>
+					</UTooltip>
+				</UFieldGroup>
 			</div>
 
 			<!-- Zoom -->
 			<UInputNumber
+				increment-icon="i-lucide-zoom-in"
+				decrement-icon="i-lucide-zoom-out"
+				color="neutral"
+				variant="outline"
 				:model-value="zoom"
 				:min="0.1"
 				:max="4"
@@ -148,15 +155,7 @@
 						@click="emit('resetPan')"
 					/>
 				</UTooltip>
-				<UTooltip text="裁剪画布：去掉没有图片的空白区域">
-					<UButton
-						icon="i-lucide-crop"
-						color="neutral"
-						variant="subtle"
-						:disabled="imageCount === 0"
-						@click="emit('cropToContent')"
-					/>
-				</UTooltip>
+
 				<UTooltip text="清空画布">
 					<UButton
 						icon="i-lucide-trash-2"

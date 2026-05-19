@@ -1,8 +1,7 @@
 <template>
-	<div class="flex flex-wrap items-center gap-3 text-sm">
+	<div class="flex items-center gap-4 text-sm">
 		<!-- Nudge buttons -->
 		<div class="flex items-center gap-1">
-			<span class="text-muted">微调:</span>
 			<UFieldGroup size="xs">
 				<UTooltip text="上移 (↑)">
 					<UButton
@@ -41,35 +40,34 @@
 
 		<!-- Position & size inputs (single selection only) -->
 		<template v-if="singleSelected">
-			<div class="w-px h-4 bg-muted" />
 			<div class="flex items-center gap-2">
-				<UFormField label="X" size="xs" class="flex items-center gap-1">
+				<UFormField label="X" size="xs" orientation="horizontal">
 					<UInputNumber
 						:model-value="singleSelected.x"
 						size="xs"
-						class="w-20"
+						class="w-28"
 						@update:model-value="
 							v => emit('setPos', 'x', v ?? singleSelected!.x)
 						"
 					/>
 				</UFormField>
-				<UFormField label="Y" size="xs" class="flex items-center gap-1">
+				<UFormField label="Y" size="xs" orientation="horizontal">
 					<UInputNumber
 						:model-value="singleSelected.y"
 						size="xs"
-						class="w-20"
+						class="w-28"
 						@update:model-value="
 							v => emit('setPos', 'y', v ?? singleSelected!.y)
 						"
 					/>
 				</UFormField>
 				<div class="w-px h-4 bg-muted" />
-				<UFormField label="W" size="xs" class="flex items-center gap-1">
+				<UFormField label="W" size="xs" orientation="horizontal">
 					<UInputNumber
 						:model-value="singleSelected.width"
 						:min="1"
 						size="xs"
-						class="w-20"
+						class="w-28"
 						@update:model-value="v => onWidth(v ?? singleSelected!.width)"
 					/>
 				</UFormField>
@@ -79,16 +77,15 @@
 						color="neutral"
 						variant="ghost"
 						size="xs"
-						class="px-0.5"
 						@click="sizeLocked = !sizeLocked"
 					/>
 				</UTooltip>
-				<UFormField label="H" size="xs" class="flex items-center gap-1">
+				<UFormField label="H" size="xs" orientation="horizontal">
 					<UInputNumber
 						:model-value="singleSelected.height"
 						:min="1"
 						size="xs"
-						class="w-20"
+						class="w-28"
 						@update:model-value="v => onHeight(v ?? singleSelected!.height)"
 					/>
 				</UFormField>
@@ -113,15 +110,41 @@ const emit = defineEmits<{
 const sizeLocked = ref(false)
 
 function onWidth(v: number) {
-	if (sizeLocked.value && props.singleSelected && props.singleSelected.width > 0) {
-		emit('setSize', 'height', Math.max(1, Math.round(v * props.singleSelected.height / props.singleSelected.width)))
+	if (
+		sizeLocked.value &&
+		props.singleSelected &&
+		props.singleSelected.width > 0
+	) {
+		emit(
+			'setSize',
+			'height',
+			Math.max(
+				1,
+				Math.round(
+					(v * props.singleSelected.height) / props.singleSelected.width,
+				),
+			),
+		)
 	}
 	emit('setSize', 'width', v)
 }
 
 function onHeight(v: number) {
-	if (sizeLocked.value && props.singleSelected && props.singleSelected.height > 0) {
-		emit('setSize', 'width', Math.max(1, Math.round(v * props.singleSelected.width / props.singleSelected.height)))
+	if (
+		sizeLocked.value &&
+		props.singleSelected &&
+		props.singleSelected.height > 0
+	) {
+		emit(
+			'setSize',
+			'width',
+			Math.max(
+				1,
+				Math.round(
+					(v * props.singleSelected.width) / props.singleSelected.height,
+				),
+			),
+		)
 	}
 	emit('setSize', 'height', v)
 }
