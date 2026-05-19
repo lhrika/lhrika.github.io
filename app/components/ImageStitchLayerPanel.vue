@@ -35,6 +35,11 @@
 				/>
 				<img :src="img.src" class="w-7 h-7 object-cover rounded shrink-0" />
 				<span class="flex-1 truncate text-muted">{{ img.name }}</span>
+				<UIcon
+					v-if="img.groupId"
+					name="i-lucide-group"
+					class="size-3 text-amber-500 shrink-0"
+				/>
 			</div>
 		</div>
 

@@ -9,6 +9,7 @@ export interface StitchImageMeta {
 	width: number
 	height: number
 	zIndex: number
+	groupId?: string
 }
 
 export const useImageStitchStore = defineStore(

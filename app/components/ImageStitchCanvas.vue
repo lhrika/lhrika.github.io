@@ -75,6 +75,7 @@ const props = defineProps<{
 	canvasBg: string
 	zoom: number
 	fullscreen?: boolean
+	groupMemberIds: (id: string) => string[]
 }>()
 
 const emit = defineEmits<{
@@ -133,10 +134,15 @@ function startDrag(e: MouseEvent, id: string) {
 		startX: img.x,
 		startY: img.y,
 	}
-	// Capture multi-drag origins
-	if (props.selectedIds.includes(id) && props.selectedIds.length > 1) {
+	// Capture origins for all images that should move together:
+	// union of the current selection and the dragged image's group members
+	const groupIds = props.groupMemberIds(id)
+	const coMoveIds = props.selectedIds.includes(id) && props.selectedIds.length > 1
+		? [...new Set([...props.selectedIds, ...groupIds])]
+		: groupIds
+	if (coMoveIds.length > 1) {
 		multiDragOrigins.value = {}
-		for (const selId of props.selectedIds) {
+		for (const selId of coMoveIds) {
 			const selImg = props.sortedImages.find(i => i.id === selId)
 			if (selImg) multiDragOrigins.value[selId] = { x: selImg.x, y: selImg.y }
 		}
@@ -180,14 +186,10 @@ function onMouseMove(e: MouseEvent) {
 		const dx = Math.round((e.clientX - dragging.value.startMouseX) / props.zoom)
 		const dy = Math.round((e.clientY - dragging.value.startMouseY) / props.zoom)
 
-		if (
-			props.selectedIds.length > 1 &&
-			props.selectedIds.includes(dragging.value.id)
-		) {
-			for (const selId of props.selectedIds) {
+		if (Object.keys(multiDragOrigins.value).length > 0) {
+			for (const [selId, origin] of Object.entries(multiDragOrigins.value)) {
 				const img = props.sortedImages.find(i => i.id === selId)
-				const origin = multiDragOrigins.value[selId]
-				if (img && origin) {
+				if (img) {
 					img.x = origin.x + dx
 					img.y = origin.y + dy
 				}

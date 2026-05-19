@@ -200,7 +200,7 @@
 		<!-- Row 2: auto-stitch + alignment (only when ≥2 selected) -->
 		<div v-if="selectedCount >= 2" class="flex gap-2 items-center">
 			<UButton
-				v-if="selectedCount === 2"
+				v-if="canAutoAlign"
 				icon="i-lucide-combine"
 				label="自动拼接"
 				color="primary"
@@ -208,7 +208,29 @@
 				:loading="autoAligning"
 				@click="emit('autoAlign')"
 			/>
-			<div v-if="selectedCount === 2" class="w-px h-6 bg-muted" />
+			<div v-if="canAutoAlign" class="w-px h-6 bg-muted" />
+			<UFieldGroup>
+				<UTooltip text="组合选中图层">
+					<UButton
+						icon="i-lucide-group"
+						label="组合"
+						color="neutral"
+						variant="subtle"
+						@click="emit('groupSelected')"
+					/>
+				</UTooltip>
+				<UTooltip text="解除组合">
+					<UButton
+						icon="i-lucide-ungroup"
+						label="解组"
+						color="neutral"
+						variant="subtle"
+						:disabled="!selectedHaveGroup"
+						@click="emit('ungroupSelected')"
+					/>
+				</UTooltip>
+			</UFieldGroup>
+			<div class="w-px h-6 bg-muted" />
 			<span class="text-sm text-muted">对齐:</span>
 			<UFieldGroup>
 				<UTooltip text="顶部对齐">
@@ -249,6 +271,8 @@ defineProps<{
 	autoAligning?: boolean
 	thumbAligning?: boolean
 	isFullscreen?: boolean
+	selectedHaveGroup?: boolean
+	canAutoAlign?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -269,6 +293,8 @@ const emit = defineEmits<{
 	autoAlign: []
 	thumbAlign: []
 	toggleFullscreen: []
+	groupSelected: []
+	ungroupSelected: []
 }>()
 
 const imageFiles = ref<File[]>([])

@@ -160,16 +160,92 @@ export function useImageStitch() {
 		for (const img of images.value) URL.revokeObjectURL(img.src)
 	}
 
+	// ---- Group helpers ----
+	function groupMemberIds(id: string): string[] {
+		const img = images.value.find(i => i.id === id)
+		if (!img?.groupId) return [id]
+		return images.value.filter(i => i.groupId === img.groupId).map(i => i.id)
+	}
+
+	/**
+	 * Represents a logical unit for alignment: either a single image or a group.
+	 * `originX/Y` is the bounding-box top-left in canvas coordinates.
+	 * `src` is a blob URL of the composited render (revoke after use).
+	 */
+	interface LogicalUnit {
+		memberIds: string[]   // all image IDs in this unit
+		src: string           // composite blob URL
+		width: number
+		height: number
+		originX: number       // canvas x of the bounding box top-left
+		originY: number       // canvas y of the bounding box top-left
+	}
+
+	async function compositeUnit(members: StitchImage[]): Promise<LogicalUnit> {
+		const minX = Math.min(...members.map(i => i.x))
+		const minY = Math.min(...members.map(i => i.y))
+		const maxX = Math.max(...members.map(i => i.x + i.width))
+		const maxY = Math.max(...members.map(i => i.y + i.height))
+		const w = maxX - minX
+		const h = maxY - minY
+
+		const canvas = document.createElement('canvas')
+		canvas.width = w
+		canvas.height = h
+		const ctx = canvas.getContext('2d')!
+		const sorted = [...members].sort((a, b) => a.zIndex - b.zIndex)
+		for (const img of sorted) {
+			const el = await loadImage(img.src)
+			ctx.drawImage(el, img.x - minX, img.y - minY, img.width, img.height)
+		}
+		const blob = await new Promise<Blob>((resolve, reject) =>
+			canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/png'),
+		)
+		return {
+			memberIds: members.map(i => i.id),
+			src: URL.createObjectURL(blob),
+			width: w,
+			height: h,
+			originX: minX,
+			originY: minY,
+		}
+	}
+
+	/**
+	 * Returns the distinct logical units (single images or full groups)
+	 * that are currently selected.
+	 */
+	const selectedLogicalUnits = computed(() => {
+		const seen = new Set<string>() // group IDs or image IDs already counted
+		const units: { memberIds: string[]; representativeId: string }[] = []
+		for (const id of selectedIds.value) {
+			const img = images.value.find(i => i.id === id)
+			if (!img) continue
+			const key = img.groupId ?? id
+			if (seen.has(key)) continue
+			seen.add(key)
+			const memberIds = img.groupId
+				? images.value.filter(i => i.groupId === img.groupId).map(i => i.id)
+				: [id]
+			units.push({ memberIds, representativeId: id })
+		}
+		return units
+	})
+
 	// ---- Selection ----
 	function selectImage(e: MouseEvent, id: string) {
+		const groupIds = groupMemberIds(id)
 		if (e.shiftKey || e.ctrlKey || e.metaKey) {
-			if (selectedIds.value.includes(id)) {
-				selectedIds.value = selectedIds.value.filter(s => s !== id)
+			// Toggle the whole group as a unit
+			const allSelected = groupIds.every(gid => selectedIds.value.includes(gid))
+			if (allSelected) {
+				selectedIds.value = selectedIds.value.filter(s => !groupIds.includes(s))
 			} else {
-				selectedIds.value = [...selectedIds.value, id]
+				const merged = new Set([...selectedIds.value, ...groupIds])
+				selectedIds.value = [...merged]
 			}
 		} else {
-			selectedIds.value = [id]
+			selectedIds.value = groupIds
 		}
 	}
 
@@ -392,96 +468,133 @@ export function useImageStitch() {
 		if (project) await applyProject(project)
 	}
 
-	// ---- Auto align (two selected images) ----
-	// Detects whether to align horizontally or vertically based on image dimensions
-	// and current positions, then applies the best overlap found.
+	// ---- Auto align (two selected logical units) ----
+	// A logical unit is either a single image or a group (composited into one canvas).
+	// Detects whether to align horizontally or vertically based on bounding-box positions.
 	async function autoAlignSelected(): Promise<{
 		overlap: number
 		confidence: number
 	} | null> {
-		if (selectedIds.value.length !== 2) return null
-		const [idA, idB] = selectedIds.value
-		const imgA = images.value.find(i => i.id === idA)
-		const imgB = images.value.find(i => i.id === idB)
-		if (!imgA || !imgB) return null
+		const units = selectedLogicalUnits.value
+		if (units.length !== 2) return null
 
-		const sameWidth = imgA.width === imgB.width
-		const sameHeight = imgA.height === imgB.height
+		// Build composite for each unit
+		const getMembers = (memberIds: string[]) =>
+			memberIds.map(id => images.value.find(i => i.id === id)).filter(Boolean) as StitchImage[]
 
-		// Derive center positions for hint detection
-		const centerAx = imgA.x + imgA.width / 2
-		const centerBx = imgB.x + imgB.width / 2
-		const centerAy = imgA.y + imgA.height / 2
-		const centerBy = imgB.y + imgB.height / 2
-		const diffX = Math.abs(centerAx - centerBx)
-		const diffY = Math.abs(centerAy - centerBy)
+		const [compA, compB] = await Promise.all([
+			compositeUnit(getMembers(units[0]!.memberIds)),
+			compositeUnit(getMembers(units[1]!.memberIds)),
+		])
 
-		// Decide mode:
-		// - both same: use whichever axis the user spread the images along
-		// - only same width: vertical
-		// - only same height: horizontal
-		// - neither: use current position spread to decide
-		const useVertical =
-			sameWidth && !sameHeight
-				? true
-				: sameHeight && !sameWidth
-					? false
-					: diffY >= diffX // both same or neither — follow the dominant spread
+		try {
+			const sameWidth = compA.width === compB.width
+			const sameHeight = compA.height === compB.height
 
-		if (useVertical) {
-			// Vertical alignment — images must share the same width
-			const w = Math.min(imgA.width, imgB.width)
-			let hint: 'a-top' | 'b-top' | undefined
-			if (diffY > 10) hint = centerAy < centerBy ? 'a-top' : 'b-top'
+			const centerAx = compA.originX + compA.width / 2
+			const centerBx = compB.originX + compB.width / 2
+			const centerAy = compA.originY + compA.height / 2
+			const centerBy = compB.originY + compB.height / 2
+			const diffX = Math.abs(centerAx - centerBx)
+			const diffY = Math.abs(centerAy - centerBy)
 
-			const result = await autoAlignVertical(
-				imgA.src,
-				imgA.height,
-				imgB.src,
-				imgB.height,
-				w,
-				hint,
-			)
-			if (!result) return null
+			const useVertical =
+				sameWidth && !sameHeight
+					? true
+					: sameHeight && !sameWidth
+						? false
+						: diffY >= diffX
 
-			const topImg = result.topImage === 'a' ? imgA : imgB
-			const botImg = result.topImage === 'a' ? imgB : imgA
+			if (useVertical) {
+				const w = Math.min(compA.width, compB.width)
+				let hint: 'a-top' | 'b-top' | undefined
+				if (diffY > 10) hint = centerAy < centerBy ? 'a-top' : 'b-top'
 
-			// Keep top image's y; position bottom image so their overlap region meets
-			botImg.y = topImg.y + topImg.height - result.overlap
-			// Horizontally align lefts
-			botImg.x = topImg.x
+				const result = await autoAlignVertical(
+					compA.src, compA.height,
+					compB.src, compB.height,
+					w, hint,
+				)
+				if (!result) return null
 
-			pushHistory()
-			return { overlap: result.overlap, confidence: result.confidence }
-		} else {
-			// Horizontal alignment — images must share the same height
-			const h = Math.min(imgA.height, imgB.height)
-			let hint: 'a-left' | 'b-left' | undefined
-			if (diffX > 10) hint = centerAx < centerBx ? 'a-left' : 'b-left'
+				const topComp = result.topImage === 'a' ? compA : compB
+				const botComp = result.topImage === 'a' ? compB : compA
+				const botIds = result.topImage === 'a' ? units[1]!.memberIds : units[0]!.memberIds
 
-			const result = await autoAlignHorizontal(
-				imgA.src,
-				imgA.width,
-				imgB.src,
-				imgB.width,
-				h,
-				hint,
-			)
-			if (!result) return null
+				// New origin for the bottom unit
+				const newBotOriginY = topComp.originY + topComp.height - result.overlap
+				const dy = newBotOriginY - botComp.originY
+				const dx = topComp.originX - botComp.originX
+				for (const id of botIds) {
+					const img = images.value.find(i => i.id === id)
+					if (img) { img.x += dx; img.y += dy }
+				}
 
-			const leftImg = result.leftImage === 'a' ? imgA : imgB
-			const rightImg = result.leftImage === 'a' ? imgB : imgA
+				pushHistory()
+				return { overlap: result.overlap, confidence: result.confidence }
+			} else {
+				const h = Math.min(compA.height, compB.height)
+				let hint: 'a-left' | 'b-left' | undefined
+				if (diffX > 10) hint = centerAx < centerBx ? 'a-left' : 'b-left'
 
-			// Keep left image's x; position right image so their overlap region meets
-			rightImg.x = leftImg.x + leftImg.width - result.overlap
-			// Vertically align tops
-			rightImg.y = leftImg.y
+				const result = await autoAlignHorizontal(
+					compA.src, compA.width,
+					compB.src, compB.width,
+					h, hint,
+				)
+				if (!result) return null
 
-			pushHistory()
-			return { overlap: result.overlap, confidence: result.confidence }
+				const leftComp = result.leftImage === 'a' ? compA : compB
+				const rightComp = result.leftImage === 'a' ? compB : compA
+				const rightIds = result.leftImage === 'a' ? units[1]!.memberIds : units[0]!.memberIds
+
+				// New origin for the right unit
+				const newRightOriginX = leftComp.originX + leftComp.width - result.overlap
+				const dx = newRightOriginX - rightComp.originX
+				const dy = leftComp.originY - rightComp.originY
+				for (const id of rightIds) {
+					const img = images.value.find(i => i.id === id)
+					if (img) { img.x += dx; img.y += dy }
+				}
+
+				pushHistory()
+				return { overlap: result.overlap, confidence: result.confidence }
+			}
+		} finally {
+			URL.revokeObjectURL(compA.src)
+			URL.revokeObjectURL(compB.src)
 		}
 	}
+
+	// ---- Grouping ----
+	function groupSelected() {
+		if (selectedIds.value.length < 2) return
+		const newGroupId = crypto.randomUUID()
+		for (const id of selectedIds.value) {
+			const img = images.value.find(i => i.id === id)
+			if (img) img.groupId = newGroupId
+		}
+		pushHistory()
+	}
+
+	function ungroupSelected() {
+		const affected = new Set<string>()
+		for (const id of selectedIds.value) {
+			const img = images.value.find(i => i.id === id)
+			if (img?.groupId) affected.add(img.groupId)
+		}
+		if (affected.size === 0) return
+		for (const img of images.value) {
+			if (img.groupId && affected.has(img.groupId)) {
+				img.groupId = undefined
+			}
+		}
+		pushHistory()
+	}
+
+	const selectedHaveGroup = computed(() =>
+		selectedIds.value.some(id => images.value.find(i => i.id === id)?.groupId),
+	)
 
 	// ---- Crop canvas to content ----
 	function cropToContent() {
@@ -575,5 +688,10 @@ export function useImageStitch() {
 		autoAlignSelected,
 		cropToContent,
 		alignByThumbnailSelected,
+		groupMemberIds,
+		groupSelected,
+		ungroupSelected,
+		selectedHaveGroup,
+		selectedLogicalUnits,
 	}
 }

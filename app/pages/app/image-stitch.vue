@@ -33,6 +33,8 @@
 							:auto-aligning="autoAligning"
 							:thumb-aligning="thumbAligning"
 							:is-fullscreen="isFullscreen"
+							:selected-have-group="selectedHaveGroup"
+							:can-auto-align="selectedLogicalUnits.length === 2"
 							@undo="undo"
 							@redo="redo"
 							@align="alignImages"
@@ -44,6 +46,8 @@
 							@open-project-file="onOpenProjectFile"
 							@auto-align="onAutoAlign"
 							@thumb-align="showThumbAlignModal = true"
+							@group-selected="groupSelected"
+							@ungroup-selected="ungroupSelected"
 							@reset-pan="canvasRef?.resetPan()"
 							@toggle-fullscreen="toggle"
 						/>
@@ -68,6 +72,7 @@
 								:canvas-bg="canvasBg"
 								:zoom="zoom"
 								:fullscreen="isFullscreen"
+								:group-member-ids="groupMemberIds"
 								@update:zoom="zoom = $event"
 								@select="selectImage"
 								@deselect="deselectAll"
@@ -202,6 +207,11 @@ const {
 	autoAlignSelected,
 	cropToContent,
 	alignByThumbnailSelected,
+	groupMemberIds,
+	groupSelected,
+	ungroupSelected,
+	selectedHaveGroup,
+	selectedLogicalUnits,
 } = useImageStitch()
 
 // 1. Toast feedback
