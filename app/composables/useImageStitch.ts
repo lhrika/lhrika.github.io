@@ -432,13 +432,16 @@ export function useImageStitch() {
 	}
 
 	// ---- Export ----
-	async function exportImage(opts: {
+	function exportExt(format: string): string {
+		return format === 'image/png' ? 'png' : format === 'image/jpeg' ? 'jpg' : 'webp'
+	}
+
+	async function renderImage(opts: {
 		format: string
 		width: number
 		height: number
 		quality: number
-		filename?: string
-	}) {
+	}): Promise<{ dataUrl: string; ext: string }> {
 		const canvas = document.createElement('canvas')
 		canvas.width = opts.width
 		canvas.height = opts.height
@@ -460,14 +463,19 @@ export function useImageStitch() {
 				)
 		}
 		const quality = opts.format === 'image/png' ? undefined : opts.quality / 100
-		const ext =
-			opts.format === 'image/png'
-				? 'png'
-				: opts.format === 'image/jpeg'
-					? 'jpg'
-					: 'webp'
+		return { dataUrl: canvas.toDataURL(opts.format, quality), ext: exportExt(opts.format) }
+	}
+
+	async function exportImage(opts: {
+		format: string
+		width: number
+		height: number
+		quality: number
+		filename?: string
+	}) {
+		const { dataUrl, ext } = await renderImage(opts)
 		const a = document.createElement('a')
-		a.href = canvas.toDataURL(opts.format, quality)
+		a.href = dataUrl
 		a.download = `${opts.filename || 'stitched-image'}.${ext}`
 		a.click()
 	}
@@ -812,6 +820,7 @@ export function useImageStitch() {
 		reorderLayers,
 		removeImage,
 		alignImages,
+		renderImage,
 		exportImage,
 		pushHistory,
 		clearAll,

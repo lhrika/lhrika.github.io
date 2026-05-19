@@ -182,7 +182,7 @@
 				color="primary"
 				variant="outline"
 				:disabled="imageCount === 0"
-				@click="emit('toggleExport')"
+				@click="emit('openExport')"
 			/>
 
 			<!-- Fullscreen -->
@@ -340,7 +340,7 @@ const emit = defineEmits<{
 	undo: []
 	redo: []
 	align: [edge: AlignEdge]
-	toggleExport: []
+	openExport: []
 	addFiles: [files: File[]]
 	clearAll: []
 	cropToContent: []

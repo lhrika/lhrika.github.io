@@ -38,7 +38,7 @@
 							@undo="undo"
 							@redo="redo"
 							@align="alignImages"
-							@toggle-export="showExportPanel = !showExportPanel"
+							@open-export="showExportModal = true"
 							@add-files="addFiles"
 							@crop-to-content="onCropToContent"
 							@clear-all="confirmClearAll"
@@ -52,21 +52,6 @@
 							@reset-pan="canvasRef?.resetPan()"
 							@toggle-fullscreen="toggle"
 						/>
-
-						<UCollapsible
-							v-model:open="showExportPanel"
-							:ui="{
-								content: 'p-4',
-							}"
-						>
-							<template #content>
-								<ImageStitchExportPanel
-									:canvas-width="canvasWidth"
-									:canvas-height="canvasHeight"
-									@export="onExport"
-								/>
-							</template>
-						</UCollapsible>
 
 						<div
 							class="flex gap-4 min-h-0"
@@ -120,6 +105,15 @@
 				</div>
 			</UContainer>
 		</UPageBody>
+
+		<!-- Export modal -->
+		<ImageStitchExportPanel
+			v-model:open="showExportModal"
+			:canvas-width="canvasWidth"
+			:canvas-height="canvasHeight"
+			:render-image="renderImage"
+			:export-image="exportImage"
+		/>
 
 		<!-- Thumbnail-align modal: pick which image is the thumbnail -->
 		<UModal
@@ -225,6 +219,7 @@ const {
 	reorderLayers,
 	removeImage,
 	alignImages,
+	renderImage,
 	exportImage,
 	pushHistory,
 	clearAll,
@@ -269,25 +264,6 @@ async function onSaveProject() {
 	}
 }
 
-async function onExport(opts: {
-	format: string
-	width: number
-	height: number
-	quality: number
-	filename: string
-}) {
-	try {
-		await exportImage(opts)
-		toast.add({
-			title: '导出成功',
-			color: 'success',
-			icon: 'i-lucide-check-circle',
-		})
-	} catch {
-		toast.add({ title: '导出失败', color: 'error', icon: 'i-lucide-circle-x' })
-	}
-}
-
 function onCropToContent() {
 	cropToContent()
 	toast.add({
@@ -299,7 +275,7 @@ function onCropToContent() {
 }
 
 const zoom = ref(1)
-const showExportPanel = ref(false)
+const showExportModal = ref(false)
 const autoAligning = ref(false)
 const thumbAligning = ref(false)
 const showThumbAlignModal = ref(false)
