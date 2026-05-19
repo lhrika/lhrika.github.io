@@ -104,6 +104,8 @@
 								"
 								@reorder="reorderLayers"
 								@rename="renameImage"
+								@select-all="selectAll"
+								@deselect-all="deselectAll"
 							/>
 						</div>
 
@@ -240,6 +242,7 @@ const {
 	ungroupSelected,
 	selectedHaveGroup,
 	selectedLogicalUnits,
+	selectAll,
 } = useImageStitch()
 
 // 1. Toast feedback

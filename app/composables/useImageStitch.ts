@@ -253,6 +253,10 @@ export function useImageStitch() {
 		selectedIds.value = []
 	}
 
+	function selectAll() {
+		selectedIds.value = images.value.map(i => i.id)
+	}
+
 	// ---- Nudge ----
 	function nudge(dx: number, dy: number) {
 		for (const selId of selectedIds.value) {
@@ -765,6 +769,7 @@ export function useImageStitch() {
 		cleanupObjectURLs,
 		selectImage,
 		deselectAll,
+		selectAll,
 		nudge,
 		setPos,
 		setSize,

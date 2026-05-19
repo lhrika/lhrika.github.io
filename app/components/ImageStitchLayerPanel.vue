@@ -1,7 +1,15 @@
 <template>
 	<div class="w-48 border border-muted rounded-lg bg-elevated flex flex-col">
-		<div class="px-3 py-2 text-sm font-bold border-b border-muted">
-			图层 ({{ sortedImages.length }})
+		<div class="px-3 py-2 text-sm font-bold border-b border-muted flex items-center justify-between">
+			<span>图层 ({{ selectedIds.length > 0 ? `${selectedIds.length}/` : '' }}{{ sortedImages.length }})</span>
+			<UTooltip :text="allSelected ? '取消全选' : '全选'">
+				<UCheckbox
+					:model-value="allSelected"
+					:indeterminate="someSelected"
+					size="sm"
+					@update:model-value="allSelected ? emit('deselectAll') : emit('selectAll')"
+				/>
+			</UTooltip>
 		</div>
 
 		<!-- List (highest z first) -->
@@ -139,7 +147,18 @@ const emit = defineEmits<{
 	removeSelected: []
 	reorder: [orderedIds: string[]]
 	rename: [id: string, name: string]
+	selectAll: []
+	deselectAll: []
 }>()
+
+const allSelected = computed(
+	() =>
+		props.sortedImages.length > 0 &&
+		props.sortedImages.every(i => props.selectedIds.includes(i.id)),
+)
+const someSelected = computed(
+	() => !allSelected.value && props.selectedIds.length > 0,
+)
 
 // ---- Inline rename ----
 const renamingId = ref<string | null>(null)
