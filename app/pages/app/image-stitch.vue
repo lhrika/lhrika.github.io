@@ -31,6 +31,7 @@
 							:selected-count="selectedIds.length"
 							:image-count="images.length"
 							:auto-aligning="autoAligning"
+							:thumb-aligning="thumbAligning"
 							:is-fullscreen="isFullscreen"
 							@undo="undo"
 							@redo="redo"
@@ -42,6 +43,7 @@
 							@save-project="onSaveProject"
 							@open-project-file="onOpenProjectFile"
 							@auto-align="onAutoAlign"
+							@thumb-align="showThumbAlignModal = true"
 							@reset-pan="canvasRef?.resetPan()"
 							@toggle-fullscreen="toggle"
 						/>
@@ -101,6 +103,41 @@
 				</div>
 			</UContainer>
 		</UPageBody>
+
+		<!-- Thumbnail-align modal: pick which image is the thumbnail -->
+		<UModal
+			v-model:open="showThumbAlignModal"
+			title="选择缩略图"
+			description="选择哪张图片是缩略图，其余图片将根据它的内容自动定位"
+			:ui="{ footer: 'justify-end' }"
+		>
+			<template #body>
+				<div class="flex flex-col gap-2">
+					<div
+						v-for="img in images"
+						:key="img.id"
+						class="flex items-center gap-3 p-2 rounded-lg border cursor-pointer transition-colors"
+						:class="thumbId === img.id ? 'border-primary bg-primary/10' : 'border-muted hover:bg-muted/50'"
+						@click="thumbId = img.id"
+					>
+						<img :src="img.src" class="w-16 h-12 object-cover rounded shrink-0" />
+						<span class="text-sm truncate flex-1">{{ img.name }}</span>
+						<UIcon v-if="thumbId === img.id" name="i-lucide-check-circle" class="text-primary shrink-0" />
+					</div>
+				</div>
+			</template>
+			<template #footer>
+				<UButton label="取消" color="neutral" variant="outline" @click="showThumbAlignModal = false" />
+				<UButton
+					label="开始定位"
+					icon="i-lucide-scan-search"
+					color="primary"
+					:disabled="!thumbId || images.length < 2"
+					:loading="thumbAligning"
+					@click="onThumbAlign"
+				/>
+			</template>
+		</UModal>
 
 		<!-- 2. Confirm clear all modal -->
 		<UModal
@@ -164,6 +201,7 @@ const {
 	pickAndLoadProject,
 	autoAlignSelected,
 	cropToContent,
+	alignByThumbnailSelected,
 } = useImageStitch()
 
 // 1. Toast feedback
@@ -222,6 +260,9 @@ function onCropToContent() {
 const zoom = ref(1)
 const showExportPanel = ref(false)
 const autoAligning = ref(false)
+const thumbAligning = ref(false)
+const showThumbAlignModal = ref(false)
+const thumbId = ref<string | null>(null)
 
 async function onAutoAlign() {
 	autoAligning.value = true
@@ -240,6 +281,25 @@ async function onAutoAlign() {
 			color: 'warning',
 			icon: 'i-lucide-triangle-alert',
 		})
+	}
+}
+
+async function onThumbAlign() {
+	if (!thumbId.value) return
+	showThumbAlignModal.value = false
+	thumbAligning.value = true
+	const result = await alignByThumbnailSelected(thumbId.value)
+	thumbAligning.value = false
+	thumbId.value = null
+	if (result) {
+		toast.add({
+			title: '缩略图定位完成',
+			description: `平均置信度 ${Math.round(result.avgConfidence * 100)}%`,
+			color: 'success',
+			icon: 'i-lucide-scan-search',
+		})
+	} else {
+		toast.add({ title: '定位失败', color: 'warning', icon: 'i-lucide-triangle-alert' })
 	}
 }
 

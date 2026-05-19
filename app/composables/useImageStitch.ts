@@ -24,6 +24,7 @@ export function useImageStitch() {
 	const db = useImageStitchDB()
 	const fileIO = useImageStitchFile()
 	const { autoAlignHorizontal, autoAlignVertical } = useImageStitchAutoAlign()
+	const { alignByThumbnail } = useImageStitchThumbAlign()
 
 	// Runtime state — src is a blob URL created at load time
 	const images = ref<StitchImage[]>([])
@@ -499,6 +500,34 @@ export function useImageStitch() {
 		pushHistory()
 	}
 
+	// ---- Thumbnail-guided layout ----
+	// One image is the thumbnail; the rest are patches to be positioned.
+	async function alignByThumbnailSelected(thumbId: string): Promise<{ avgConfidence: number } | null> {
+		const patches = images.value.filter(i => i.id !== thumbId)
+		const thumb = images.value.find(i => i.id === thumbId)
+		if (!thumb || patches.length === 0) return null
+
+		const cols = Math.round(Math.sqrt(patches.length))
+		const rows = Math.ceil(patches.length / cols)
+		const result = await alignByThumbnail(
+			thumb.src,
+			thumb.width,
+			thumb.height,
+			patches.map(p => ({ id: p.id, src: p.src })),
+			cols,
+			rows,
+		)
+
+		for (const placement of result.placements) {
+			const img = images.value.find(i => i.id === placement.id)
+			if (img) { img.x = placement.x; img.y = placement.y }
+		}
+		store.canvasWidth = result.canvasWidth
+		store.canvasHeight = result.canvasHeight
+		pushHistory()
+		return { avgConfidence: result.avgConfidence }
+	}
+
 	// ---- Clear all ----
 	async function clearAll() {
 		cleanupObjectURLs()
@@ -545,5 +574,6 @@ export function useImageStitch() {
 		pickAndLoadProject,
 		autoAlignSelected,
 		cropToContent,
+		alignByThumbnailSelected,
 	}
 }

@@ -163,6 +163,19 @@
 			</UTooltip>
 		</UFieldGroup>
 
+		<!-- Thumbnail align -->
+		<UTooltip text="参照缩略图自动定位所有图片">
+			<UButton
+				icon="i-lucide-scan-search"
+				label="缩略图定位"
+				color="neutral"
+				variant="outline"
+				:disabled="imageCount < 2"
+				:loading="thumbAligning"
+				@click="emit('thumbAlign')"
+			/>
+		</UTooltip>
+
 		<!-- Export -->
 		<UButton
 			icon="i-lucide-download"
@@ -234,6 +247,7 @@ defineProps<{
 	selectedCount: number
 	imageCount: number
 	autoAligning?: boolean
+	thumbAligning?: boolean
 	isFullscreen?: boolean
 }>()
 
@@ -253,6 +267,7 @@ const emit = defineEmits<{
 	saveProject: []
 	openProjectFile: [file: File]
 	autoAlign: []
+	thumbAlign: []
 	toggleFullscreen: []
 }>()
 
