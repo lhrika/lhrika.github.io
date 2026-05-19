@@ -102,6 +102,7 @@
 									}
 								"
 								@reorder="reorderLayers"
+								@rename="renameImage"
 							/>
 						</div>
 
@@ -231,6 +232,7 @@ const {
 	autoAlignSelected,
 	cropToContent,
 	alignByThumbnailSelected,
+	renameImage,
 	groupMemberIds,
 	groupSelected,
 	ungroupSelected,

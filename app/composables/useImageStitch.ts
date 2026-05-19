@@ -322,6 +322,14 @@ export function useImageStitch() {
 		pushHistory()
 	}
 
+	function renameImage(id: string, name: string) {
+		const img = images.value.find(i => i.id === id)
+		if (img) {
+			img.name = name.trim() || img.name
+			pushHistory()
+		}
+	}
+
 	function removeImage(id: string) {
 		URL.revokeObjectURL(images.value.find(i => i.id === id)?.src ?? '')
 		images.value = images.value.filter(i => i.id !== id)
@@ -688,6 +696,7 @@ export function useImageStitch() {
 		autoAlignSelected,
 		cropToContent,
 		alignByThumbnailSelected,
+		renameImage,
 		groupMemberIds,
 		groupSelected,
 		ungroupSelected,

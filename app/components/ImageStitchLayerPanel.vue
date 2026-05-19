@@ -34,7 +34,22 @@
 					class="size-3 text-muted shrink-0"
 				/>
 				<img :src="img.src" class="w-7 h-7 object-cover rounded shrink-0" />
-				<span class="flex-1 truncate text-muted">{{ img.name }}</span>
+				<input
+					v-if="renamingId === img.id"
+					:ref="el => { if (el) renameInput = el as HTMLInputElement }"
+					v-model="renameValue"
+					class="flex-1 min-w-0 bg-transparent border-b border-primary outline-none text-xs"
+					@keydown.enter="commitRename"
+					@keydown.escape="cancelRename"
+					@blur="commitRename"
+					@click.stop
+					@mousedown.stop
+				/>
+				<span
+					v-else
+					class="flex-1 truncate text-muted"
+					@dblclick.stop="startRename(img.id, img.name)"
+				>{{ img.name }}</span>
 				<UIcon
 					v-if="img.groupId"
 					name="i-lucide-group"
@@ -121,7 +136,32 @@ const emit = defineEmits<{
 	moveLayerToEdge: [id: string, edge: 'top' | 'bottom']
 	removeSelected: []
 	reorder: [orderedIds: string[]]
+	rename: [id: string, name: string]
 }>()
+
+// ---- Inline rename ----
+const renamingId = ref<string | null>(null)
+const renameValue = ref('')
+let renameInput: HTMLInputElement | null = null
+
+function startRename(id: string, currentName: string) {
+	renamingId.value = id
+	renameValue.value = currentName
+	nextTick(() => {
+		renameInput?.select()
+	})
+}
+
+function commitRename() {
+	if (renamingId.value) {
+		emit('rename', renamingId.value, renameValue.value)
+		renamingId.value = null
+	}
+}
+
+function cancelRename() {
+	renamingId.value = null
+}
 
 // ---- Drag to reorder ----
 // List is rendered highest-z first; "before" = higher z, "after" = lower z
