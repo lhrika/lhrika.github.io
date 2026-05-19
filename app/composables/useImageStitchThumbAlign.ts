@@ -56,13 +56,6 @@ function findBestPosition(
 	return { x: bx, y: by, score: bs }
 }
 
-async function getPixels(src: string, w: number, h: number): Promise<Uint8ClampedArray> {
-	const canvas = document.createElement('canvas')
-	canvas.width = w; canvas.height = h
-	const ctx = canvas.getContext('2d')!
-	ctx.drawImage(await loadImage(src), 0, 0, w, h)
-	return ctx.getImageData(0, 0, w, h).data
-}
 
 export interface ThumbAlignInput {
 	id: string
@@ -84,7 +77,6 @@ export interface ThumbAlignResult {
 }
 
 export function useImageStitchThumbAlign() {
-	const normalise = (score: number) => Math.max(0, 1 - score / 195075)
 
 	/**
 	 * @param thumbSrc  blob URL of the thumbnail
@@ -102,14 +94,14 @@ export function useImageStitchThumbAlign() {
 		cols: number,
 		rows: number,
 	): Promise<ThumbAlignResult> {
-		const thumbPixels = await getPixels(thumbSrc, thumbW, thumbH)
+		const thumbPixels = await loadPixels(thumbSrc, thumbW, thumbH)
 
 		// Downscaled patch size inside the thumbnail
 		const nw = Math.round(thumbW / cols)
 		const nh = Math.round(thumbH / rows)
 
 		// Downscale all patches in parallel
-		const needles = await Promise.all(patches.map(p => getPixels(p.src, nw, nh)))
+		const needles = await Promise.all(patches.map(p => loadPixels(p.src, nw, nh)))
 
 		// Search all patches in parallel (each is independent)
 		const placements: ThumbAlignOutput[] = await Promise.all(
@@ -122,7 +114,7 @@ export function useImageStitchThumbAlign() {
 					id: patch.id,
 					x: col * thumbW,
 					y: row * thumbH,
-					confidence: normalise(score),
+					confidence: normalizeConfidence(score),
 				}
 			}),
 		)

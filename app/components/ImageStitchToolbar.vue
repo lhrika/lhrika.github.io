@@ -356,26 +356,22 @@ const emit = defineEmits<{
 }>()
 
 // ---- Canvas aspect-ratio lock ----
-const canvasLocked = ref(false)
+const { locked: canvasLocked, onWidth: _onCanvasWidth, onHeight: _onCanvasHeight } = useAspectRatioLock(
+	() => props.canvasWidth,
+	() => props.canvasHeight,
+	100,
+)
 
 function onCanvasWidth(v: number) {
-	emit('update:canvasWidth', v)
-	if (canvasLocked.value && props.canvasWidth > 0) {
-		emit(
-			'update:canvasHeight',
-			Math.max(100, Math.round((v * props.canvasHeight) / props.canvasWidth)),
-		)
-	}
+	const result = _onCanvasWidth(v)
+	emit('update:canvasWidth', result.width)
+	if (result.height !== props.canvasHeight) emit('update:canvasHeight', result.height)
 }
 
 function onCanvasHeight(v: number) {
-	emit('update:canvasHeight', v)
-	if (canvasLocked.value && props.canvasHeight > 0) {
-		emit(
-			'update:canvasWidth',
-			Math.max(100, Math.round((v * props.canvasWidth) / props.canvasHeight)),
-		)
-	}
+	const result = _onCanvasHeight(v)
+	emit('update:canvasHeight', result.height)
+	if (result.width !== props.canvasWidth) emit('update:canvasWidth', result.width)
 }
 
 const imageFiles = ref<File[]>([])

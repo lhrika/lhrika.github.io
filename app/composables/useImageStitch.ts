@@ -55,6 +55,11 @@ export function useImageStitch() {
 		},
 	})
 
+	// ---- Helpers ----
+	function getImageById(id: string): StitchImage | undefined {
+		return images.value.find(i => i.id === id)
+	}
+
 	// ---- Derived ----
 	const sortedImages = computed(() =>
 		[...images.value].sort((a, b) => a.zIndex - b.zIndex),
@@ -126,8 +131,9 @@ export function useImageStitch() {
 			const blob = await db.loadBlob(meta.id)
 			if (blob) {
 				restored.push({ ...meta, src: URL.createObjectURL(blob) })
+			} else {
+				console.warn('[image-stitch] Missing blob for image', meta.id, '— skipping')
 			}
-			// If blob is missing (e.g. cleared by browser), skip the image
 		}
 		images.value = restored
 		// Sync store in case some images were skipped
@@ -167,7 +173,7 @@ export function useImageStitch() {
 
 	// ---- Group helpers ----
 	function groupMemberIds(id: string): string[] {
-		const img = images.value.find(i => i.id === id)
+		const img = getImageById(id)
 		if (!img?.groupId) return [id]
 		return images.value.filter(i => i.groupId === img.groupId).map(i => i.id)
 	}
@@ -224,7 +230,7 @@ export function useImageStitch() {
 		const seen = new Set<string>() // group IDs or image IDs already counted
 		const units: { memberIds: string[]; representativeId: string }[] = []
 		for (const id of selectedIds.value) {
-			const img = images.value.find(i => i.id === id)
+			const img = getImageById(id)
 			if (!img) continue
 			const key = img.groupId ?? id
 			if (seen.has(key)) continue
@@ -288,7 +294,7 @@ export function useImageStitch() {
 	// ---- Nudge ----
 	function nudge(dx: number, dy: number) {
 		for (const selId of selectedIds.value) {
-			const img = images.value.find(i => i.id === selId)
+			const img = getImageById(selId)
 			if (img) {
 				img.x += dx
 				img.y += dy
@@ -316,7 +322,7 @@ export function useImageStitch() {
 
 	// ---- Layer order ----
 	function moveLayer(id: string, delta: number) {
-		const img = images.value.find(i => i.id === id)
+		const img = getImageById(id)
 		if (!img) return
 		const swap = images.value.find(i => i.zIndex === img.zIndex + delta)
 		if (swap) swap.zIndex = img.zIndex
@@ -325,7 +331,7 @@ export function useImageStitch() {
 	}
 
 	function moveLayerToEdge(id: string, edge: 'top' | 'bottom') {
-		const img = images.value.find(i => i.id === id)
+		const img = getImageById(id)
 		if (!img) return
 		if (edge === 'top') {
 			const maxZ = Math.max(...images.value.map(i => i.zIndex))
@@ -348,14 +354,14 @@ export function useImageStitch() {
 	function reorderLayers(orderedIds: string[]) {
 		const total = orderedIds.length
 		orderedIds.forEach((id, idx) => {
-			const img = images.value.find(i => i.id === id)
+			const img = getImageById(id)
 			if (img) img.zIndex = total - idx
 		})
 		pushHistory()
 	}
 
 	function renameImage(id: string, name: string) {
-		const img = images.value.find(i => i.id === id)
+		const img = getImageById(id)
 		if (img) {
 			img.name = name.trim() || img.name
 			pushHistory()
@@ -363,7 +369,7 @@ export function useImageStitch() {
 	}
 
 	function removeImage(id: string) {
-		URL.revokeObjectURL(images.value.find(i => i.id === id)?.src ?? '')
+		URL.revokeObjectURL(getImageById(id)?.src ?? '')
 		images.value = images.value.filter(i => i.id !== id)
 		selectedIds.value = selectedIds.value.filter(s => s !== id)
 		db.deleteBlobs([id])
@@ -437,7 +443,7 @@ export function useImageStitch() {
 		canvas.width = opts.width
 		canvas.height = opts.height
 		const ctx = canvas.getContext('2d')
-		if (!ctx) return
+		if (!ctx) throw new Error('Failed to create canvas context')
 		const scaleX = opts.width / store.canvasWidth
 		const scaleY = opts.height / store.canvasHeight
 		ctx.fillStyle = store.canvasBg
@@ -520,7 +526,7 @@ export function useImageStitch() {
 
 		// Build composite for each unit
 		const getMembers = (memberIds: string[]) =>
-			memberIds.map(id => images.value.find(i => i.id === id)).filter(Boolean) as StitchImage[]
+			memberIds.map(id => getImageById(id)).filter(Boolean) as StitchImage[]
 
 		const [compA, compB] = await Promise.all([
 			compositeUnit(getMembers(units[0]!.memberIds)),
@@ -566,7 +572,7 @@ export function useImageStitch() {
 				const dy = newBotOriginY - botComp.originY
 				const dx = topComp.originX - botComp.originX
 				for (const id of botIds) {
-					const img = images.value.find(i => i.id === id)
+					const img = getImageById(id)
 					if (img) { img.x += dx; img.y += dy }
 				}
 
@@ -593,7 +599,7 @@ export function useImageStitch() {
 				const dx = newRightOriginX - rightComp.originX
 				const dy = leftComp.originY - rightComp.originY
 				for (const id of rightIds) {
-					const img = images.value.find(i => i.id === id)
+					const img = getImageById(id)
 					if (img) { img.x += dx; img.y += dy }
 				}
 
@@ -641,7 +647,7 @@ export function useImageStitch() {
 		if (selectedIds.value.length < 2) return
 		const newGroupId = crypto.randomUUID()
 		for (const id of selectedIds.value) {
-			const img = images.value.find(i => i.id === id)
+			const img = getImageById(id)
 			if (img) img.groupId = newGroupId
 		}
 		pushHistory()
@@ -650,7 +656,7 @@ export function useImageStitch() {
 	function ungroupSelected() {
 		const affected = new Set<string>()
 		for (const id of selectedIds.value) {
-			const img = images.value.find(i => i.id === id)
+			const img = getImageById(id)
 			if (img?.groupId) affected.add(img.groupId)
 		}
 		if (affected.size === 0) return
@@ -663,7 +669,7 @@ export function useImageStitch() {
 	}
 
 	const selectedHaveGroup = computed(() =>
-		selectedIds.value.some(id => images.value.find(i => i.id === id)?.groupId),
+		selectedIds.value.some(id => getImageById(id)?.groupId),
 	)
 
 	// ---- Crop canvas to content ----
@@ -689,7 +695,7 @@ export function useImageStitch() {
 	// Phase 2: auto-align adjacent pairs → pixel-perfect overlap seams.
 	async function alignByThumbnailSelected(thumbId: string): Promise<{ avgConfidence: number } | null> {
 		const patches = images.value.filter(i => i.id !== thumbId)
-		const thumb = images.value.find(i => i.id === thumbId)
+		const thumb = getImageById(thumbId)
 		if (!thumb || patches.length === 0) return null
 
 		const cols = Math.round(Math.sqrt(patches.length))
@@ -705,7 +711,7 @@ export function useImageStitch() {
 
 		// Apply initial grid placements
 		for (const placement of result.placements) {
-			const img = images.value.find(i => i.id === placement.id)
+			const img = getImageById(placement.id)
 			if (img) { img.x = placement.x; img.y = placement.y }
 		}
 		store.canvasWidth = result.canvasWidth
@@ -723,7 +729,7 @@ export function useImageStitch() {
 		for (const p of sorted) {
 			const col = Math.round(p.x / thumb.width)
 			const row = Math.round(p.y / thumb.height)
-			const img = images.value.find(i => i.id === p.id)
+			const img = getImageById(p.id)
 			if (img && col < cols && row < rows) grid[col]![row] = img
 		}
 

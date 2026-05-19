@@ -85,35 +85,27 @@ const format = ref('image/png')
 const width = ref(props.canvasWidth)
 const height = ref(props.canvasHeight)
 const quality = ref(90)
-const locked = ref(false)
 
-watch(
-	() => props.canvasWidth,
-	v => {
-		width.value = v
-	},
-)
-watch(
-	() => props.canvasHeight,
-	v => {
-		height.value = v
-	},
+watch(() => props.canvasWidth, v => { width.value = v })
+watch(() => props.canvasHeight, v => { height.value = v })
+
+const { locked, onWidth: _onWidth, onHeight: _onHeight } = useAspectRatioLock(
+	() => width.value,
+	() => height.value,
 )
 
 function onWidth(v: number | null) {
 	if (v == null) return
-	if (locked.value && width.value > 0) {
-		height.value = Math.max(1, Math.round((v * height.value) / width.value))
-	}
-	width.value = v
+	const result = _onWidth(v)
+	width.value = result.width
+	height.value = result.height
 }
 
 function onHeight(v: number | null) {
 	if (v == null) return
-	if (locked.value && height.value > 0) {
-		width.value = Math.max(1, Math.round((v * width.value) / height.value))
-	}
-	height.value = v
+	const result = _onHeight(v)
+	width.value = result.width
+	height.value = result.height
 }
 
 function onExport() {

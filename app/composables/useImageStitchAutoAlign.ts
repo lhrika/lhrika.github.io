@@ -15,20 +15,6 @@ interface AlignResult {
 	confidence: number
 }
 
-async function loadPixels(
-	src: string,
-	width: number,
-	height: number,
-): Promise<Uint8ClampedArray> {
-	const canvas = document.createElement('canvas')
-	canvas.width = width
-	canvas.height = height
-	const ctx = canvas.getContext('2d')
-	if (!ctx) throw new Error('Canvas 2D not available')
-	const img = await loadImage(src)
-	ctx.drawImage(img, 0, 0, width, height)
-	return ctx.getImageData(0, 0, width, height).data
-}
 
 /**
  * Horizontal SSD: compare right edge of img1 with left edge of img2.
@@ -203,8 +189,6 @@ async function findOverlapV(
 }
 
 export function useImageStitchAutoAlign() {
-	// 255² × 3 channels = 195075 is worst-possible SSD per pixel
-	const normalise = (score: number) => Math.max(0, 1 - score / 195075)
 
 	/**
 	 * Horizontal alignment: img A and B share the same height, overlap left/right.
@@ -224,7 +208,7 @@ export function useImageStitchAutoAlign() {
 			const r = await findOverlapH(srcA, wA, height, srcB, wB)
 			return {
 				overlap: r.overlap,
-				confidence: normalise(r.score),
+				confidence: normalizeConfidence(r.score),
 				leftImage: 'a',
 			}
 		}
@@ -232,7 +216,7 @@ export function useImageStitchAutoAlign() {
 			const r = await findOverlapH(srcB, wB, height, srcA, wA)
 			return {
 				overlap: r.overlap,
-				confidence: normalise(r.score),
+				confidence: normalizeConfidence(r.score),
 				leftImage: 'b',
 			}
 		}
@@ -245,7 +229,7 @@ export function useImageStitchAutoAlign() {
 		const best = useAB ? ab : ba
 		return {
 			overlap: best.overlap,
-			confidence: normalise(best.score),
+			confidence: normalizeConfidence(best.score),
 			leftImage: useAB ? 'a' : 'b',
 		}
 	}
@@ -269,7 +253,7 @@ export function useImageStitchAutoAlign() {
 			const r = await findOverlapV(srcA, width, hA, srcB, hB)
 			return {
 				overlap: r.overlap,
-				confidence: normalise(r.score),
+				confidence: normalizeConfidence(r.score),
 				topImage: 'a',
 			}
 		}
@@ -277,7 +261,7 @@ export function useImageStitchAutoAlign() {
 			const r = await findOverlapV(srcB, width, hB, srcA, hA)
 			return {
 				overlap: r.overlap,
-				confidence: normalise(r.score),
+				confidence: normalizeConfidence(r.score),
 				topImage: 'b',
 			}
 		}
@@ -290,7 +274,7 @@ export function useImageStitchAutoAlign() {
 		const best = useAB ? ab : ba
 		return {
 			overlap: best.overlap,
-			confidence: normalise(best.score),
+			confidence: normalizeConfidence(best.score),
 			topImage: useAB ? 'a' : 'b',
 		}
 	}
