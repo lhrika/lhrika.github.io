@@ -39,8 +39,10 @@
 					:ref="el => { if (el) renameInput = el as HTMLInputElement }"
 					v-model="renameValue"
 					class="flex-1 min-w-0 bg-transparent border-b border-primary outline-none text-xs"
-					@keydown.enter="commitRename"
+					@keydown.enter="onRenameEnter"
 					@keydown.escape="cancelRename"
+					@compositionstart="isComposing = true"
+					@compositionend="isComposing = false"
 					@blur="commitRename"
 					@click.stop
 					@mousedown.stop
@@ -142,6 +144,7 @@ const emit = defineEmits<{
 // ---- Inline rename ----
 const renamingId = ref<string | null>(null)
 const renameValue = ref('')
+const isComposing = ref(false)
 let renameInput: HTMLInputElement | null = null
 
 function startRename(id: string, currentName: string) {
@@ -150,6 +153,11 @@ function startRename(id: string, currentName: string) {
 	nextTick(() => {
 		renameInput?.select()
 	})
+}
+
+function onRenameEnter() {
+	if (isComposing.value) return
+	commitRename()
 }
 
 function commitRename() {
