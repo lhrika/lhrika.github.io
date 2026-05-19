@@ -145,7 +145,6 @@
 
 			<div class="flex-1" />
 
-			<!-- Canvas utilities: reset pan / crop / clear — grouped -->
 			<UFieldGroup>
 				<UTooltip text="画布恢复到中心位置">
 					<UButton
@@ -155,7 +154,16 @@
 						@click="emit('resetPan')"
 					/>
 				</UTooltip>
-
+				<UTooltip text="参照缩略图自动定位所有图片">
+					<UButton
+						icon="i-lucide-scan-search"
+						color="neutral"
+						variant="subtle"
+						:disabled="imageCount < 2"
+						:loading="thumbAligning"
+						@click="emit('thumbAlign')"
+					/>
+				</UTooltip>
 				<UTooltip text="清空画布">
 					<UButton
 						icon="i-lucide-trash-2"
@@ -166,19 +174,6 @@
 					/>
 				</UTooltip>
 			</UFieldGroup>
-
-			<!-- Thumbnail align -->
-			<UTooltip text="参照缩略图自动定位所有图片">
-				<UButton
-					icon="i-lucide-scan-search"
-					label="缩略图定位"
-					color="neutral"
-					variant="outline"
-					:disabled="imageCount < 2"
-					:loading="thumbAligning"
-					@click="emit('thumbAlign')"
-				/>
-			</UTooltip>
 
 			<!-- Export -->
 			<UButton
