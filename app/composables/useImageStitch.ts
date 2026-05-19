@@ -623,6 +623,8 @@ export function useImageStitch() {
 
 	// ---- Thumbnail-guided layout ----
 	// One image is the thumbnail; the rest are patches to be positioned.
+	// Phase 1: thumbnail SSD → snaps each patch to its grid cell.
+	// Phase 2: auto-align adjacent pairs → pixel-perfect overlap seams.
 	async function alignByThumbnailSelected(thumbId: string): Promise<{ avgConfidence: number } | null> {
 		const patches = images.value.filter(i => i.id !== thumbId)
 		const thumb = images.value.find(i => i.id === thumbId)
@@ -639,12 +641,60 @@ export function useImageStitch() {
 			rows,
 		)
 
+		// Apply initial grid placements
 		for (const placement of result.placements) {
 			const img = images.value.find(i => i.id === placement.id)
 			if (img) { img.x = placement.x; img.y = placement.y }
 		}
 		store.canvasWidth = result.canvasWidth
 		store.canvasHeight = result.canvasHeight
+
+		// Phase 2: refine each adjacent pair with pixel-level auto-align.
+		// Build a col×row grid from placements (sorted by x then y).
+		const sorted = [...result.placements].sort((a, b) =>
+			a.x !== b.x ? a.x - b.x : a.y - b.y,
+		)
+		// Map (col, row) → image
+		const grid: (StitchImage | undefined)[][] = Array.from({ length: cols }, () =>
+			Array(rows).fill(undefined),
+		)
+		for (const p of sorted) {
+			const col = Math.round(p.x / thumb.width)
+			const row = Math.round(p.y / thumb.height)
+			const img = images.value.find(i => i.id === p.id)
+			if (img && col < cols && row < rows) grid[col]![row] = img
+		}
+
+		// Refine horizontal pairs (left → right, row by row)
+		for (let row = 0; row < rows; row++) {
+			for (let col = 0; col < cols - 1; col++) {
+				const left = grid[col]![row]
+				const right = grid[col + 1]![row]
+				if (!left || !right) continue
+				const h = Math.min(left.height, right.height)
+				const res = await autoAlignHorizontal(left.src, left.width, right.src, right.width, h, 'a-left')
+				if (res) {
+					right.x = left.x + left.width - res.overlap
+					right.y = left.y
+				}
+			}
+		}
+
+		// Refine vertical pairs (top → bottom, col by col), using x from horizontal pass
+		for (let col = 0; col < cols; col++) {
+			for (let row = 0; row < rows - 1; row++) {
+				const top = grid[col]![row]
+				const bot = grid[col]![row + 1]
+				if (!top || !bot) continue
+				const w = Math.min(top.width, bot.width)
+				const res = await autoAlignVertical(top.src, top.height, bot.src, bot.height, w, 'a-top')
+				if (res) {
+					bot.y = top.y + top.height - res.overlap
+					bot.x = top.x
+				}
+			}
+		}
+
 		pushHistory()
 		return { avgConfidence: result.avgConfidence }
 	}

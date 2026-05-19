@@ -41,21 +41,15 @@ function findBestPosition(
 
 	let bx = 0; let by = 0; let bs = Infinity
 
-	// Pass 1: coarse — step 4
-	for (let y = 0; y <= maxY; y += 4)
-		for (let x = 0; x <= maxX; x += 4) {
+	// Pass 1: coarse — step 2 (was 4, finer for better initial estimate)
+	for (let y = 0; y <= maxY; y += 2)
+		for (let x = 0; x <= maxX; x += 2) {
 			const s = ssdPatch(haystack, hw, needle, nw, nh, x, y, 2)
 			if (s < bs) { bs = s; bx = x; by = y }
 		}
-	// Pass 2: fine — ±8, step 2
-	for (let y = Math.max(0, by - 8); y <= Math.min(maxY, by + 8); y += 2)
-		for (let x = Math.max(0, bx - 8); x <= Math.min(maxX, bx + 8); x += 2) {
-			const s = ssdPatch(haystack, hw, needle, nw, nh, x, y, 1)
-			if (s < bs) { bs = s; bx = x; by = y }
-		}
-	// Pass 3: pixel-perfect — ±2
-	for (let y = Math.max(0, by - 2); y <= Math.min(maxY, by + 2); y++)
-		for (let x = Math.max(0, bx - 2); x <= Math.min(maxX, bx + 2); x++) {
+	// Pass 2: fine — ±4, step 1 (exhaustive around best)
+	for (let y = Math.max(0, by - 4); y <= Math.min(maxY, by + 4); y++)
+		for (let x = Math.max(0, bx - 4); x <= Math.min(maxX, bx + 4); x++) {
 			const s = ssdPatch(haystack, hw, needle, nw, nh, x, y, 1)
 			if (s < bs) { bs = s; bx = x; by = y }
 		}
@@ -120,10 +114,13 @@ export function useImageStitchThumbAlign() {
 		const placements: ThumbAlignOutput[] = []
 		for (let i = 0; i < patches.length; i++) {
 			const { x: tx, y: ty, score } = findBestPosition(thumbPixels, thumbW, thumbH, needles[i]!, nw, nh)
+			// Snap to the nearest grid cell center to enforce integer grid alignment
+			const col = Math.round(tx / nw)
+			const row = Math.round(ty / nh)
 			placements.push({
 				id: patches[i]!.id,
-				x: Math.round(tx * cols),
-				y: Math.round(ty * rows),
+				x: Math.round(Math.min(col, cols - 1) * thumbW),
+				y: Math.round(Math.min(row, rows - 1) * thumbH),
 				confidence: normalise(score),
 			})
 		}
