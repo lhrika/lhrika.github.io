@@ -48,6 +48,7 @@
 							@thumb-align="showThumbAlignModal = true"
 							@group-selected="groupSelected"
 							@ungroup-selected="ungroupSelected"
+							@auto-layer-order="autoLayerOrder"
 							@reset-pan="canvasRef?.resetPan()"
 							@toggle-fullscreen="toggle"
 						/>
@@ -232,6 +233,7 @@ const {
 	autoAlignSelected,
 	cropToContent,
 	alignByThumbnailSelected,
+	autoLayerOrder,
 	renameImage,
 	groupMemberIds,
 	groupSelected,

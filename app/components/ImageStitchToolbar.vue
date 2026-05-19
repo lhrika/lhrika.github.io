@@ -230,6 +230,34 @@
 				</UTooltip>
 			</UFieldGroup>
 			<div class="w-px h-6 bg-muted" />
+			<!-- Auto layer order -->
+			<UPopover>
+				<UTooltip text="按方向自动排列图层顺序">
+					<UButton
+						icon="i-lucide-layers"
+						label="图层排序"
+						color="neutral"
+						variant="subtle"
+					/>
+				</UTooltip>
+				<template #content>
+					<div class="p-2 flex flex-col gap-1 items-center">
+						<p class="text-xs text-muted mb-1">该方向的图层在上</p>
+						<div class="grid grid-cols-3 gap-0.5">
+							<UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-arrow-up-left"    @click="emit('autoLayerOrder', 'top-left')" />
+							<UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-arrow-up"         @click="emit('autoLayerOrder', 'top')" />
+							<UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-arrow-up-right"   @click="emit('autoLayerOrder', 'top-right')" />
+							<UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-arrow-left"       @click="emit('autoLayerOrder', 'left')" />
+							<div />
+							<UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-arrow-right"      @click="emit('autoLayerOrder', 'right')" />
+							<UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-arrow-down-left"  @click="emit('autoLayerOrder', 'bottom-left')" />
+							<UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-arrow-down"       @click="emit('autoLayerOrder', 'bottom')" />
+							<UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-arrow-down-right" @click="emit('autoLayerOrder', 'bottom-right')" />
+						</div>
+					</div>
+				</template>
+			</UPopover>
+			<div class="w-px h-6 bg-muted" />
 			<span class="text-sm text-muted">对齐:</span>
 			<UFieldGroup>
 				<UTooltip text="顶部对齐">
@@ -324,6 +352,7 @@ const emit = defineEmits<{
 	toggleFullscreen: []
 	groupSelected: []
 	ungroupSelected: []
+	autoLayerOrder: [direction: 'top-left' | 'top' | 'top-right' | 'right' | 'bottom-right' | 'bottom' | 'bottom-left' | 'left']
 }>()
 
 // ---- Canvas aspect-ratio lock ----

@@ -574,6 +574,36 @@ export function useImageStitch() {
 		}
 	}
 
+	// ---- Auto layer order ----
+	// Sort selected images by position in a given direction; higher score → higher z-index.
+	function autoLayerOrder(
+		direction: 'top-left' | 'top' | 'top-right' | 'right' | 'bottom-right' | 'bottom' | 'bottom-left' | 'left',
+	) {
+		const selected = images.value.filter(i => selectedIds.value.includes(i.id))
+		if (selected.length < 2) return
+
+		const score = (img: StitchImage) => {
+			const cx = img.x + img.width / 2
+			const cy = img.y + img.height / 2
+			switch (direction) {
+				case 'top-left':     return -(cx + cy)
+				case 'top':          return -cy
+				case 'top-right':    return cx - cy
+				case 'right':        return cx
+				case 'bottom-right': return cx + cy
+				case 'bottom':       return cy
+				case 'bottom-left':  return cy - cx
+				case 'left':         return -cx
+			}
+		}
+
+		// Sort ascending by score; assign z-indices from the existing set so non-selected layers aren't affected
+		const sorted = [...selected].sort((a, b) => score(a) - score(b))
+		const zValues = selected.map(i => i.zIndex).sort((a, b) => a - b)
+		sorted.forEach((img, idx) => { img.zIndex = zValues[idx]! })
+		pushHistory()
+	}
+
 	// ---- Grouping ----
 	function groupSelected() {
 		if (selectedIds.value.length < 2) return
@@ -752,6 +782,7 @@ export function useImageStitch() {
 		autoAlignSelected,
 		cropToContent,
 		alignByThumbnailSelected,
+		autoLayerOrder,
 		renameImage,
 		groupMemberIds,
 		groupSelected,
