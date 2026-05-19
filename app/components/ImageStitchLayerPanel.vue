@@ -30,7 +30,7 @@
 						dragOver === img.id && dragPos === 'after',
 					'opacity-40': dragging === img.id,
 				}"
-				@click.stop="emit('select', $event, img.id)"
+				@mousedown.stop="onItemMousedown($event, img.id)"
 				@dragstart="onDragStart($event, img.id)"
 				@dragend="onDragEnd"
 				@dragover.prevent="onDragOver($event, img.id)"
@@ -44,7 +44,7 @@
 				<img :src="img.src" class="w-7 h-7 object-cover rounded shrink-0" />
 				<input
 					v-if="renamingId === img.id"
-					:ref="el => { if (el) renameInput = el as HTMLInputElement }"
+					:ref="el => { renameInput = el as HTMLInputElement | null }"
 					v-model="renameValue"
 					class="flex-1 min-w-0 bg-transparent border-b border-primary outline-none text-xs"
 					@keydown.enter="onRenameEnter"
@@ -132,7 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import type { StitchImage } from '~/composables/useImageStitch'
+import type { StitchImage, SelectAction } from '~/composables/useImageStitch'
 
 const props = defineProps<{
 	sortedImages: StitchImage[]
@@ -141,7 +141,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-	select: [e: MouseEvent, id: string]
+	select: [action: SelectAction]
 	moveLayer: [id: string, delta: number]
 	moveLayerToEdge: [id: string, edge: 'top' | 'bottom']
 	removeSelected: []
@@ -160,17 +160,27 @@ const someSelected = computed(
 	() => !allSelected.value && props.selectedIds.length > 0,
 )
 
+// ---- Selection ----
+function onItemMousedown(e: MouseEvent, id: string) {
+	const type: SelectAction['type'] = e.shiftKey
+		? 'range'
+		: e.ctrlKey || e.metaKey
+			? 'toggle'
+			: 'single'
+	emit('select', { type, id })
+}
+
 // ---- Inline rename ----
 const renamingId = ref<string | null>(null)
 const renameValue = ref('')
 const isComposing = ref(false)
-let renameInput: HTMLInputElement | null = null
+const renameInput = ref<HTMLInputElement | null>(null)
 
 function startRename(id: string, currentName: string) {
 	renamingId.value = id
 	renameValue.value = currentName
 	nextTick(() => {
-		renameInput?.select()
+		renameInput.value?.select()
 	})
 }
 

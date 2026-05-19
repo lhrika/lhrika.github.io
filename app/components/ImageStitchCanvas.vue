@@ -42,7 +42,7 @@
 					userSelect: 'none',
 				}"
 				@mousedown.stop="startDrag($event, img.id)"
-				@click.stop="emit('select', $event, img.id)"
+				@click.stop="emit('select', { type: $event.shiftKey ? 'range' : ($event.ctrlKey || $event.metaKey) ? 'toggle' : 'single', id: img.id })"
 			>
 				<img
 					:src="img.src"
@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import type { StitchImage } from '~/composables/useImageStitch'
+import type { StitchImage, SelectAction } from '~/composables/useImageStitch'
 
 const props = defineProps<{
 	sortedImages: StitchImage[]
@@ -80,7 +80,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-	select: [e: MouseEvent, id: string]
+	select: [action: SelectAction]
 	deselect: []
 	dragEnd: []
 	resizeEnd: []

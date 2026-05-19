@@ -12,6 +12,11 @@ export type AlignEdge =
 	| 'center'
 	| 'middle'
 
+export type SelectAction =
+	| { type: 'single'; id: string }   // plain click — replace selection
+	| { type: 'toggle'; id: string }   // Ctrl/Meta — add/remove one unit
+	| { type: 'range'; id: string }    // Shift — select from anchor to id
+
 const MAX_HISTORY = 50
 
 function metaOf(img: StitchImage): StitchImageMeta {
@@ -233,10 +238,15 @@ export function useImageStitch() {
 	})
 
 	// ---- Selection ----
-	function selectImage(e: MouseEvent, id: string) {
+	// Last non-range click anchor (for Shift+click range selection)
+	const selectionAnchorId = ref<string | null>(null)
+
+	function selectImage(action: SelectAction) {
+		const { id } = action
 		const groupIds = groupMemberIds(id)
-		if (e.shiftKey || e.ctrlKey || e.metaKey) {
-			// Toggle the whole group as a unit
+
+		if (action.type === 'toggle') {
+			// Ctrl/Meta: add or remove this unit
 			const allSelected = groupIds.every(gid => selectedIds.value.includes(gid))
 			if (allSelected) {
 				selectedIds.value = selectedIds.value.filter(s => !groupIds.includes(s))
@@ -244,8 +254,26 @@ export function useImageStitch() {
 				const merged = new Set([...selectedIds.value, ...groupIds])
 				selectedIds.value = [...merged]
 			}
+			selectionAnchorId.value = id
+		} else if (action.type === 'range') {
+			// Shift: select all layers between anchor and id (inclusive) in sorted order
+			const anchor = selectionAnchorId.value ?? id
+			const ids = sortedImages.value.map(i => i.id)
+			const a = ids.indexOf(anchor)
+			const b = ids.indexOf(id)
+			const [lo, hi] = a <= b ? [a, b] : [b, a]
+			const rangeIds = ids.slice(lo, hi + 1)
+			// Expand each id in range to include its full group
+			const expanded = new Set<string>()
+			for (const rid of rangeIds) {
+				for (const gid of groupMemberIds(rid)) expanded.add(gid)
+			}
+			selectedIds.value = [...expanded]
+			// Do not update anchor on range selection
 		} else {
+			// Single: replace selection
 			selectedIds.value = groupIds
+			selectionAnchorId.value = id
 		}
 	}
 
