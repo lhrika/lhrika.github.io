@@ -70,20 +70,26 @@
 						:min="1"
 						size="xs"
 						class="w-20"
-						@update:model-value="
-							v => emit('setSize', 'width', v ?? singleSelected!.width)
-						"
+						@update:model-value="v => onWidth(v ?? singleSelected!.width)"
 					/>
 				</UFormField>
+				<UTooltip :text="sizeLocked ? '解锁比例' : '锁定比例'">
+					<UButton
+						:icon="sizeLocked ? 'i-lucide-lock' : 'i-lucide-lock-open'"
+						color="neutral"
+						variant="ghost"
+						size="xs"
+						class="px-0.5"
+						@click="sizeLocked = !sizeLocked"
+					/>
+				</UTooltip>
 				<UFormField label="H" size="xs" class="flex items-center gap-1">
 					<UInputNumber
 						:model-value="singleSelected.height"
 						:min="1"
 						size="xs"
 						class="w-20"
-						@update:model-value="
-							v => emit('setSize', 'height', v ?? singleSelected!.height)
-						"
+						@update:model-value="v => onHeight(v ?? singleSelected!.height)"
 					/>
 				</UFormField>
 			</div>
@@ -94,7 +100,7 @@
 <script setup lang="ts">
 import type { StitchImage } from '~/composables/useImageStitch'
 
-defineProps<{
+const props = defineProps<{
 	singleSelected: StitchImage | undefined
 }>()
 
@@ -103,4 +109,20 @@ const emit = defineEmits<{
 	setPos: [axis: 'x' | 'y', value: number]
 	setSize: [dim: 'width' | 'height', value: number]
 }>()
+
+const sizeLocked = ref(false)
+
+function onWidth(v: number) {
+	if (sizeLocked.value && props.singleSelected && props.singleSelected.width > 0) {
+		emit('setSize', 'height', Math.max(1, Math.round(v * props.singleSelected.height / props.singleSelected.width)))
+	}
+	emit('setSize', 'width', v)
+}
+
+function onHeight(v: number) {
+	if (sizeLocked.value && props.singleSelected && props.singleSelected.height > 0) {
+		emit('setSize', 'width', Math.max(1, Math.round(v * props.singleSelected.width / props.singleSelected.height)))
+	}
+	emit('setSize', 'height', v)
+}
 </script>

@@ -13,10 +13,20 @@
 			</UFormField>
 			<!-- 4. UInputNumber for numeric fields -->
 			<UFormField label="宽度 (px)">
-				<UInputNumber v-model="width" :min="1" :max="20000" class="w-32" />
+				<UInputNumber :model-value="width" :min="1" :max="20000" class="w-32" @update:model-value="onWidth" />
 			</UFormField>
+			<UTooltip :text="locked ? '解锁比例' : '锁定比例'">
+				<UButton
+					:icon="locked ? 'i-lucide-lock' : 'i-lucide-lock-open'"
+					color="neutral"
+					variant="ghost"
+					size="xs"
+					class="self-end mb-1"
+					@click="locked = !locked"
+				/>
+			</UTooltip>
 			<UFormField label="高度 (px)">
-				<UInputNumber v-model="height" :min="1" :max="20000" class="w-32" />
+				<UInputNumber :model-value="height" :min="1" :max="20000" class="w-32" @update:model-value="onHeight" />
 			</UFormField>
 			<UFormField v-if="format !== 'image/png'" label="质量 (1-100)">
 				<UInputNumber v-model="quality" :min="1" :max="100" class="w-28" />
@@ -55,19 +65,32 @@ const format = ref('image/png')
 const width = ref(props.canvasWidth)
 const height = ref(props.canvasHeight)
 const quality = ref(90)
+const locked = ref(false)
 
 watch(
 	() => props.canvasWidth,
-	v => {
-		width.value = v
-	},
+	v => { width.value = v },
 )
 watch(
 	() => props.canvasHeight,
-	v => {
-		height.value = v
-	},
+	v => { height.value = v },
 )
+
+function onWidth(v: number | null) {
+	if (v == null) return
+	if (locked.value && width.value > 0) {
+		height.value = Math.max(1, Math.round(v * height.value / width.value))
+	}
+	width.value = v
+}
+
+function onHeight(v: number | null) {
+	if (v == null) return
+	if (locked.value && height.value > 0) {
+		width.value = Math.max(1, Math.round(v * width.value / height.value))
+	}
+	height.value = v
+}
 
 function onExport() {
 	emit('export', {
