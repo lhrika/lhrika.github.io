@@ -56,6 +56,7 @@
 					draggable="false"
 				/>
 				<div
+					v-if="selectedIds.includes(img.id)"
 					class="absolute bottom-0 right-0 w-3 h-3 bg-indigo-500 opacity-80 cursor-se-resize"
 					@mousedown.stop="startResize($event, img.id)"
 				/>
@@ -156,6 +157,7 @@ interface ResizeState {
 	startMouseY: number
 	startWidth: number
 	startHeight: number
+	aspectRatio: number
 }
 const resizing = ref<ResizeState | null>(null)
 
@@ -169,6 +171,7 @@ function startResize(e: MouseEvent, id: string) {
 		startMouseY: e.clientY,
 		startWidth: img.width,
 		startHeight: img.height,
+		aspectRatio: img.width / img.height,
 	}
 }
 
@@ -208,8 +211,18 @@ function onMouseMove(e: MouseEvent) {
 		const dy = Math.round((e.clientY - resizing.value.startMouseY) / props.zoom)
 		const img = props.sortedImages.find(i => i.id === resizing.value!.id)
 		if (img) {
-			img.width = Math.max(10, resizing.value.startWidth + dx)
-			img.height = Math.max(10, resizing.value.startHeight + dy)
+			let newW = Math.max(10, resizing.value.startWidth + dx)
+			let newH = Math.max(10, resizing.value.startHeight + dy)
+			if (e.shiftKey) {
+				// Use whichever axis moved more to drive the constrained dimension
+				if (Math.abs(dx) >= Math.abs(dy)) {
+					newH = Math.max(10, Math.round(newW / resizing.value.aspectRatio))
+				} else {
+					newW = Math.max(10, Math.round(newH * resizing.value.aspectRatio))
+				}
+			}
+			img.width = newW
+			img.height = newH
 		}
 	}
 }
