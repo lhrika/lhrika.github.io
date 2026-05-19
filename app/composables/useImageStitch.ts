@@ -665,35 +665,41 @@ export function useImageStitch() {
 			if (img && col < cols && row < rows) grid[col]![row] = img
 		}
 
-		// Refine horizontal pairs (left → right, row by row)
-		for (let row = 0; row < rows; row++) {
-			for (let col = 0; col < cols - 1; col++) {
-				const left = grid[col]![row]
-				const right = grid[col + 1]![row]
-				if (!left || !right) continue
-				const h = Math.min(left.height, right.height)
-				const res = await autoAlignHorizontal(left.src, left.width, right.src, right.width, h, 'a-left')
-				if (res) {
-					right.x = left.x + left.width - res.overlap
-					right.y = left.y
+		// Refine horizontal pairs: rows are independent → run all rows in parallel.
+		// Within each row, pairs must be sequential (right depends on left's final x).
+		await Promise.all(
+			Array.from({ length: rows }, (_, row) => async () => {
+				for (let col = 0; col < cols - 1; col++) {
+					const left = grid[col]![row]
+					const right = grid[col + 1]![row]
+					if (!left || !right) continue
+					const h = Math.min(left.height, right.height)
+					const res = await autoAlignHorizontal(left.src, left.width, right.src, right.width, h, 'a-left')
+					if (res) {
+						right.x = left.x + left.width - res.overlap
+						right.y = left.y
+					}
 				}
-			}
-		}
+			}).map(fn => fn()),
+		)
 
-		// Refine vertical pairs (top → bottom, col by col), using x from horizontal pass
-		for (let col = 0; col < cols; col++) {
-			for (let row = 0; row < rows - 1; row++) {
-				const top = grid[col]![row]
-				const bot = grid[col]![row + 1]
-				if (!top || !bot) continue
-				const w = Math.min(top.width, bot.width)
-				const res = await autoAlignVertical(top.src, top.height, bot.src, bot.height, w, 'a-top')
-				if (res) {
-					bot.y = top.y + top.height - res.overlap
-					bot.x = top.x
+		// Refine vertical pairs: cols are independent → run all cols in parallel.
+		// Within each col, pairs must be sequential (bot depends on top's final y).
+		await Promise.all(
+			Array.from({ length: cols }, (_, col) => async () => {
+				for (let row = 0; row < rows - 1; row++) {
+					const top = grid[col]![row]
+					const bot = grid[col]![row + 1]
+					if (!top || !bot) continue
+					const w = Math.min(top.width, bot.width)
+					const res = await autoAlignVertical(top.src, top.height, bot.src, bot.height, w, 'a-top')
+					if (res) {
+						bot.y = top.y + top.height - res.overlap
+						bot.x = top.x
+					}
 				}
-			}
-		}
+			}).map(fn => fn()),
+		)
 
 		pushHistory()
 		return { avgConfidence: result.avgConfidence }

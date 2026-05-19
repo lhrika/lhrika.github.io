@@ -111,19 +111,21 @@ export function useImageStitchThumbAlign() {
 		// Downscale all patches in parallel
 		const needles = await Promise.all(patches.map(p => getPixels(p.src, nw, nh)))
 
-		const placements: ThumbAlignOutput[] = []
-		for (let i = 0; i < patches.length; i++) {
-			const { x: tx, y: ty, score } = findBestPosition(thumbPixels, thumbW, thumbH, needles[i]!, nw, nh)
-			// Snap to the nearest grid cell center to enforce integer grid alignment
-			const col = Math.round(tx / nw)
-			const row = Math.round(ty / nh)
-			placements.push({
-				id: patches[i]!.id,
-				x: Math.round(Math.min(col, cols - 1) * thumbW),
-				y: Math.round(Math.min(row, rows - 1) * thumbH),
-				confidence: normalise(score),
-			})
-		}
+		// Search all patches in parallel (each is independent)
+		const placements: ThumbAlignOutput[] = await Promise.all(
+			patches.map(async (patch, i) => {
+				const { x: tx, y: ty, score } = findBestPosition(thumbPixels, thumbW, thumbH, needles[i]!, nw, nh)
+				// Snap to the nearest grid cell to enforce integer grid alignment
+				const col = Math.min(Math.round(tx / nw), cols - 1)
+				const row = Math.min(Math.round(ty / nh), rows - 1)
+				return {
+					id: patch.id,
+					x: col * thumbW,
+					y: row * thumbH,
+					confidence: normalise(score),
+				}
+			}),
+		)
 
 		return {
 			placements,
