@@ -120,6 +120,11 @@ const items = computed<NavigationMenuItem[]>(() => [
 		icon: 'i-lucide-layout-grid',
 		children: [
 			{
+				label: '临时收纳',
+				to: localePath('/app/tmp'),
+				icon: 'i-lucide-folder-lock',
+			},
+			{
 				label: '家計簿',
 				to: localePath('/app/kakeibo'),
 				icon: 'i-lucide-wallet',
