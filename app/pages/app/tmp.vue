@@ -17,6 +17,7 @@ const {
 	upload,
 	download,
 	previewText,
+	updateText,
 	remove,
 } = useTmpStorage()
 const localePath = useLocalePath()
@@ -33,6 +34,9 @@ const deleteOpen = ref(false)
 const previewOpen = ref(false)
 const previewName = ref('')
 const previewContent = ref('')
+const previewFile = ref<FileObject | null>(null)
+const editing = ref(false)
+const editContent = ref('')
 const copying = ref(false)
 let accountVersion = 0
 
@@ -57,6 +61,15 @@ const canSaveText = computed(
 	() =>
 		textContent.value.trim().length > 0 && textSize.value <= TMP_MAX_FILE_SIZE,
 )
+const editSize = computed(
+	() => new TextEncoder().encode(editContent.value).byteLength,
+)
+const canSaveEdit = computed(
+	() =>
+		previewFile.value !== null &&
+		editContent.value !== previewContent.value &&
+		editSize.value <= TMP_MAX_FILE_SIZE,
+)
 
 onMounted(() => {
 	ready.value = true
@@ -75,6 +88,9 @@ watch(
 		previewOpen.value = false
 		previewContent.value = ''
 		previewName.value = ''
+		previewFile.value = null
+		editing.value = false
+		editContent.value = ''
 	},
 	{ flush: 'sync' },
 )
@@ -117,13 +133,39 @@ async function saveText() {
 	}
 }
 
-async function openText(file: FileObject) {
+async function openText(file: FileObject, edit = false) {
 	const version = accountVersion
-	const text = await previewText(file)
+	const text = await previewText(file, edit ? TMP_MAX_FILE_SIZE : undefined)
 	if (text === null || version !== accountVersion) return
 	previewName.value = getTmpFilename(file.name)
 	previewContent.value = text
+	previewFile.value = file
+	editContent.value = text
+	editing.value = edit
 	previewOpen.value = true
+}
+
+function startEditing() {
+	editContent.value = previewContent.value
+	editing.value = true
+}
+
+function cancelEditing() {
+	editContent.value = previewContent.value
+	editing.value = false
+}
+
+async function saveEdit() {
+	if (!previewFile.value || !canSaveEdit.value || busy.value) return
+	const version = accountVersion
+	const content = editContent.value
+	if (
+		(await updateText(previewFile.value, content)) &&
+		version === accountVersion
+	) {
+		previewContent.value = content
+		editing.value = false
+	}
 }
 
 async function copyText() {
@@ -415,6 +457,16 @@ function cancelDelete() {
 											@click="openText(file)"
 										/>
 										<UButton
+											v-if="isText(file)"
+											label="编辑"
+											icon="i-lucide-pencil"
+											color="neutral"
+											variant="ghost"
+											size="sm"
+											:disabled="busy"
+											@click="openText(file, true)"
+										/>
+										<UButton
 											label="下载"
 											icon="i-lucide-download"
 											color="neutral"
@@ -444,28 +496,80 @@ function cancelDelete() {
 		<UModal
 			v-model:open="previewOpen"
 			:title="previewName"
-			description="纯文本预览"
+			:description="editing ? '编辑纯文本，保存后更新原文件。' : '纯文本预览'"
+			:dismissible="!editing && !busy"
+			:close="!editing && !busy"
 			:ui="{ content: 'sm:max-w-2xl' }"
 		>
 			<template #body>
+				<form
+					v-if="editing"
+					id="tmp-text-edit"
+					class="space-y-3"
+					@submit.prevent="saveEdit"
+				>
+					<UFormField
+						label="文本内容"
+						name="editContent"
+						:error="
+							editSize > TMP_MAX_FILE_SIZE ? '文本不能超过 50 MB。' : undefined
+						"
+					>
+						<UTextarea
+							v-model="editContent"
+							autofocus
+							:disabled="busy"
+							:rows="14"
+							class="w-full"
+							:ui="{ base: 'font-mono leading-relaxed' }"
+						/>
+					</UFormField>
+					<p class="text-sm text-muted">{{ formatTmpSize(editSize) }}</p>
+				</form>
 				<pre
+					v-else
 					class="max-h-[60vh] overflow-auto whitespace-pre-wrap break-words rounded-lg bg-elevated p-4 font-mono text-sm leading-relaxed text-default"
 					>{{ previewContent }}</pre
 				>
 			</template>
 			<template #footer>
-				<UButton
-					label="复制文本"
-					icon="i-lucide-copy"
-					:loading="copying"
-					@click="copyText"
-				/>
-				<UButton
-					label="关闭"
-					color="neutral"
-					variant="outline"
-					@click="closePreview"
-				/>
+				<template v-if="editing">
+					<UButton
+						type="submit"
+						form="tmp-text-edit"
+						label="保存修改"
+						icon="i-lucide-save"
+						:loading="busy"
+						:disabled="!canSaveEdit || busy"
+					/>
+					<UButton
+						label="取消编辑"
+						color="neutral"
+						variant="outline"
+						:disabled="busy"
+						@click="cancelEditing"
+					/>
+				</template>
+				<template v-else>
+					<UButton
+						label="编辑"
+						icon="i-lucide-pencil"
+						:disabled="busy"
+						@click="startEditing"
+					/>
+					<UButton
+						label="复制文本"
+						icon="i-lucide-copy"
+						:loading="copying"
+						@click="copyText"
+					/>
+					<UButton
+						label="关闭"
+						color="neutral"
+						variant="outline"
+						@click="closePreview"
+					/>
+				</template>
 			</template>
 		</UModal>
 		<UModal

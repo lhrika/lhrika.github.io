@@ -4,6 +4,7 @@ import {
 	TMP_MAX_FILE_SIZE,
 	TMP_MAX_PREVIEW_SIZE,
 	createTmpObjectName,
+	formatTmpSize,
 	getTmpFilename,
 } from '~/utils/tmpStorage'
 
@@ -131,7 +132,11 @@ export function useTmpStorage() {
 		}
 		const { data, error } = await supabase.storage
 			.from(TMP_BUCKET)
-			.download(`${owner}/${file.name}`)
+			.download(
+				`${owner}/${file.name}`,
+				{ cacheNonce: crypto.randomUUID() },
+				{ cache: 'no-store' },
+			)
 		if (error) throw error
 		if (version !== accountVersion)
 			throw new Error('登录状态已变更，请重新打开文件。')
@@ -158,22 +163,61 @@ export function useTmpStorage() {
 		}
 	}
 
-	async function previewText(file: FileObject) {
+	async function previewText(file: FileObject, maxSize = TMP_MAX_PREVIEW_SIZE) {
 		if (busy.value) return null
 		busy.value = true
 		const version = accountVersion
 		try {
-			if ((file.metadata?.size ?? 0) > TMP_MAX_PREVIEW_SIZE) {
-				throw new Error('文本超过 1 MB，请下载后查看。')
+			if ((file.metadata?.size ?? 0) > maxSize) {
+				throw new Error(`文本超过 ${formatTmpSize(maxSize)}，请下载后查看。`)
 			}
 			const blob = await read(file)
-			if (blob.size > TMP_MAX_PREVIEW_SIZE)
-				throw new Error('文本超过 1 MB，请下载后查看。')
+			if (blob.size > maxSize)
+				throw new Error(`文本超过 ${formatTmpSize(maxSize)}，请下载后查看。`)
 			const text = await blob.text()
 			return version === accountVersion ? text : null
 		} catch (error) {
 			if (version === accountVersion) showError('无法预览文本', error)
 			return null
+		} finally {
+			busy.value = false
+		}
+	}
+
+	async function updateText(file: FileObject, content: string) {
+		const owner = uid.value
+		const version = accountVersion
+		if (
+			!owner ||
+			busy.value ||
+			!files.value.some(item => item.id === file.id && item.name === file.name)
+		) {
+			return false
+		}
+		busy.value = true
+		try {
+			if (
+				!file.metadata?.mimetype?.startsWith('text/plain') &&
+				!/\.txt$/i.test(getTmpFilename(file.name))
+			) {
+				throw new Error('只能编辑纯文本文件。')
+			}
+			const body = new Blob([content], { type: 'text/plain;charset=utf-8' })
+			if (body.size > TMP_MAX_FILE_SIZE) throw new Error('文本不能超过 50 MB。')
+			const { error } = await supabase.storage
+				.from(TMP_BUCKET)
+				.update(`${owner}/${file.name}`, body, {
+					contentType: 'text/plain;charset=utf-8',
+					cacheControl: '0',
+				})
+			if (version !== accountVersion) return false
+			if (error) throw error
+			toast.add({ title: '已保存修改', color: 'success' })
+			await refresh()
+			return version === accountVersion
+		} catch (error) {
+			if (version === accountVersion) showError('保存修改失败', error)
+			return false
 		} finally {
 			busy.value = false
 		}
@@ -213,6 +257,7 @@ export function useTmpStorage() {
 		upload,
 		download,
 		previewText,
+		updateText,
 		remove,
 	}
 }
